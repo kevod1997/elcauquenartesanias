@@ -1,0 +1,12 @@
+# Configuración local de herramientas de agentes
+.agents/
+.claude/
+skills-lock.json
+
+# Dependencias y build
+node_modules/
+.vercel/
+
+# Basura del sistema
+Thumbs.db
+.DS_Store
