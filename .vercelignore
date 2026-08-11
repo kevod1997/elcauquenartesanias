@@ -1,0 +1,9 @@
+# Los JPEG originales quedan en el repo como fuente, pero el sitio sirve solo .webp
+assets/*.jpeg
+assets/*.jpg
+
+# Notas y configuración de herramientas: no van al deploy
+docs/
+.agents/
+.claude/
+skills-lock.json
