@@ -92,6 +92,60 @@ a:hover { color: var(--madera); }
   background: radial-gradient(110% 80% at 50% 0%, #6B4C2A 0%, #4A331E 45%, #3B2A1A 100%);
 }
 
+/* Accesos rápidos: mismos destinos que la sección de contacto, arriba a la
+   derecha, para no obligar a bajar hasta el final. Quietos, no fijos: la
+   grilla de placas no admite chrome flotante encima. */
+.hero__accesos {
+  position: absolute;
+  top: clamp(14px, 3vw, 26px);
+  right: clamp(14px, 3vw, 26px);
+  display: flex;
+  /* 10px: deja las dos áreas de toque de 44px justas, sin solaparse */
+  gap: 10px;
+}
+
+/* Un solo disco de filete fino para los accesos del hero y los de contacto:
+   cambia el diámetro, nunca el tratamiento. --disco es lo único que cada
+   sitio ajusta. */
+.acceso,
+.icon-btn {
+  --disco: 34px;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--disco);
+  height: var(--disco);
+  border-radius: 999px;
+  color: rgba(247, 242, 235, 0.82);
+  border: 1px solid rgba(247, 242, 235, 0.26);
+  text-decoration: none;
+  transition:
+    background-color var(--t-rapida) var(--ease),
+    border-color var(--t-rapida) var(--ease),
+    color var(--t-rapida) var(--ease);
+}
+
+.acceso:hover,
+.icon-btn:hover {
+  background: rgba(247, 242, 235, 0.12);
+  border-color: rgba(247, 242, 235, 0.6);
+  color: var(--crema);
+}
+
+/* El disco se queda por debajo de 44px para no pesar sobre el logo ni sobre
+   la fila de contacto, pero el área de toque llega a 44px igual. */
+.acceso::after,
+.icon-btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: max(44px, var(--disco));
+  height: max(44px, var(--disco));
+  transform: translate(-50%, -50%);
+}
+
 .hero__logo {
   width: clamp(96px, 24vw, 132px);
   height: clamp(96px, 24vw, 132px);
@@ -157,6 +211,17 @@ a:hover { color: var(--madera); }
   grid-template-columns: repeat(auto-fill, minmax(min(290px, 100%), 1fr));
   gap: clamp(20px, 4vw, 32px);
 }
+
+/* En desktop las envolturas de las hileras son transparentes para la grilla:
+   se conserva exactamente su distribuciÃ³n y el orden original del catÃ¡logo. */
+.product-row,
+.product-row__track {
+  display: contents;
+}
+
+.product-row .card { order: var(--orden-producto); }
+
+.product-row__arrow { display: none; }
 
 /* ---------- Tarjeta de producto ---------- */
 
@@ -395,44 +460,13 @@ a:hover { color: var(--madera); }
 .contacto__redes {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  /* 10px, igual que el hero: dos áreas de toque de 44px sin solaparse */
+  gap: 10px;
 }
 
-.icon-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 56px;
-  height: 56px;
-  border-radius: 999px;
-  text-decoration: none;
-  transition:
-    background-color var(--t-rapida) var(--ease),
-    border-color var(--t-rapida) var(--ease),
-    transform var(--t-rapida) var(--ease);
-}
-
-.icon-btn:hover { transform: translateY(calc(-0.5 * var(--lift))); }
-
-.icon-btn--solid {
-  background: var(--crema);
-  color: var(--cacao);
-}
-
-.icon-btn--solid:hover {
-  background: var(--arena);
-  color: var(--cacao);
-}
-
-.icon-btn--outline {
-  border: 1px solid rgba(247, 242, 235, 0.45);
-  color: var(--crema);
-}
-
-.icon-btn--outline:hover {
-  border-color: var(--crema);
-  color: var(--crema);
-}
+/* Un punto más grandes que los del hero porque acá sí son el destino de la
+   sección, no un atajo al mHechas a mano. */
+.icon-btn { --disco: 40px; }
 
 .pagos {
   display: flex;
@@ -451,8 +485,166 @@ a:hover { color: var(--madera); }
   background: var(--tinta);
   color: var(--dorado);
   text-align: center;
-  padding: 26px 20px;
+  padding: 22px 20px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px 18px;
   font-size: 13px;
+}
+
+.footer p { margin: 0; }
+
+.footer__credito {
+  font-size: 12px;
+  color: rgba(183, 158, 127, 0.62);
+}
+
+.footer__credito a {
+  color: rgba(247, 242, 235, 0.72);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(247, 242, 235, 0.3);
+  transition:
+    color var(--t-rapida) var(--ease),
+    border-color var(--t-rapida) var(--ease);
+}
+
+.footer__credito a:hover {
+  color: var(--crema);
+  border-bottom-color: var(--crema);
+}
+
+/* ---------- Mobile ----------
+   Contacto y formas de pago comparten fila: la sección deja de ser una
+   pantalla propia y pasa a ser un pie. */
+
+@media (max-width: 560px) {
+  .catalogo {
+    padding-right: 0;
+    padding-left: 0;
+  }
+
+  .catalogo__head {
+    display: block;
+    margin-bottom: 22px;
+    padding: 0 20px;
+  }
+
+  .catalogo__note {
+    display: block;
+    margin-top: 8px;
+    line-height: 1.35;
+    font-size: clamp(11.5px, 3.5vw, 13px);
+    white-space: nowrap;
+  }
+
+  .catalogo__sep { display: inline; }
+
+  .grid {
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+  }
+
+  .product-row {
+    position: relative;
+    display: block;
+    min-width: 0;
+  }
+
+  .product-row__track {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-left: 20px;
+    padding: 0 20px 8px;
+    scrollbar-width: none;
+    overscroll-behavior-inline: contain;
+  }
+
+  .product-row__track::-webkit-scrollbar { display: none; }
+
+  .product-row .card {
+    order: initial;
+    min-width: calc(100% - 54px);
+    scroll-snap-align: start;
+  }
+
+  .product-row--single .card { min-width: 100%; }
+
+  .product-row__arrow {
+    position: absolute;
+    top: clamp(150px, 42vw, 182px);
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid rgba(247, 242, 235, 0.45);
+    border-radius: 999px;
+    cursor: pointer;
+    background: rgba(59, 42, 26, 0.82);
+    box-shadow: 0 7px 18px -8px rgba(59, 42, 26, 0.7);
+    color: var(--crema);
+    opacity: 1;
+    transition: opacity var(--t-rapida) var(--ease);
+  }
+
+  .product-row__arrow--prev { left: 8px; }
+
+  .product-row__arrow--next { right: 8px; }
+
+  .product-row__arrow.is-hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .product-row__arrow--next.is-prompting svg {
+    animation: pista-horizontal 240ms ease-out 2 alternate;
+  }
+
+  .contacto { padding: 30px 20px; }
+
+  .contacto__inner {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: 22px;
+  }
+
+  .label {
+    margin-bottom: 8px;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+  }
+
+  .contacto__redes { gap: 8px; }
+
+  .icon-btn { --disco: 36px; }
+
+  .icon-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .pagos { gap: 6px; }
+
+  .pagos span {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+
+  .footer { padding: 18px 20px; }
+  .footer__linea { font-size: 12px; }
+  .footer__credito { font-size: 11px; }
+}
+
+@keyframes pista-horizontal {
+  from { transform: translateX(-3px); opacity: 0.65; }
+  to { transform: translateX(2px); opacity: 1; }
 }
 
 /* ---------- Visor ---------- */
@@ -666,4 +858,6 @@ a:hover { color: var(--madera); }
     --panel-escala: 1;
     --t-lenta: 280ms;
   }
+
+  .product-row__arrow--next.is-prompting svg { animation: none; }
 }

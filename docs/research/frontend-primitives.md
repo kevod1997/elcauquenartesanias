@@ -5,7 +5,7 @@ Investigación contra fuentes primarias (specs W3C/WHATWG, MDN, documentación d
 
 Contexto del sitio: HTML/CSS/JS vanilla, sin build step, deploy estático en Vercel.
 Archivos: `index.html`, `main.js`, `styles.css`, `assets/*.jpeg`. Audiencia: consumidor
-general argentino, mayoritariamente Chrome en Android + Safari en iOS.
+general Hechas a manotino, mayoritariamente Chrome en Android + Safari en iOS.
 
 Convención de documentación: **no existía ninguna** en el repo (el único `.md` era
 `.agents/skills/frontend-design/SKILL.md`, que pertenece a un skill instalado, no a docs
@@ -90,7 +90,7 @@ mostrado no dispara transición por sí solo — ese es exactamente el problema 
 
 Riesgo conocido: `transitionend` no dispara si la transición nunca arranca (por ejemplo
 si `prefers-reduced-motion` la anuló, o si el valor final es igual al inicial). Siempre
-hay que ponerle un `setTimeout` de guarda con la duración + margen.
+hay que ponerle un `setTimeout` de guarda con la duración + mHechas a mano.
 
 **Soporte**: universal. `transitionend` y `animationend` existen desde antes de cualquier
 navegador relevante en 2026.
@@ -169,7 +169,7 @@ Fuente: [BCD `html/elements/dialog.json`](https://github.com/mdn/browser-compat-
 [WebDX](https://api.webstatus.dev/v1/features?q=id:dialog).
 `"preview"` en BCD significa Safari Technology Preview, no una versión estable.
 
-### Qué es seguro shipear en 2026 para Argentina
+### Qué es seguro shipear en 2026 para Hechas a mano
 
 - `<dialog>` + `showModal()` + `::backdrop`: **sí, sin reservas.** Piso Safari 15.4
   (marzo 2022), widely available.
@@ -731,7 +731,7 @@ son Safari 13.1 y iOS Safari 13.4–13.7 — es decir, iPhones que se quedaron e
 
 **Veredicto**: el ~4 % sin soporte no es "4 % de la audiencia de este sitio", es
 mayoritariamente navegadores viejos de escritorio y bots. Para una audiencia de consumidor
-argentino en 2026, iOS 13 es residual. Mantener el JPEG duplica el peso del repo y agrega
+Hechas a manotino en 2026, iOS 13 es residual. Mantener el JPEG duplica el peso del repo y agrega
 un elemento por cada imagen, a cambio de casi nada.
 
 ### Recomendación para este sitio

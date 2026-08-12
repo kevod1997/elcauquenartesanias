@@ -21,43 +21,43 @@
     {
       nombre: 'Cazuelas artesanales', precio: '$5.000', placa: 'cazuelas-placa',
       desc: 'Madera maciza de guayubira con terminación de alta calidad. Ideales para aceitunas, frutos secos, salsas y condimentos.',
-      medidas: ['13 cm Ø', '4 cm alto', 'Guayubira']
+      medidas: ['13 cm diámetro', '4 cm alto', 'Guayubira']
     },
     {
       nombre: 'Cuencos o bowls', precio: '$7.000', placa: 'cuencos-placa',
       desc: 'Torneados a mano, pequeños y versátiles. Vetas y tonos irrepetibles en cada pieza.',
-      medidas: ['12 cm Ø', '7 cm alto', 'Guayubira']
+      medidas: ['12 cm diámetro', '7 cm alto', 'Guayubira']
     },
     {
       nombre: 'Bowls de guayubira', precio: '$12.000', placa: 'bowls-placa',
       desc: 'Acabado natural que realza las vetas. Para ensaladas, frutas, picadas, panes y postres.',
-      medidas: ['23 cm Ø', '4 cm alto', 'Guayubira']
+      medidas: ['23 cm diámetro', '4 cm alto', 'Guayubira']
     },
     {
       nombre: 'Ensaladeras', precio: '$13.000', placa: 'ensaladeras-placa',
       desc: 'Belleza natural y diseño atemporal para la mesa. Acabado suave, ideales para uso diario.',
-      medidas: ['22,5 cm Ø', '4 cm alto', 'Guayubira']
+      medidas: ['22,5 cm diámetro', '4 cm alto', 'Guayubira']
     },
     {
       nombre: 'Platos cóncavos', precio: '$8.000', placa: 'concavos-placa',
       desc: 'Hechos para compartir: quesos, fiambres, aceitunas y snacks. Resistentes y fáciles de mantener.',
-      medidas: ['19 cm Ø', '4 y 3,5 cm alto']
+      medidas: ['19 cm diámetro', '4 y 3,5 cm alto']
     },
     {
       nombre: 'Plato para asado', precio: '$9.000', placa: 'asado-placa',
       desc: 'Con borde interior que evita derrames y realza la presentación. Para asados, picadas y parrilladas.',
-      medidas: ['23 cm Ø', '2 cm alto', 'Guayubira']
+      medidas: ['23 cm diámetro', '2 cm alto', 'Guayubira']
     },
     {
       nombre: 'Mate de caldén', precio: '$15.000', placa: 'mate-placa',
-      desc: 'Madera de caldén, reconocida por su dureza y belleza natural, con fleje de alpaca grabado. Cuatro diseños de fleje para elegir.',
-      medidas: ['5 cm Ø interior', '6 cm profundidad', 'Caldén'],
+      desc: 'Madera de caldén, reconocida por su dureza y belleza natural, con fleje de alpaca grabado. Cuatro Diseños para elegir.',
+      medidas: ['5 cm diámetro interior', '6 cm profundidad', 'Caldén'],
       variantes: mates
     },
     {
       nombre: 'Mortero de palo santo', precio: '$14.000', placa: 'mortero-placa',
       desc: 'Tallado a mano en palo santo, apreciado por su dureza y su aroma. Para especias, semillas y hierbas.',
-      medidas: ['10,5 cm Ø ext.', '12 cm alto', 'Palo santo']
+      medidas: ['10,5 cm diámetro ext.', '12 cm alto', 'Palo santo']
     },
     {
       nombre: 'Pinchos para picadas', precio: '$6.000', placa: 'pinchos-placa',
@@ -136,7 +136,7 @@
       bloque.className = 'variantes';
       var label = document.createElement('span');
       label.className = 'variantes__label';
-      label.textContent = 'Diseños de fleje';
+      label.textContent = 'Diseños';
       var lista = document.createElement('div');
       lista.className = 'variantes__lista';
       p.variantes.forEach(function (v, vi) {
@@ -316,12 +316,94 @@
   /* ---------- Arranque ---------- */
 
   var grid = document.getElementById('grid');
-  productos.forEach(function (p) { grid.appendChild(crearTarjeta(p)); });
+  var filasMobile = [[0, 1, 2, 3], [4, 5, 7, 8], [6]];
 
-  document.getElementById('waGeneral').href =
-    wa('Hola! Vi la página de El Cauquén Artesanías y quería hacer una consulta.');
+  filasMobile.forEach(function (indices) {
+    var fila = document.createElement('div');
+    fila.className = 'product-row' + (indices.length === 1 ? ' product-row--single' : '');
 
-  var ig = document.getElementById('igLink');
-  ig.href = 'https://instagram.com/' + INSTAGRAM.replace('@', '');
-  ig.title = INSTAGRAM;
+    var carril = document.createElement('div');
+    carril.className = 'product-row__track';
+
+    indices.forEach(function (indice) {
+      var tarjeta = crearTarjeta(productos[indice]);
+      /* display: contents deja estas tarjetas como items directos de la grilla
+         en desktop; order recupera allÃ­ el orden original del catÃ¡logo. */
+      tarjeta.style.setProperty('--orden-producto', indice);
+      carril.appendChild(tarjeta);
+    });
+
+    fila.appendChild(carril);
+
+    if (indices.length > 1) {
+      var retroceder = document.createElement('button');
+      retroceder.className = 'product-row__arrow product-row__arrow--prev is-hidden';
+      retroceder.type = 'button';
+      retroceder.disabled = true;
+      retroceder.setAttribute('aria-label', 'Ver productos anteriores de esta hilera');
+      retroceder.innerHTML = '<svg width="11" height="18" viewBox="0 0 11 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 1L2 9l7 8"></path></svg>';
+
+      var avanzar = document.createElement('button');
+      avanzar.className = 'product-row__arrow product-row__arrow--next';
+      avanzar.type = 'button';
+      avanzar.setAttribute('aria-label', 'Ver mÃ¡s productos de esta hilera');
+      avanzar.innerHTML = '<svg width="11" height="18" viewBox="0 0 11 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 1l7 8-7 8"></path></svg>';
+      fila.appendChild(retroceder);
+      fila.appendChild(avanzar);
+
+      var actualizarFlechas = function () {
+        var estaAlInicio = carril.scrollLeft <= 2;
+        var llegoAlFinal = carril.scrollLeft >= carril.scrollWidth - carril.clientWidth - 2;
+        retroceder.classList.toggle('is-hidden', estaAlInicio);
+        avanzar.classList.toggle('is-hidden', llegoAlFinal);
+        retroceder.disabled = estaAlInicio;
+        avanzar.disabled = llegoAlFinal;
+      };
+
+      var moverHilera = function (direccion) {
+        var tarjeta = carril.querySelector('.card');
+        var distancia = tarjeta ? tarjeta.getBoundingClientRect().width + 14 : carril.clientWidth;
+        var reducirMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        carril.scrollBy({ left: direccion * distancia, behavior: reducirMovimiento ? 'auto' : 'smooth' });
+      };
+
+      carril.addEventListener('scroll', actualizarFlechas, { passive: true });
+      retroceder.addEventListener('click', function () {
+        moverHilera(-1);
+      });
+      avanzar.addEventListener('click', function () {
+        moverHilera(1);
+      });
+
+      if ('IntersectionObserver' in window) {
+        var observador = new IntersectionObserver(function (entradas) {
+          if (entradas[0].isIntersecting) {
+            avanzar.classList.add('is-prompting');
+            observador.disconnect();
+          }
+        }, { threshold: 0.45 });
+        observador.observe(fila);
+      } else {
+        avanzar.classList.add('is-prompting');
+      }
+
+      requestAnimationFrame(actualizarFlechas);
+    }
+
+    grid.appendChild(fila);
+  });
+
+  /* Los accesos del hero y los de la sección de contacto son los mismos
+     destinos, así que se resuelven juntos por atributo. */
+  var hrefWa = wa('Hola! Vi la página de El Cauquén Artesanías y quería hacer una consulta.');
+  var hrefIg = 'https://instagram.com/' + INSTAGRAM.replace('@', '');
+
+  Array.prototype.forEach.call(document.querySelectorAll('[data-wa]'), function (a) {
+    a.href = hrefWa;
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll('[data-ig]'), function (a) {
+    a.href = hrefIg;
+    a.title = INSTAGRAM;
+  });
 })();

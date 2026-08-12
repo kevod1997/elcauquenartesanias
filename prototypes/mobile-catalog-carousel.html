@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Exploración mobile · El Cauquén</title>
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    html { background: #d9ccbc; }
+    body { min-width: 0; background: #d9ccbc; }
+    #stage { min-height: 100vh; }
+    .proto-phone {
+      width: min(100%, 430px);
+      min-height: 100vh;
+      margin: 0 auto;
+      padding-bottom: 94px;
+      background: linear-gradient(180deg, var(--crema) 0%, var(--crema-2) 100%);
+      box-shadow: 0 0 56px rgba(59, 42, 26, 0.16);
+    }
+    .proto-phone .hero { padding: 30px 20px 28px; }
+    .proto-phone .hero__logo { width: 68px; height: 68px; margin-bottom: 12px; }
+    .proto-phone .hero__eyebrow { margin-bottom: 9px; font-size: 9px; }
+    .proto-phone .hero__title { font-size: 30px; }
+    .proto-catalog { padding: 34px 18px 28px; }
+    .proto-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; margin-bottom: 22px; }
+    .proto-head h2 { margin: 0; color: var(--cacao); font: 500 29px/1.05 'Playfair Display', serif; }
+    .proto-head p { margin: 7px 0 0; color: var(--texto-tenue); font-size: 12px; line-height: 1.4; }
+    .proto-swipe { flex: none; color: var(--madera); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+    .proto-products { display: flex; flex-direction: column; gap: 18px; }
+    .proto-products .card { width: 100%; flex: none; }
+    .proto-products .card:hover, .proto-products .card:focus-within { transform: none; }
+    .proto-products .card__foto img { transform: none; }
+    .proto-products .card__nombre { font-size: 21px; }
+    .proto-products .card__desc { font-size: 14px; }
+    .proto-products .btn-wa { min-height: 48px; }
+    .proto-enter { animation: proto-enter 240ms cubic-bezier(.22,.61,.36,1) both; }
+    @keyframes proto-enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+    /* Hileras de taller */
+    .shelf { margin: 0 -18px 30px; }
+    .shelf:last-child { margin-bottom: 0; }
+    .shelf__head { display: flex; align-items: baseline; justify-content: space-between; padding: 0 18px 10px; }
+    .shelf__head h3 { margin: 0; color: var(--cacao); font: 600 19px 'Playfair Display', serif; }
+    .shelf__head span { color: var(--texto-tenue); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }
+    .shelf__rail {
+      display: flex;
+      flex-direction: row;
+      gap: 14px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-padding-left: 18px;
+      padding: 0 18px 8px;
+      scrollbar-width: none;
+    }
+    .shelf__rail::-webkit-scrollbar { display: none; }
+    .shelf__rail .card { min-width: calc(100% - 34px); scroll-snap-align: start; }
+    .shelf--single .card { min-width: 100%; }
+
+    /* Fichero */
+    .tabs-wrap { position: sticky; top: 0; z-index: 20; margin: -8px -18px 20px; padding: 8px 18px 10px; background: rgba(247,242,235,.94); backdrop-filter: blur(10px); }
+    .tabs { display: flex; gap: 7px; overflow-x: auto; scrollbar-width: none; }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab { flex: none; min-height: 40px; padding: 0 14px; border: 1px solid rgba(107,76,42,.22); border-radius: 999px; background: transparent; color: var(--madera); cursor: pointer; font-size: 12px; }
+    .tab[aria-selected="true"] { border-color: var(--verde); background: var(--verde); color: var(--crema); }
+    .group-title { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px; }
+    .group-title h3 { margin: 0; color: var(--cacao); font: 600 20px 'Playfair Display', serif; }
+    .group-title span { color: var(--texto-tenue); font-size: 11px; }
+
+    /* Muestrario */
+    .showcase-nav { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; gap: 10px; margin-bottom: 14px; }
+    .showcase-nav button { width: 44px; height: 44px; border: 1px solid rgba(107,76,42,.24); border-radius: 999px; background: white; color: var(--madera); cursor: pointer; font-size: 20px; }
+    .showcase-status { text-align: center; }
+    .showcase-status strong { display: block; color: var(--cacao); font: 600 17px 'Playfair Display', serif; }
+    .showcase-status span { color: var(--texto-tenue); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; }
+    .showcase-viewport { overflow: hidden; margin: 0 -18px; }
+    .showcase-track { display: flex; flex-direction: row; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-left: 18px; padding: 0 18px 10px; scrollbar-width: none; }
+    .showcase-track::-webkit-scrollbar { display: none; }
+    .showcase-track .card { min-width: calc(100% - 34px); scroll-snap-align: start; }
+    .showcase-marks { display: flex; justify-content: center; gap: 5px; margin-top: 8px; }
+    .showcase-marks span { width: 5px; height: 5px; border-radius: 99px; background: rgba(107,76,42,.25); }
+    .showcase-marks span[data-current] { width: 18px; background: var(--madera); }
+
+    /* Capítulos */
+    .chapters { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin-bottom: 20px; }
+    .chapter { min-height: 48px; padding: 5px; border: 1px solid rgba(107,76,42,.2); border-radius: 10px; background: white; color: var(--madera); cursor: pointer; font-size: 11px; line-height: 1.25; }
+    .chapter span { display: block; margin-top: 2px; color: var(--texto-tenue); font-size: 9px; }
+    .chapter[aria-selected="true"] { border-color: var(--madera); background: var(--madera); color: var(--crema); }
+    .chapter[aria-selected="true"] span { color: var(--arena); }
+
+    /* Visor simple del prototipo */
+    .proto-viewer { position: fixed; inset: 0; z-index: 1000000; display: none; align-items: center; justify-content: center; padding: 14px; border: 0; background: rgba(31,21,12,.9); }
+    .proto-viewer[open] { display: flex; }
+    .proto-viewer__panel { position: relative; width: min(100%, 430px); }
+    .proto-viewer img { display: block; width: 100%; max-height: 82vh; border-radius: 12px; object-fit: contain; }
+    .proto-viewer button { position: absolute; top: 10px; right: 10px; width: 42px; height: 42px; border: 0; border-radius: 999px; background: var(--crema); color: var(--cacao); cursor: pointer; font-size: 22px; }
+
+    /* Picker spec */
+    .proto-picker { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 2147483647; display: flex; align-items: center; gap: 2px; padding: 4px; border-radius: 999px; background: rgba(10,10,10,.82); -webkit-backdrop-filter: blur(12px) saturate(1.4); backdrop-filter: blur(12px) saturate(1.4); box-shadow: 0 0 0 1px rgba(255,255,255,.08) inset,0 8px 24px rgba(0,0,0,.24),0 2px 6px rgba(0,0,0,.12); font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; font-size: 13px; line-height: 1; -webkit-font-smoothing: antialiased; user-select: none; -webkit-user-select: none; }
+    .proto-picker-highlight { position: absolute; top: 4px; left: 0; height: 28px; border-radius: 999px; background: rgba(255,255,255,.12); will-change: transform; }
+    .proto-picker[data-ready] .proto-picker-highlight { transition: transform 250ms cubic-bezier(.23,1,.32,1),width 250ms cubic-bezier(.23,1,.32,1); }
+    .proto-picker-item { position: relative; display: flex; align-items: center; height: 28px; padding: 0 10px; border: 0; border-radius: 999px; background: transparent; color: rgba(255,255,255,.55); font: inherit; cursor: pointer; transition: color 150ms ease-out; }
+    .proto-picker-item:hover { color: rgba(255,255,255,.85); }
+    .proto-picker-item:active { transform: scale(.97); }
+    .proto-picker-item:focus-visible { outline: 2px solid rgba(255,255,255,.4); outline-offset: 2px; }
+    .proto-picker-item[data-active] { color: #fff; }
+    .proto-picker-divider { width: 1px; height: 16px; margin: 0 3px; background: rgba(255,255,255,.12); }
+    .proto-picker-replay { padding: 0 8px; font-size: 14px; }
+    @media (max-width: 390px) { .proto-picker-item { padding: 0 7px; font-size: 10px; } .proto-picker-divider { margin-inline: 1px; } }
+    @media (prefers-reduced-motion: reduce) { .proto-picker[data-ready] .proto-picker-highlight { transition: none; } .proto-enter { animation: none; } }
+  </style>
+</head>
+<body>
+  <main id="stage"></main>
+
+  <nav class="proto-picker" aria-label="Variantes del prototipo">
+    <span class="proto-picker-highlight" aria-hidden="true"></span>
+    <button class="proto-picker-item" data-active aria-current="true">Hileras</button>
+    <button class="proto-picker-item">Fichero</button>
+    <button class="proto-picker-item">Muestrario</button>
+    <button class="proto-picker-item">Capítulos</button>
+    <span class="proto-picker-divider" aria-hidden="true"></span>
+    <button class="proto-picker-item proto-picker-replay" aria-label="Repetir animación (R)">↻</button>
+  </nav>
+
+  <dialog class="proto-viewer" id="viewer" aria-label="Ficha ampliada">
+    <div class="proto-viewer__panel">
+      <img id="viewer-image" alt="">
+      <button type="button" id="viewer-close" aria-label="Cerrar">×</button>
+    </div>
+  </dialog>
+
+  <script>
+    const products = [
+      {name:'Cazuelas artesanales',price:'$5.000',base:'cazuelas-placa',desc:'Madera maciza de guayubira con terminación de alta calidad. Ideales para aceitunas, frutos secos, salsas y condimentos.',measures:['13 cm diámetro','4 cm alto','Guayubira']},
+      {name:'Cuencos o bowls',price:'$7.000',base:'cuencos-placa',desc:'Torneados a mano, pequeños y versátiles. Vetas y tonos irrepetibles en cada pieza.',measures:['12 cm diámetro','7 cm alto','Guayubira']},
+      {name:'Bowls de guayubira',price:'$12.000',base:'bowls-placa',desc:'Acabado natural que realza las vetas. Para ensaladas, frutas, picadas, panes y postres.',measures:['23 cm diámetro','4 cm alto','Guayubira']},
+      {name:'Ensaladeras',price:'$13.000',base:'ensaladeras-placa',desc:'Belleza natural y diseño atemporal para la mesa. Acabado suave, ideales para uso diario.',measures:['22,5 cm diámetro','4 cm alto','Guayubira']},
+      {name:'Platos cóncavos',price:'$8.000',base:'concavos-placa',desc:'Hechos para compartir: quesos, fiambres, aceitunas y snacks. Resistentes y fáciles de mantener.',measures:['19 cm diámetro','4 y 3,5 cm alto']},
+      {name:'Plato para asado',price:'$9.000',base:'asado-placa',desc:'Con borde interior que evita derrames y realza la presentación. Para asados, picadas y parrilladas.',measures:['23 cm diámetro','2 cm alto','Guayubira']},
+      {name:'Mate de caldén',price:'$15.000',base:'mate-placa',desc:'Madera de caldén, reconocida por su dureza y belleza natural, con fleje de alpaca grabado. Cuatro Diseños para elegir.',measures:['5 cm diámetro interior','6 cm profundidad','Caldén'],variants:[['mate-floral','Fleje floral'],['mate-pampa','Fleje pampa'],['mate-greca','Fleje greca'],['mate-aves','Fleje aves']]},
+      {name:'Mortero de palo santo',price:'$14.000',base:'mortero-placa',desc:'Tallado a mano en palo santo, apreciado por su dureza y su aroma. Para especias, semillas y hierbas.',measures:['10,5 cm diámetro ext.','12 cm alto','Palo santo']},
+      {name:'Pinchos para picadas',price:'$6.000',base:'pinchos-placa',desc:'Juego con base torneada y dos modelos de pincho. Un detalle práctico para tapas y aperitivos.',measures:['7,5 cm alto base','9 cm largo','2 modelos']}
+    ];
+    const image = (base,size=640) => `../assets/${base}-${size}.webp`;
+    const lens = '<svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><circle cx="6" cy="6" r="4.6"></circle><path d="M9.4 9.4L13 13"></path></svg>';
+    const waIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"></path></svg>';
+
+    function card(index) {
+      const p = products[index];
+      const measures = p.measures.map(m => `<span>${m}</span>`).join('');
+      const variants = p.variants ? `<div class="variantes"><span class="variantes__label">Diseños</span><div class="variantes__lista">${p.variants.map(v => `<button type="button" data-view="${v[0]}" aria-label="Ver ${v[1].toLowerCase()}"><img src="${image(v[0],160)}" width="160" height="160" alt="${v[1]}"></button>`).join('')}</div></div>` : '';
+      const message = encodeURIComponent(`Hola! Vi ${p.name.toLowerCase()} y me interesa comprar. ¿Tenés disponibilidad?`);
+      return `<article class="card" data-card="${index}"><button class="card__foto" type="button" data-view="${p.base}" aria-label="Ver ficha completa de ${p.name}"><img src="${image(p.base)}" width="640" height="640" alt="Ficha de ${p.name}"><span class="card__lupa">${lens}<span>Ver ficha</span></span></button><div class="card__body"><div class="card__head"><h3 class="card__nombre">${p.name}</h3><span class="card__precio">${p.price}</span></div><p class="card__desc">${p.desc}</p><div class="medidas">${measures}</div>${variants}<a class="btn-wa" href="https://wa.me/542284580320?text=${message}" target="_blank" rel="noopener noreferrer">${waIcon} Consultar por WhatsApp</a></div></article>`;
+    }
+    const hero = `<header class="hero"><img class="hero__logo" src="../assets/logo.webp" width="390" height="393" alt="El Cauquén Artesanías"><p class="hero__eyebrow">Piezas  unicas en madera · Hechas a mano</p><h1 class="hero__title">El Cauquén<br><span>Artesanías</span></h1></header>`;
+    const shell = content => `<div class="page proto-phone">${hero}<section class="proto-catalog proto-enter">${content}</section></div>`;
+    const head = (title,note,swipe='') => `<div class="proto-head"><div><h2>${title}</h2><p>${note}</p></div>${swipe ? `<span class="proto-swipe">${swipe}</span>` : ''}</div>`;
+    const groups = [
+      {name:'Para servir',ids:[0,1]},
+      {name:'Centro de mesa',ids:[2,3,4]},
+      {name:'Mate y sobremesa',ids:[6,8]},
+      {name:'Fuego y cocina',ids:[5,7]}
+    ];
+    const rows = [[0,1,2,3],[4,5,7,8],[6]];
+
+    const variants = [
+      () => shell(`${head('Nuestros productos','Precios por unidad · Consultá disponibilidad','Deslizá →')}<div>${rows.map((ids,i) => `<section class="shelf ${ids.length===1?'shelf--single':''}"><div class="shelf__rail proto-products" data-rail="${i}">${ids.map(card).join('')}</div></section>`).join('')}</div>`),
+      () => shell(`${head('Elegí una familia','La card permanece completa; sólo cambia el grupo visible')}<div class="tabs-wrap"><div class="tabs" role="tablist">${groups.map((g,i) => `<button class="tab" role="tab" aria-selected="${i===0}" data-tab="${i}">${g.name}</button>`).join('')}</div></div><div id="tab-panel"></div>`),
+      () => shell(`${head('Muestrario completo','Una pieza por vez, en el mismo orden del catálogo')}<div class="showcase-nav"><button type="button" data-prev aria-label="Producto anterior">←</button><div class="showcase-status"><strong>Cazuelas artesanales</strong><span>1 de 9</span></div><button type="button" data-next aria-label="Producto siguiente">→</button></div><div class="showcase-viewport"><div class="showcase-track proto-products" data-showcase>${products.map((_,i)=>card(i)).join('')}</div></div><div class="showcase-marks">${products.map((_,i)=>`<span ${i===0?'data-current':''}></span>`).join('')}</div>`),
+      () => shell(`${head('Catálogo por capítulos','Tres piezas completas por página')}<div class="chapters" role="tablist">${['Piezas 1–3','Piezas 4–6','Piezas 7–9'].map((label,i)=>`<button class="chapter" role="tab" aria-selected="${i===0}" data-chapter="${i}">${label}<span>${i===0?'Servir':i===1?'Compartir':'Rituales'}</span></button>`).join('')}</div><div id="chapter-panel" class="proto-products"></div>`)
+    ];
+
+    const stage = document.getElementById('stage');
+    const picker = document.querySelector('.proto-picker');
+    const highlight = picker.querySelector('.proto-picker-highlight');
+    const items = [...picker.querySelectorAll('.proto-picker-item:not(.proto-picker-replay)')];
+    const replay = picker.querySelector('.proto-picker-replay');
+    const viewer = document.getElementById('viewer');
+    let current = 0;
+
+    function bindCards(root=stage) {
+      root.querySelectorAll('[data-view]').forEach(button => button.addEventListener('click', () => {
+        const base = button.dataset.view;
+        const full = base.startsWith('mate-') && base !== 'mate-placa' ? image(base) : image(base, undefined);
+        document.getElementById('viewer-image').src = full;
+        document.getElementById('viewer-image').alt = button.getAttribute('aria-label') || 'Ficha ampliada';
+        viewer.setAttribute('open','');
+      }));
+    }
+    function bindVariant() {
+      bindCards();
+      const tabs = [...stage.querySelectorAll('[data-tab]')];
+      if (tabs.length) {
+        const panel = stage.querySelector('#tab-panel');
+        const select = i => {
+          tabs.forEach((tab,j)=>tab.setAttribute('aria-selected',String(i===j)));
+          const g=groups[i];
+          panel.innerHTML=`<div class="group-title"><h3>${g.name}</h3><span>${g.ids.length} piezas</span></div><div class="proto-products">${g.ids.map(card).join('')}</div>`;
+          bindCards(panel);
+        };
+        tabs.forEach((tab,i)=>tab.addEventListener('click',()=>select(i)));
+        select(0);
+      }
+      const chapters = [...stage.querySelectorAll('[data-chapter]')];
+      if (chapters.length) {
+        const panel=stage.querySelector('#chapter-panel');
+        const select=i=>{chapters.forEach((tab,j)=>tab.setAttribute('aria-selected',String(i===j)));panel.innerHTML=[0,1,2].map(n=>card(i*3+n)).join('');bindCards(panel)};
+        chapters.forEach((tab,i)=>tab.addEventListener('click',()=>select(i)));
+        select(0);
+      }
+      const track=stage.querySelector('[data-showcase]');
+      if (track) {
+        let index=0;
+        const status=stage.querySelector('.showcase-status');
+        const marks=[...stage.querySelectorAll('.showcase-marks span')];
+        const update=i=>{index=Math.max(0,Math.min(products.length-1,i));const cards=track.querySelectorAll('.card');track.scrollTo({left:cards[index].offsetLeft-18,behavior:'smooth'});status.innerHTML=`<strong>${products[index].name}</strong><span>${index+1} de 9</span>`;marks.forEach((m,j)=>m.toggleAttribute('data-current',j===index))};
+        stage.querySelector('[data-prev]').addEventListener('click',()=>update(index-1));
+        stage.querySelector('[data-next]').addEventListener('click',()=>update(index+1));
+        track.addEventListener('scroll',()=>{const cards=[...track.querySelectorAll('.card')];const nearest=cards.reduce((best,c,i)=>Math.abs(c.offsetLeft-track.scrollLeft-18)<Math.abs(cards[best].offsetLeft-track.scrollLeft-18)?i:best,0);if(nearest!==index){index=nearest;status.innerHTML=`<strong>${products[index].name}</strong><span>${index+1} de 9</span>`;marks.forEach((m,j)=>m.toggleAttribute('data-current',j===index))}},{passive:true});
+      }
+    }
+    function moveHighlight(){const el=items[current];highlight.style.width=el.offsetWidth+'px';highlight.style.transform=`translateX(${el.offsetLeft}px)`}
+    function mount(i){stage.innerHTML='';requestAnimationFrame(()=>{stage.innerHTML=variants[i]();bindVariant()})}
+    function setActive(i){if(i<0||i>=variants.length)return;current=i;items.forEach((el,j)=>{el.toggleAttribute('data-active',j===i);if(j===i)el.setAttribute('aria-current','true');else el.removeAttribute('aria-current')});moveHighlight();const url=new URL(location);url.searchParams.set('v',i+1);history.replaceState(null,'',url);mount(i)}
+    items.forEach((el,i)=>el.addEventListener('click',()=>setActive(i)));
+    replay.addEventListener('click',()=>mount(current));
+    window.addEventListener('resize',moveHighlight);
+    document.getElementById('viewer-close').addEventListener('click',()=>viewer.removeAttribute('open'));
+    viewer.addEventListener('click',e=>{if(e.target===viewer)viewer.removeAttribute('open')});
+    document.addEventListener('keydown',e=>{if(/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)||e.target.isContentEditable)return;if(e.metaKey||e.ctrlKey||e.altKey)return;const n=parseInt(e.key,10);if(n>=1&&n<=variants.length)setActive(n-1);else if(e.key==='ArrowRight')setActive((current+1)%variants.length);else if(e.key==='ArrowLeft')setActive((current-1+variants.length)%variants.length);else if(e.key==='r'||e.key==='R')mount(current);else if(e.key==='Escape')viewer.removeAttribute('open')});
+    setActive((parseInt(new URLSearchParams(location.search).get('v'),10)||1)-1);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>picker.setAttribute('data-ready','')));
+  </script>
+</body>
+</html>
