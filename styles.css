@@ -568,11 +568,23 @@ a:hover { color: var(--madera); }
 
   .product-row .card {
     order: initial;
-    min-width: calc(100% - 54px);
+    min-width: calc(100% - 38px);
     scroll-snap-align: start;
   }
 
   .product-row--single .card { min-width: 100%; }
+
+  .medidas {
+    flex-wrap: nowrap;
+    gap: 5px;
+  }
+
+  .medidas span {
+    padding-right: 6px;
+    padding-left: 6px;
+    font-size: clamp(9px, 2.8vw, 11px);
+    white-space: nowrap;
+  }
 
   .product-row__arrow {
     position: absolute;

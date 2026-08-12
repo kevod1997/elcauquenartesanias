@@ -21,48 +21,48 @@
     {
       nombre: 'Cazuelas artesanales', precio: '$5.000', placa: 'cazuelas-placa',
       desc: 'Madera maciza de guayubira con terminación de alta calidad. Ideales para aceitunas, frutos secos, salsas y condimentos.',
-      medidas: ['13 cm diámetro', '4 cm alto', 'Guayubira']
+      medidas: ['Ø 13 cm', 'Alto 4 cm']
     },
     {
       nombre: 'Cuencos o bowls', precio: '$7.000', placa: 'cuencos-placa',
       desc: 'Torneados a mano, pequeños y versátiles. Vetas y tonos irrepetibles en cada pieza.',
-      medidas: ['12 cm diámetro', '7 cm alto', 'Guayubira']
+      medidas: ['Ø 12 cm', 'Alto 7 cm']
     },
     {
       nombre: 'Bowls de guayubira', precio: '$12.000', placa: 'bowls-placa',
       desc: 'Acabado natural que realza las vetas. Para ensaladas, frutas, picadas, panes y postres.',
-      medidas: ['23 cm diámetro', '4 cm alto', 'Guayubira']
+      medidas: ['Ø 23 cm', 'Alto 4 cm']
     },
     {
       nombre: 'Ensaladeras', precio: '$13.000', placa: 'ensaladeras-placa',
       desc: 'Belleza natural y diseño atemporal para la mesa. Acabado suave, ideales para uso diario.',
-      medidas: ['22,5 cm diámetro', '4 cm alto', 'Guayubira']
+      medidas: ['Ø 22,5 cm', 'Alto 4 cm']
     },
     {
       nombre: 'Platos cóncavos', precio: '$8.000', placa: 'concavos-placa',
       desc: 'Hechos para compartir: quesos, fiambres, aceitunas y snacks. Resistentes y fáciles de mantener.',
-      medidas: ['19 cm diámetro', '4 y 3,5 cm alto']
+      medidas: ['Ø 19 cm', 'Alto 4 y 3,5 cm']
     },
     {
       nombre: 'Plato para asado', precio: '$9.000', placa: 'asado-placa',
       desc: 'Con borde interior que evita derrames y realza la presentación. Para asados, picadas y parrilladas.',
-      medidas: ['23 cm diámetro', '2 cm alto', 'Guayubira']
+      medidas: ['Ø 23 cm', 'Alto 2 cm']
     },
     {
       nombre: 'Mate de caldén', precio: '$15.000', placa: 'mate-placa',
       desc: 'Madera de caldén, reconocida por su dureza y belleza natural, con fleje de alpaca grabado. Cuatro Diseños para elegir.',
-      medidas: ['5 cm diámetro interior', '6 cm profundidad', 'Caldén'],
+      medidas: ['Ø interior 5 cm', 'Prof. 6 cm'],
       variantes: mates
     },
     {
       nombre: 'Mortero de palo santo', precio: '$14.000', placa: 'mortero-placa',
       desc: 'Tallado a mano en palo santo, apreciado por su dureza y su aroma. Para especias, semillas y hierbas.',
-      medidas: ['10,5 cm diámetro ext.', '12 cm alto', 'Palo santo']
+      medidas: ['Ø exterior 10,5 cm', 'Alto 12 cm']
     },
     {
       nombre: 'Pinchos para picadas', precio: '$6.000', placa: 'pinchos-placa',
       desc: 'Juego con base torneada y dos modelos de pincho. Un detalle práctico para tapas y aperitivos.',
-      medidas: ['7,5 cm alto base', '9 cm largo', '2 modelos']
+      medidas: ['Alto base 7,5 cm', 'Largo 9 cm']
     }
   ];
 
