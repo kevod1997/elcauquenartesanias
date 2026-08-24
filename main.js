@@ -63,6 +63,16 @@
       nombre: 'Pinchos para picadas', precio: '$6.000', placa: 'pinchos-placa',
       desc: 'Juego con base torneada y dos modelos de pincho. Un detalle práctico para tapas y aperitivos.',
       medidas: ['Alto base 7,5 cm', 'Largo 9 cm']
+    },
+    {
+      nombre: 'Porta sahumerios', precio: '$4.000', placa: 'porta-sahumerio-placa',
+      desc: 'Torneado en madera maciza, con orificio central para sostener el sahumerio de manera práctica y segura. Ideal para acompañar momentos de relajación o como objeto decorativo.',
+      medidas: ['Ø 18 cm']
+    },
+    {
+      nombre: 'Bases de madera con vela', precio: '$4.200', placa: 'velas-placa',
+      desc: 'Bases torneadas en madera maciza con vela tealight incluida, lista para usar. Versátiles y elegantes para mesas, living o dormitorio.',
+      medidas: ['Varios modelos']
     }
   ];
 
@@ -316,7 +326,7 @@
   /* ---------- Arranque ---------- */
 
   var grid = document.getElementById('grid');
-  var filasMobile = [[0, 1, 2, 3], [4, 5, 7, 8], [6]];
+  var filasMobile = [[0, 1, 2, 3], [4, 5, 7, 8], [6], [9, 10]];
 
   filasMobile.forEach(function (indices) {
     var fila = document.createElement('div');
