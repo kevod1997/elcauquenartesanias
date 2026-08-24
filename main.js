@@ -67,12 +67,14 @@
     {
       nombre: 'Porta sahumerios', precio: '$4.000', placa: 'porta-sahumerio-placa',
       desc: 'Torneado en madera maciza, con orificio central para sostener el sahumerio de manera práctica y segura. Ideal para acompañar momentos de relajación o como objeto decorativo.',
-      medidas: ['Ø 18 cm']
+      medidas: ['Ø 18 cm'],
+      fotos: ['porta-sahumerio']
     },
     {
       nombre: 'Bases de madera con vela', precio: '$4.200', placa: 'velas-placa',
       desc: 'Bases torneadas en madera maciza con vela tealight incluida, lista para usar. Versátiles y elegantes para mesas, living o dormitorio.',
-      medidas: ['Varios modelos']
+      medidas: ['Varios modelos'],
+      fotos: ['velas']
     }
   ];
 
@@ -197,6 +199,9 @@
 
   function abrir(producto, i) {
     items = [{ base: producto.placa, previa: 640, label: 'Ficha · ' + producto.nombre }]
+      .concat((producto.fotos || []).map(function (f) {
+        return { base: f, previa: 640, label: 'Foto · ' + producto.nombre };
+      }))
       .concat((producto.variantes || []).map(function (v) {
         return { base: v.base, previa: 160, label: v.label };
       }));
