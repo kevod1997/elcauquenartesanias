@@ -18,7 +18,7 @@ tomadas (y su porqué) y las validaciones ejecutadas.
 | 10. Limpieza y cierre | ⏳ Pendiente | |
 
 **Siguiente:** implementar la fase 1 (prompt 6.2); la preparación ya cerró sus decisiones D1–D5.
-Leer la definición de la fase 1 en el PRD, con sus pasos del usuario antes del push.
+Leer la definición de la fase 1 en el PRD, en especial D4 (sitio viejo en `public/`).
 
 ## Pendientes abiertos
 

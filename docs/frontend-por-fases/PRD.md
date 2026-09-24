@@ -109,7 +109,9 @@ en Astro. Motivo:
 `https://admin.elcauquenartesanias.com.ar`.** Las páginas del admin viven en `src/pages/admin/`.
 En `vercel.json`, un rewrite con `has: [{ "type": "host", "value": "admin.elcauquenartesanias.com.ar" }]`
 lleva el host del admin a `/admin/*`, y los otros hosts redirigen `/admin/*` a ese host
-([`has` en rewrites](https://vercel.com/docs/project-configuration/vercel-json)). Motivo:
+([`has` en rewrites](https://vercel.com/docs/project-configuration/vercel-json)). El rewrite deja
+pasar los archivos del build (`/_astro/*`) y los de `public/`, que las páginas del admin también
+cargan. Motivo:
 
 - Better Auth emite la cookie `SameSite=Lax`, solo para el host `api.*`, porque el backend no
   activa `crossSubDomainCookies` (`elcauquen-backend/src/auth/auth.ts` y
@@ -145,17 +147,33 @@ descarta `hc<AppType>`. Motivo:
   4xx/5xx, y acepta un `fetch` propio para los tests ([openapi-fetch](https://openapi-ts.dev/openapi-fetch/)).
 - `/api/auth/*` queda fuera de `openapi.json`. Su tipado se decide en la fase 4.
 
-**D4. Migración: el proyecto Vercel actual queda congelado.** Se le desconecta Git y sigue
-sirviendo la raíz y `www` con su último deploy, el sitio estático actual. Un proyecto Vercel nuevo,
-desde el mismo repo, hace el build de Astro con el dominio `admin.*`, y el sitio público nuevo queda
-en su URL `.vercel.app`. En la fase 10, con el catálogo cargado, la raíz y `www` pasan al proyecto
-nuevo. Motivo:
+**D4. Migración: el proyecto Vercel actual sigue siendo el único, y el sitio viejo se sirve desde
+`public/`.** En la fase 1, `index.html`, `main.js`, `styles.css` y los `.webp` y fuentes de
+`assets/` pasan tal cual a `public/`, que Astro copia sin tocar al build
+([estructura](https://docs.astro.build/en/basics/project-structure/)). `/` sigue siendo el sitio
+actual mientras no exista `src/pages/index.astro`. Las etapas de la migración:
 
-- Producción hoy devuelve `{"productos":[]}`. Cambiar el sitio antes de cargar el catálogo lo deja
-  vacío.
-- El congelamiento no toca el código y se revierte reconectando Git.
-- El proyecto viejo se congela desconectando Git. `ignoreCommand` no sirve para esto: un
-  `ignoreCommand` en `vercel.json` reemplaza al del panel y alcanzaría a los dos proyectos.
+- **Fases 1 a 9:** el admin crece en `/admin` y, desde la fase 4, también en el dominio `admin.*`
+  del mismo proyecto. El catálogo nuevo se arma en `/catalogo-nuevo`, con `noindex`.
+- **Fase 10:** el catálogo nuevo pasa a `/` y se borra el sitio viejo de `public/`. Es un commit,
+  sin mover dominios.
+
+Motivo:
+
+- Producción hoy devuelve `{"productos":[]}`. Cambiar la raíz antes de cargar el catálogo desde el
+  admin (fases 5 a 7) la deja vacía.
+- Desde la fase 4, el admin tiene que estar publicado en `admin.*` (CORS de la API y de R2, enlace
+  del mail de contraseña). Con un solo proyecto no hay que desconectar Git, crear otro proyecto ni
+  mover dominios. La ISR de D5 se prueba en producción sobre `/catalogo-nuevo`.
+- El usuario eligió esta opción frente a congelar el proyecto actual y crear uno nuevo.
+
+Cuidados:
+
+- Vercel no detecta Astro en un proyecto que ya existe. `vercel.json` fija `"framework": "astro"`,
+  que reemplaza al preset del panel
+  ([`framework`](https://vercel.com/docs/project-configuration/vercel-json)).
+- Los `.jpeg`/`.jpg` originales quedan fuera de `public/`: todo lo que está en `public/` se publica,
+  y hoy `.vercelignore` los excluye del deploy.
 
 **D5. Render del catálogo público: SSR con ISR en Vercel (`@astrojs/vercel`, `isr`).** Solo las
 páginas del catálogo usan `export const prerender = false`; el admin queda estático. Motivo:
@@ -171,20 +189,19 @@ páginas del catálogo usan `export const prerender = false`; el admin queda est
 - Borrar `docs/contrato-api-borrador.md` del front, que es una copia vieja.
 - Resolver el working tree: commitear o descartar los cambios sin versionar.
 - Crear el proyecto Astro en la raíz con pnpm, TypeScript estricto, `@astrojs/react` y
-  `@astrojs/vercel`, con scripts de `typecheck`, `lint` y `build`. `index.html`, `main.js`,
-  `styles.css` y `assets/` quedan como referencia hasta la fase 3.
+  `@astrojs/vercel`, con scripts de `typecheck`, `lint` y `build`, y `"framework": "astro"` en
+  `vercel.json`.
+- Mover el sitio actual a `public/` (D4), con las rutas de `.vercelignore`, `.gitignore` y los
+  headers de `vercel.json` ajustadas.
 - Crear el `AGENTS.md` del front con `/writing-for-agents`.
 
-**Hacer (usuario), antes de pushear el proyecto Astro a `main`:**
+**Cerrar cuando:**
 
-1. En el proyecto Vercel actual, desconectar Git (Settings → Git).
-2. Crear el proyecto Vercel nuevo desde el repo, con framework Astro.
-
-El orden importa: sin el paso 1, el push reemplaza el sitio en producción.
-
-**Cerrar cuando:** `pnpm typecheck`, `pnpm lint` y `pnpm build` pasan; el `AGENTS.md` indica
-comandos, estructura, las decisiones D1–D5 que afectan al código y las reglas de §3; la raíz sigue
-sirviendo el sitio actual después del push.
+- `pnpm typecheck`, `pnpm lint` y `pnpm build` pasan.
+- `pnpm preview` sirve en `/` el sitio actual sin diferencias visibles.
+- El `AGENTS.md` indica comandos, estructura, las decisiones D1–D5 que afectan al código y las
+  reglas de §3.
+- Después del push, el deploy de producción en Vercel sirve el sitio actual en la raíz.
 
 ### Fase 2 — Capa de API tipada
 
@@ -194,15 +211,15 @@ sirviendo el sitio actual después del push.
 
 ### Fase 3 — Sitio público
 
-**Construir:** consumir `/api/productos`, `/api/productos/:id` y `/api/categorias` sin credenciales; imágenes por tamaño; migrar la home desde el modelo viejo (sección "Pendiente" del contrato). Render con ISR (D5): fijar la `expiration`. Portar `index.html`, `main.js` y `styles.css` a Astro y después borrarlos.
+**Construir:** consumir `/api/productos`, `/api/productos/:id` y `/api/categorias` sin credenciales; imágenes por tamaño; migrar la home desde el modelo viejo (sección "Pendiente" del contrato). Render con ISR (D5): fijar la `expiration`. Portar el sitio de `public/` a Astro en `/catalogo-nuevo`, con `noindex` (D4); el sitio viejo sigue en `/`.
 
-**Cerrar cuando:** el catálogo público se ve con datos de la API en la URL `.vercel.app` del proyecto nuevo, sin datos hardcodeados y sin regresiones visuales respecto del sitio actual.
+**Cerrar cuando:** `/catalogo-nuevo` se ve en producción con datos de la API y con ISR, sin datos hardcodeados y sin regresiones visuales respecto del sitio actual (con el catálogo vacío, probar además en local con datos de prueba).
 
 ### Fase 4 — Login y sesión
 
 **Construir:** pantallas de login y logout; `GET /admin/sesion`; guard de rutas en el cliente (D2); `/restablecer` (lee `?token=` y llama a `POST /api/auth/reset-password`); rewrite por host y redirect de `/admin/*` en `vercel.json` (D2); tipado de `/api/auth/*`, que está fuera de `openapi.json` (D3).
 
-**Hacer (usuario):** agregar `admin.elcauquenartesanias.com.ar` al proyecto Vercel nuevo y su CNAME "DNS only" en Cloudflare; en el `.env` local del backend, `ADMIN_ORIGIN=http://localhost:4321` y `RESET_PASSWORD_URL=http://localhost:4321/admin/restablecer`.
+**Hacer (usuario):** agregar `admin.elcauquenartesanias.com.ar` al proyecto Vercel (el único, D4) y su CNAME "DNS only" en Cloudflare; en el `.env` local del backend, `ADMIN_ORIGIN=http://localhost:4321` y `RESET_PASSWORD_URL=http://localhost:4321/admin/restablecer`.
 
 **Cerrar cuando:** el owner real entra y sale, una ruta protegida sin sesión redirige al login y el reset de contraseña completo funciona de punta a punta.
 
@@ -222,13 +239,13 @@ sirviendo el sitio actual después del push.
 
 **Construir:** flujo `upload-url` → `PUT` a R2 → `confirmar` → consulta de etapa → `publicar`; cupo de seis, diseños, reordenamiento de la galería, reintento de fallidas y volver a borrador. Considerar `/prototype` para la UI de etapas.
 
-**Cerrar cuando:** una imagen real se sube desde el browser, se procesa, se publica y se ve en el sitio público; el `PUT` a R2 pasa el CORS con el origen del admin.
+**Cerrar cuando:** una imagen real se sube desde el browser, se procesa, se publica y se ve en `/catalogo-nuevo` (D4); el `PUT` a R2 pasa el CORS con el origen del admin.
 
 ### Fase 8 — Orden
 
 **Construir:** reordenamiento global con `ordenVersion`; ante `409 ORDEN_DESACTUALIZADO`, recargar y avisar sin perder el trabajo del usuario.
 
-**Cerrar cuando:** reordenar se refleja en el catálogo público y un conflicto simulado con dos pestañas se resuelve sin error.
+**Cerrar cuando:** reordenar se refleja en `/catalogo-nuevo` (D4) y un conflicto simulado con dos pestañas se resuelve sin error.
 
 ### Fase 9 — Integrantes
 
@@ -238,11 +255,11 @@ sirviendo el sitio actual después del push.
 
 ### Fase 10 — Limpieza y cierre
 
-**Construir:** quitar el prototipo sin uso; revisar `vercel.json` y `.vercelignore`; documentar la operación.
+**Construir:** pasar el catálogo de `/catalogo-nuevo` a `/`, sin `noindex`, y borrar el sitio viejo de `public/` (D4); quitar el prototipo sin uso; revisar `vercel.json` y `.vercelignore`; documentar la operación.
 
-**Hacer (usuario):** pasar los dominios raíz y `www` del proyecto Vercel congelado al nuevo (D4) y después borrar el congelado.
+**Hacer (usuario):** confirmar que el catálogo en producción ya está cargado antes del push del cambio de `/`.
 
-**Cerrar cuando:** no quedan restos del prototipo ni documentación duplicada, y la raíz y `www` sirven el sitio del proyecto nuevo con el catálogo cargado.
+**Cerrar cuando:** no quedan restos del prototipo, del sitio viejo ni documentación duplicada, y la raíz y `www` sirven el catálogo nuevo con datos de la API.
 
 ## 5. Riesgos y decisiones técnicas diferidas
 
@@ -252,7 +269,7 @@ sirviendo el sitio actual después del push.
 | CORS de R2 | Se prueba por primera vez en la fase 7. Si falla el `PUT`, revisar `AllowedOrigins` y `Content-Type` en Cloudflare. |
 | Cambio de origen del admin | Cambiar `ADMIN_ORIGIN`, `RESET_PASSWORD_URL` y el `AllowedOrigins` de R2 juntos. |
 | Ancho y alto de imágenes | El backend no los guarda hoy; queda como mejora opcional del backend. |
-| Catálogo vacío en producción | Se llena desde el admin (fases 5 a 7). Hasta la fase 10, la raíz sigue en el proyecto congelado (D4); el sitio nuevo se prueba en su URL `.vercel.app` o con datos de prueba locales. |
+| Catálogo vacío en producción | Se llena desde el admin (fases 5 a 7). Hasta la fase 10, `/` sirve el sitio viejo desde `public/` y el catálogo nuevo vive en `/catalogo-nuevo` (D4); con el catálogo vacío, probar además con datos de prueba locales. |
 | Previews sin sesión | Un preview `*.vercel.app` no puede iniciar sesión contra la API de producción (D2); el admin se prueba en local o en `admin.*`. |
 
 ## 6. Prompts para sesiones con agentes
