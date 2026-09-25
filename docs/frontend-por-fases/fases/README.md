@@ -37,8 +37,8 @@ Pruebas que el agente no puede ejecutar (visuales, en producción o tras un push
 están en la sección "Verificaciones del usuario" de cada `fase-N.md`. Al confirmarlas todas, se
 borra esa sección y su línea de acá, y la fase pasa a "✅ Cerrada".
 
-- **Fase 8:** subir y bajar con teclado, guardar y verlo en `/catalogo-nuevo`, y el conflicto con dos
-  pestañas, en `admin.*` tras el push ([pasos](./fase-8.md#verificaciones-del-usuario)).
+- **Fase 8:** el aviso al salir con el orden sin guardar, en `admin.*`
+  ([pasos](./fase-8.md#verificaciones-del-usuario)).
 
 ## Pendientes abiertos
 

@@ -139,28 +139,29 @@ resto de los errores van al aviso de la lista con `mensajeDeError` y conservan e
     cambió `ordenVersion`; `GET /api/productos` los listó B, A y, tras intercambiarlos con el `PUT`, A, B;
   - borrar cada uno subió `ordenVersion` (11 → 12 → 13); el orden final quedó igual al inicial.
 - `astro dev`: `/admin/productos` responde `200` con `noindex` y la isla `Productos.tsx`.
+- En `admin.*` (2026-09-25), tras el push, con la extensión de Chrome y la sesión del usuario, que
+  autorizó crear, publicar y borrar productos de prueba en producción. "Prueba F8 A" y "B" publicados
+  (con `asado-placa-640.webp`) y "C" en borrador, creados en ese orden:
+  - con el foco en "Bajar «Prueba F8 A»", Enter: la fila pasó a "02", el foco siguió en el mismo botón,
+    el anuncio dijo "«Prueba F8 A», posición 2 de 3." y apareció "Hay cambios en el orden sin
+    guardar.". Otro Enter la llevó al final y el foco pasó a "Subir «Prueba F8 A»";
+  - Enter en "Guardar orden": toast "Orden guardado. El catálogo se actualiza en hasta un minuto.",
+    el botón quedó deshabilitado y el texto de cambios desapareció;
+  - conflicto con dos pestañas: la A guardó C, B, A; la B, cargada antes, subió A y guardó. Apareció
+    el aviso largo de F8-D4 con `role="alert"`, la B conservó B, A, C y "Guardar orden" siguió
+    habilitado. Guardar de nuevo en la B dio el toast sin error, y al recargar la A mostró B, A, C;
+  - `/catalogo-nuevo` listó "Prueba F8 B" antes que "Prueba F8 A" (el orden de creación era A, B);
+  - los tres productos se borraron por la API y el listado quedó vacío.
 
 ## Desvíos
 
 - F8-D7 pedía curl; se usó `fetch` de Node con los mismos pedidos, como en la fase 7.
-- La isla no se probó en un navegador: iniciar sesión exige escribir la contraseña, y eso queda para el
-  usuario. El foco, el anuncio, el aviso de conflicto y `beforeunload` quedan en las verificaciones del
-  usuario; las reglas del rebase, en los tests de `orden.ts`.
+- Las verificaciones de F8-D7 en `admin.*` las ejecutó el agente con la sesión del usuario, en lugar
+  del usuario. El anuncio se leyó en el texto de la región `role="status"`, sin lector de pantalla.
+  El aviso de `beforeunload` no se probó: el diálogo del navegador bloquea la extensión.
 
 ## Verificaciones del usuario
 
-En `https://admin.elcauquenartesanias.com.ar/admin/productos`, tras el deploy, con al menos tres
-productos (dos publicados):
-
-1. Con Tab hasta "Bajar «X»" del primero y Enter: la fila baja a "02", el foco sigue en "Bajar «X»" de
-   la misma fila y aparece "Hay cambios en el orden sin guardar.". Llevarla con Enter hasta el final:
-   el foco pasa a "Subir «X»". Con lector de pantalla, se anuncia "«X», posición N de M.".
-2. Con cambios, cerrar la pestaña o tocar "Editar": el navegador pide confirmar la salida. Cancelar.
-3. Dejar primero un producto publicado que no lo estaba, "Guardar orden": toast "Orden guardado. El
-   catálogo se actualiza en hasta un minuto." y el botón se deshabilita. Al minuto, recargar
-   `/catalogo-nuevo`: el producto aparece primero.
-4. Abrir el listado en dos pestañas. En la A, mover un producto y guardar. En la B, mover otro distinto
-   y guardar: aparece el aviso "Otro integrante cambió los productos mientras ordenabas…", la lista
-   de la B conserva su orden y "Guardar orden" sigue habilitado. Guardar en la B: toast de guardado,
-   sin error. Recargar la A: muestra el orden de la B.
-5. Dejar el orden del catálogo como lo querés y guardarlo.
+En `https://admin.elcauquenartesanias.com.ar/admin/productos`, con al menos dos productos: mover uno
+con "Bajar" y, sin guardar, cerrar la pestaña o tocar "Editar". El navegador pide confirmar la salida.
+Cancelar, tocar "Guardar orden" y repetir: esta vez sale sin preguntar.
