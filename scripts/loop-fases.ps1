@@ -1,0 +1,61 @@
+﻿# Corre las fases del PRD sin supervisión (§6.4): por fase, 6.1 y después 6.2, cada uno en una
+# sesión `claude -p` nueva con el bloque de 6.4 agregado. Los prompts se leen del PRD.
+# Uso: powershell -File scripts/loop-fases.ps1 [-Desde 4] [-Hasta 9]
+param([int]$Desde = 4, [int]$Hasta = 9)
+$ErrorActionPreference = 'Stop'
+
+# PowerShell 5.1 pasa stdin a los ejecutables en ASCII: sin esto se pierden tildes y emojis.
+$OutputEncoding = New-Object System.Text.UTF8Encoding $false
+[Console]::OutputEncoding = $OutputEncoding
+
+$raiz = Split-Path $PSScriptRoot -Parent
+Set-Location $raiz
+$prd = 'docs/frontend-por-fases/PRD.md'
+$readme = 'docs/frontend-por-fases/fases/README.md'
+$logs = Join-Path $raiz 'logs/loop'
+
+function Get-Bloque([string]$seccion) {
+  $texto = Get-Content $prd -Raw -Encoding UTF8
+  $patron = '(?s)### ' + [regex]::Escape($seccion) + ' .*?```text\r?\n(.*?)```'
+  $m = [regex]::Match($texto, $patron)
+  if (-not $m.Success) { throw "No encontré el bloque de $seccion en $prd." }
+  $m.Groups[1].Value
+}
+
+function Get-Estado([int]$n) {
+  $fila = Get-Content $readme -Encoding UTF8 | Where-Object { $_ -match "^\| $n\. " }
+  if (-not $fila) { throw "No encontré la fase $n en la tabla de $readme." }
+  $fila
+}
+
+function Test-ArbolLimpio { -not (git status --porcelain) }
+
+# Chequeos previos
+if (-not (Get-Command claude -ErrorAction SilentlyContinue)) { throw 'No encuentro `claude` en el PATH.' }
+if (-not (Test-ArbolLimpio)) { throw 'El working tree tiene cambios: commitealos o descartalos antes del loop.' }
+if (-not (Test-Path '.env.test.local')) { throw 'Falta .env.test.local con el owner de prueba (ver AGENTS.md).' }
+try { Invoke-WebRequest 'http://localhost:3001/api/categorias' -UseBasicParsing -TimeoutSec 5 | Out-Null }
+catch { throw 'El backend local no responde en :3001. Corré `pnpm dev` en ../elcauquen-backend.' }
+
+New-Item -ItemType Directory -Force $logs | Out-Null
+$modoLoop = Get-Bloque '6.4'
+
+foreach ($n in $Desde..$Hasta) {
+  if ((Get-Estado $n) -match 'Implementada|Cerrada') { Write-Host "Fase $n ya implementada: la salteo."; continue }
+
+  foreach ($p in '6.1', '6.2') {
+    Write-Host "Fase $n, prompt $p..."
+    $prompt = ((Get-Bloque $p) + "`n" + $modoLoop) -replace '\bN\b', "$n"
+    $log = Join-Path $logs "fase-$n-$p.json"
+    $prompt | claude -p --permission-mode auto --output-format json | Out-File $log -Encoding utf8
+    $resultado = Get-Content $log -Raw -Encoding UTF8 | ConvertFrom-Json
+    if ($LASTEXITCODE -ne 0 -or $resultado.is_error) { throw "Falló el prompt $p de la fase ${n}: revisá $log." }
+    if (-not (Test-ArbolLimpio)) { throw "La fase $n dejó cambios sin commitear tras ${p}: revisá $log." }
+  }
+
+  if ((Get-Estado $n) -notmatch 'Implementada|Cerrada') {
+    throw "La fase $n no quedó implementada: revisá $logs/fase-$n-6.2.json y 'Decisiones para el usuario'."
+  }
+}
+
+Write-Host "Listo. Revisá 'Decisiones para el usuario' y 'Verificaciones del usuario' en $readme."

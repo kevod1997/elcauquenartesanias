@@ -18,3 +18,7 @@ docs/items/
 
 # Variables de entorno locales
 *.env
+*.local
+
+# Logs del loop de fases (scripts/loop-fases.ps1)
+/logs/

@@ -17,8 +17,23 @@ tomadas (y su porqué) y las validaciones ejecutadas.
 | 9. Integrantes | ⏳ Pendiente | |
 | 10. Limpieza y cierre | ⏳ Pendiente | |
 
+"🔎 Implementada" es una fase con el código commiteado a la que le quedan verificaciones del
+usuario; cuenta como dependencia cumplida.
+
 **Siguiente:** fase 4 (login y sesión), que deja abierto el tipado de `/api/auth/*` (D3). Para usar la API, leé los
-tipos y las decisiones de [fase-2.md](./fase-2.md).
+tipos y las decisiones de [fase-2.md](./fase-2.md). Las fases 4 a 9 pueden correr sin supervisión
+con el loop de [§6.4 del PRD](../PRD.md#64-loop-sin-supervisión).
+
+## Decisiones para el usuario
+
+Lo que un agente no pudo decidir sin cambiar el producto, el contrato o el alcance. Al decidir
+una, se borra de acá.
+
+## Verificaciones del usuario
+
+Pruebas que el agente no puede ejecutar (visuales, en producción o tras un push), agrupadas por
+fase, con los pasos exactos. Al confirmar todas las de una fase, se borra su grupo y la fase pasa
+a "✅ Cerrada".
 
 ## Pendientes abiertos
 

@@ -338,7 +338,8 @@ viejo sigue en `/`.
 ## 6. Prompts para sesiones con agentes
 
 Tres prompts en orden de uso, reemplazando `N` por la fase. 6.1 va en una sesión propia y solo si
-la definición de la fase deja decisiones abiertas; 6.3 va en la misma sesión que 6.2.
+la definición de la fase deja decisiones abiertas; 6.3 va en la misma sesión que 6.2. Para correr
+varias fases sin supervisión, ver [6.4](#64-loop-sin-supervisión).
 
 ### 6.1 Preparación
 
@@ -351,7 +352,7 @@ Prepará la fase N de docs/frontend-por-fases/PRD.md, sin implementar código.
 2. Resolvé primero lo comprobable en el repositorio y en el contrato del backend
    (../elcauquen-backend/docs/openapi.json y ../elcauquen-backend/docs/contrato-api-borrador.md).
    Para las preguntas técnicas que aún
-   requieran fuentes externas, usá /research o Context7 con preguntas concretas,
+   requieran fuentes externas, usá Context7 o la búsqueda web con preguntas concretas,
    alternativas y versiones; verificá en fuentes primarias lo que sustenta cada decisión.
 3. Cerrá las decisiones técnicas con esa evidencia. Si una elección cambia una
    regla de producto, el contrato del backend o el alcance de la fase, presentá
@@ -413,4 +414,38 @@ present proposed changes before implementing them in order of severity.
 - **Navigation**: how easy was it for the agent to find the right files? Are there hidden dependencies between files? Would a navigation pointer make it easier?
 - **Automated checks**: are there automated checks that could catch errors the agent made? Linting, typing, tests? Start from the repo's existing guardrails so a check that exists but sits unwired or silently broken is the finding, not a reinvention.
 - **Coding standards**: did the implementing agent break a repo convention, or have to infer one that isn't written down? Mechanical violations get a deterministic check; reserve written standards for genuine judgement calls.
+```
+
+### 6.4 Loop sin supervisión
+
+`scripts/loop-fases.ps1` corre 6.1 y después 6.2 para cada fase, cada prompt en una sesión
+`claude -p` nueva, y les agrega al final este bloque. Cada sesión es una iteración: una fase y un
+prompt, sin contexto previo; lo único que pasa a la siguiente es lo commiteado (el PRD,
+`fases/README.md` y `fases/fase-N.md`). 6.3 no corre en el loop. El script lee los tres bloques
+de esta sección del PRD: editarlos acá cambia el loop.
+
+```text
+Modo loop: corrés sin supervisión y nadie va a responder. Estas reglas prevalecen sobre los
+pasos de arriba que piden consultar o esperar al usuario.
+
+- Una iteración: esta sesión cubre solo la fase N y solo el prompt de arriba. Al commitear,
+  terminá; no sigas con otra fase ni con el prompt siguiente, que el script lanza en una sesión
+  nueva. Todo lo que esa sesión necesite saber tiene que quedar escrito en fases/README.md o
+  fases/fase-N.md, no en tu respuesta final.
+- Producto intacto: decidí vos todo lo técnico. Cuando una elección toque una regla de
+  producto, el contrato del backend o el alcance de la fase, elegí la opción que deja el
+  producto como lo definen el PRD y el sitio actual. Si ninguna lo deja intacto, no la
+  implementes: anotala en "Decisiones para el usuario" de fases/README.md, con alternativas y
+  recomendación, y seguí con lo que no depende de ella. Lo que un paso pida proponer al
+  usuario va a esa misma sección.
+- Dependencias: una fase "🔎 Implementada" cuenta como cumplida. Si una dependencia de N sigue
+  "⏳ Pendiente", terminá la sesión sin cambios y explicá por qué.
+- Validación local: verificá contra el backend local como indica AGENTS.md, con llamadas a la
+  API, los tests de §3 y typecheck, lint y build. Lo visual (un error en su campo, el foco, las
+  etapas de la galería) y lo que pida producción, un push, un deploy o un paso de "Hacer
+  (usuario)" va a "Verificaciones del usuario" de fases/README.md, bajo la fase N, con los
+  pasos exactos.
+- Estado: al cerrar 6.2, marcá N en la tabla de fases/README.md como "🔎 Implementada (fecha)"
+  si le quedan verificaciones del usuario, o "✅ Cerrada (fecha)" si no.
+- Límites: sin git push, sin deploys y sin cambios en ../elcauquen-backend, que solo se lee.
 ```
