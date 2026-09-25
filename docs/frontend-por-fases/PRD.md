@@ -176,6 +176,7 @@ páginas del catálogo usan `export const prerender = false`; el admin queda est
 | [8. Orden](./fases/fase-8.md) | Reordenamiento con manejo de `409` | 6 |
 | [9. Integrantes](./fases/fase-9.md) | Alta y desactivación de editores (solo `owner`) | 4 |
 | [10. Limpieza y cierre](./fases/fase-10.md) | Repo sin restos, DNS final | 3, 7, 8 y 9 |
+| [11. Mejoras opcionales del front](./fases/fase-11.md) | Páginas 404 y 500 propias, formulario de producto sin mensajes viejos | 10 |
 
 Las fases 3 y 4 pueden ejecutarse en cualquier orden después de la 2; las 7, 8 y 9 pueden ejecutarse en cualquier orden después de sus dependencias.
 

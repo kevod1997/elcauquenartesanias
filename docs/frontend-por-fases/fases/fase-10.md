@@ -53,21 +53,13 @@
   fuera de los registros de fases anteriores.
 - Producción antes del push: `www` responde `308` a la raíz; `/` sirve el sitio viejo y
   `GET https://api.elcauquenartesanias.com.ar/api/productos` devuelve `{"productos":[]}`.
+- Producción después del push (2026-09-25): el usuario cargó el catálogo y confirmó la raíz, `www`,
+  el `404` de `/catalogo-nuevo` y la redirección de `admin.*`. El agente comprobó con curl que `/`
+  lista los productos ("Cazuelas artesanales", "Cuencos o bowls"…) con derivados de
+  `img.elcauquenartesanias.com.ar`, sin `noindex`, y que `/catalogo-nuevo` da `404`.
 
 ## Desvíos
 
 - La definición no nombraba los `.jpeg` de `assets/` ni los dos documentos borrados; se borraron por
   "no quedan restos del sitio viejo ni documentación duplicada" (ver Decisiones).
 
-## Verificaciones del usuario
-
-1. Cargar y publicar el catálogo en `https://admin.elcauquenartesanias.com.ar/admin/productos` y
-   confirmar que `https://api.elcauquenartesanias.com.ar/api/productos` ya no devuelve
-   `{"productos":[]}` (Hacer del usuario). Si necesitás las fotos originales, recuperalas con
-   `git checkout c0bc407 -- assets/` y no las commitees.
-2. Hacer push a `main` y esperar el deploy de Vercel.
-3. Abrir `https://elcauquenartesanias.com.ar/`: se ve el catálogo con los productos publicados, el hero
-   dice "Piezas únicas en madera · Hechas a mano" y el código fuente no tiene `noindex`.
-4. Abrir `https://www.elcauquenartesanias.com.ar/`: termina en la raíz con el mismo catálogo.
-5. `https://elcauquenartesanias.com.ar/catalogo-nuevo` da `404`, y
-   `https://admin.elcauquenartesanias.com.ar/` sigue llevando a `/admin`.
