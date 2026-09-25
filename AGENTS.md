@@ -21,6 +21,11 @@ cada fase (decisiones FN-Dk y registro), en `fases/fase-N.md`, y el estado, en
 - **El backend local manda mails reales por Resend**: invitá solo a `delivered+<etiqueta>@resend.dev`.
   El token de invitación o de reset está en la tabla `verification`, con `identifier`
   `reset-password:<token>` (`docker exec elcauquen-backend-postgres-1 psql -U postgres -d elcauquen`).
+- **Las verificaciones de UI en `admin.*` las ejecuta el agente** con la extensión de Chrome y la
+  sesión ya iniciada del usuario; al usuario le quedan solo iniciar sesión, los diálogos del navegador
+  (`beforeunload`) y el lector de pantalla. Crear datos de prueba en producción requiere que el
+  usuario lo autorice en el chat de esa sesión (sin eso, el modo automático lo bloquea); borralos al
+  terminar.
 - **El backend local sube al bucket R2 de producción**: usá solo imágenes de `public/assets/` y
   borrá por la API las imágenes de prueba al terminar.
 - **Una isla y su módulo de reglas se llaman igual salvo mayúsculas** (`Galeria.tsx` y `galeria.ts`):
