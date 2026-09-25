@@ -18,6 +18,25 @@ export const IconoFoto = () => (
   </svg>
 )
 
+/** Ojo del botón de mostrar la contraseña; `tachado` cuando está presionado (F11-D6). */
+export const IconoOjo = ({ tachado = false }: { tachado?: boolean }) => (
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 20 20"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.4"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M1.5 10C3.5 6.2 6.5 4.5 10 4.5s6.5 1.7 8.5 5.5c-2 3.8-5 5.5-8.5 5.5S3.5 13.8 1.5 10z" />
+    <circle cx="10" cy="10" r="2.5" />
+    {tachado && <path d="M3.5 3.5l13 13" />}
+  </svg>
+)
+
 const Trazo = ({ d }: { d: string }) => (
   <svg
     width="12"

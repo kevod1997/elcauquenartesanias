@@ -2,11 +2,11 @@
 // Catálogo público (fases 3 y 10). SSR con ISR (F3-D2): el adapter cachea esta ruta y la regenera cada 60 s.
 // Un error de la API se propaga (F3-D3): Vercel conserva la versión cacheada en lugar de una página vacía.
 import { apiPublica, pedir } from '../api'
-import '../catalogo/catalogo.css'
 import { hrefInstagram, hrefWhatsappGeneral, INSTAGRAM } from '../catalogo/contacto'
 import Hilera from '../catalogo/Hilera.astro'
 import IconoInstagram from '../catalogo/IconoInstagram.astro'
 import IconoWhatsapp from '../catalogo/IconoWhatsapp.astro'
+import Pagina from '../catalogo/Pagina.astro'
 import { hileras, imagenesVisor } from '../catalogo/presentacion'
 import Tarjeta from '../catalogo/Tarjeta.astro'
 import Visor from '../catalogo/Visor.astro'
@@ -16,130 +16,118 @@ export const prerender = false
 const { productos } = await pedir(apiPublica.GET('/api/productos'))
 ---
 
-<!doctype html>
-<html lang="es">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>El Cauquén Artesanías</title>
-    <meta
-      name="description"
-      content="Piezas únicas en madera hechas a mano: cazuelas, bowls, ensaladeras, mates de caldén, morteros y más."
-    />
-    <link rel="icon" href="/assets/logo-160.webp" />
-    <link rel="preload" href="/assets/fonts/playfair-latin-var.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/assets/fonts/playfair-latin-italic-var.woff2" as="font" type="font/woff2" crossorigin />
-  </head>
-  <body>
-    <div class="page">
-      <header class="hero">
-        <nav class="hero__accesos" aria-label="Contacto rápido">
-          <a
-            class="acceso"
-            href={hrefWhatsappGeneral}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Escribinos por WhatsApp"
-            title="WhatsApp"
+<Pagina
+  titulo="El Cauquén Artesanías"
+  descripcion="Piezas únicas en madera hechas a mano: cazuelas, bowls, ensaladeras, mates de caldén, morteros y más."
+>
+  <div class="page">
+    <header class="hero">
+      <nav class="hero__accesos" aria-label="Contacto rápido">
+        <a
+          class="acceso"
+          href={hrefWhatsappGeneral}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Escribinos por WhatsApp"
+          title="WhatsApp"
+        >
+          <IconoWhatsapp tamano={15} />
+        </a>
+        <a
+          class="acceso"
+          href={hrefInstagram}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Seguinos en Instagram"
+          title={INSTAGRAM}
+        >
+          <IconoInstagram tamano={15} />
+        </a>
+      </nav>
+
+      <img
+        class="hero__logo"
+        src="/assets/logo.webp"
+        width="390"
+        height="393"
+        alt="El Cauquén Artesanías"
+        fetchpriority="high"
+      />
+      <p class="hero__eyebrow">Piezas únicas en madera · Hechas a mano</p>
+      <h1 class="hero__title">El Cauquén<br /><span>Artesanías</span></h1>
+    </header>
+
+    <main id="catalogo" class="catalogo">
+      <div class="catalogo__head">
+        <h2 class="catalogo__title">Nuestros productos</h2>
+        <p class="catalogo__note">
+          <span>Precios por unidad</span><span class="catalogo__sep" aria-hidden="true"> · </span><span
+            >Consultá disponibilidad</span
           >
-            <IconoWhatsapp tamano={15} />
-          </a>
-          <a
-            class="acceso"
-            href={hrefInstagram}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Seguinos en Instagram"
-            title={INSTAGRAM}
-          >
-            <IconoInstagram tamano={15} />
-          </a>
-        </nav>
-
-        <img
-          class="hero__logo"
-          src="/assets/logo.webp"
-          width="390"
-          height="393"
-          alt="El Cauquén Artesanías"
-          fetchpriority="high"
-        />
-        <p class="hero__eyebrow">Piezas únicas en madera · Hechas a mano</p>
-        <h1 class="hero__title">El Cauquén<br /><span>Artesanías</span></h1>
-      </header>
-
-      <main id="catalogo" class="catalogo">
-        <div class="catalogo__head">
-          <h2 class="catalogo__title">Nuestros productos</h2>
-          <p class="catalogo__note">
-            <span>Precios por unidad</span><span class="catalogo__sep" aria-hidden="true"> · </span><span
-              >Consultá disponibilidad</span
-            >
-          </p>
-        </div>
-
-        {
-          productos.length > 0 ? (
-            <div class="grid">
-              {hileras(productos).map((indices) => (
-                <Hilera cantidad={indices.length}>
-                  {indices.map((i) => productos[i] && <Tarjeta producto={productos[i]} indice={i} />)}
-                </Hilera>
-              ))}
-            </div>
-          ) : (
-            <p class="catalogo__vacio">Todavía no hay productos publicados. Escribinos para consultar.</p>
-          )
-        }
-      </main>
-
-      <section class="contacto">
-        <div class="contacto__inner">
-          <div>
-            <p class="label">Contacto</p>
-            <div class="contacto__redes">
-              <a
-                class="icon-btn"
-                href={hrefWhatsappGeneral}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Escribinos por WhatsApp"
-                title="WhatsApp"
-              >
-                <IconoWhatsapp tamano={18} />
-              </a>
-              <a
-                class="icon-btn"
-                href={hrefInstagram}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Seguinos en Instagram"
-                title={INSTAGRAM}
-              >
-                <IconoInstagram tamano={18} />
-              </a>
-            </div>
-          </div>
-
-          <div>
-            <p class="label">Formas de pago</p>
-            <div class="pagos">
-              <span>Efectivo</span>
-              <span>Transferencia</span>
-              <span>Mercado Pago</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <footer class="footer">
-        <p class="footer__linea">© El Cauquén Artesanías · Cada pieza es única</p>
-        <p class="footer__credito">
-          Diseñado por <a href="https://kevindefalco.dev" target="_blank" rel="noopener noreferrer">Kevo</a>
         </p>
-      </footer>
-    </div>
+      </div>
 
-    <Visor galerias={productos.map(imagenesVisor)} />
-  </body>
-</html>
+      {
+        productos.length > 0 ? (
+          <div class="grid">
+            {hileras(productos).map((indices) => (
+              <Hilera cantidad={indices.length}>
+                {indices.map((i) => productos[i] && <Tarjeta producto={productos[i]} indice={i} />)}
+              </Hilera>
+            ))}
+          </div>
+        ) : (
+          <p class="catalogo__vacio">Todavía no hay productos publicados. Escribinos para consultar.</p>
+        )
+      }
+    </main>
+
+    <section class="contacto">
+      <div class="contacto__inner">
+        <div>
+          <p class="label">Contacto</p>
+          <div class="contacto__redes">
+            <a
+              class="icon-btn"
+              href={hrefWhatsappGeneral}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Escribinos por WhatsApp"
+              title="WhatsApp"
+            >
+              <IconoWhatsapp tamano={18} />
+            </a>
+            <a
+              class="icon-btn"
+              href={hrefInstagram}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Seguinos en Instagram"
+              title={INSTAGRAM}
+            >
+              <IconoInstagram tamano={18} />
+            </a>
+          </div>
+        </div>
+
+        <div>
+          <p class="label">Formas de pago</p>
+          <div class="pagos">
+            <span>Efectivo</span>
+            <span>Transferencia</span>
+            <span>Mercado Pago</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <p class="footer__linea">© El Cauquén Artesanías · Cada pieza es única</p>
+      <p class="footer__credito">
+        Diseñado por <a href="https://kevindefalco.dev" target="_blank" rel="noopener noreferrer">Kevo</a>
+      </p>
+    </footer>
+  </div>
+
+  <Visor galerias={productos.map(imagenesVisor)} />
+</Pagina>

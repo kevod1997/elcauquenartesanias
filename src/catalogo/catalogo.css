@@ -542,6 +542,60 @@ a:hover {
   border-bottom-color: var(--crema);
 }
 
+/* ---------- Páginas de error ----------
+   El hero ocupa toda la pantalla y lleva el mensaje en lugar del catálogo. */
+
+.error {
+  font-family: Inter, sans-serif;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.error .hero__title {
+  font-size: clamp(28px, 7vw, 44px);
+  max-width: 18ch;
+}
+
+.error__ayuda {
+  max-width: 38ch;
+  margin: 18px 0 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: rgba(247, 242, 235, 0.78);
+}
+
+.error__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 30px;
+}
+
+.error__enlace {
+  padding: 11px 22px;
+  border-radius: 999px;
+  background: var(--crema);
+  color: var(--cacao);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color var(--t-rapida) var(--ease);
+}
+
+.error__enlace:hover {
+  background: #ffffff;
+  color: var(--cacao);
+}
+
+.error__enlace + * {
+  margin-left: 6px;
+}
+
 /* ---------- Mobile ----------
    Contacto y formas de pago comparten fila: la sección deja de ser una
    pantalla propia y pasa a ser un pie. */

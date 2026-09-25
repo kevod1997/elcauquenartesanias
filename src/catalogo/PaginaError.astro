@@ -1,0 +1,27 @@
+---
+// Páginas de error del sitio (F11-D1, F11-D2): el hero del catálogo con el logo, el mensaje y un enlace a `/`.
+// El slot suma acciones junto al enlace, como los accesos de contacto de la 500.
+import Pagina from './Pagina.astro'
+
+interface Props {
+  codigo: 404 | 500
+  titulo: string
+  ayuda: string
+  enlace: string
+}
+
+const { codigo, titulo, ayuda, enlace } = Astro.props
+---
+
+<Pagina titulo={`${titulo} · El Cauquén Artesanías`}>
+  <main class="hero error">
+    <img class="hero__logo" src="/assets/logo.webp" width="390" height="393" alt="El Cauquén Artesanías" />
+    <p class="hero__eyebrow">Error {codigo}</p>
+    <h1 class="hero__title">{titulo}</h1>
+    <p class="error__ayuda">{ayuda}</p>
+    <div class="error__acciones">
+      <a class="error__enlace" href="/">{enlace}</a>
+      <slot />
+    </div>
+  </main>
+</Pagina>

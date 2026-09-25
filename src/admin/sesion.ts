@@ -19,9 +19,9 @@ export function obtenerSesion(): Promise<IntegranteDeSesion | null> {
   return sesion
 }
 
-/** Destino de `?volver=`: solo rutas del admin, para no abrir un redirect a otro sitio. */
+/** Destino de `?volver=`: solo rutas del admin, para no abrir un redirect a otro sitio. Si no, Productos (F11-D5). */
 export function destinoSeguro(volver: string | null): string {
-  return volver?.startsWith('/admin/') && !volver.startsWith('//') ? volver : '/admin'
+  return volver?.startsWith('/admin/') && !volver.startsWith('//') ? volver : '/admin/productos'
 }
 
 /** Va al login y vuelve a la página actual después de iniciar sesión. */

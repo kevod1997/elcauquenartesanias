@@ -1,0 +1,38 @@
+---
+// 500 propia (F11-D2), a pedido: prerenderizada, Astro la pediría por `fetch` a `http://localhost` en Vercel y
+// la respuesta saldría vacía. No llama a la API ni muestra el `error` (su stack expone el código).
+import { hrefInstagram, hrefWhatsappGeneral, INSTAGRAM } from '../catalogo/contacto'
+import IconoInstagram from '../catalogo/IconoInstagram.astro'
+import IconoWhatsapp from '../catalogo/IconoWhatsapp.astro'
+import PaginaError from '../catalogo/PaginaError.astro'
+
+export const prerender = false
+---
+
+<PaginaError
+  codigo={500}
+  titulo="No pudimos cargar el catálogo"
+  ayuda="Probá de nuevo en unos minutos. Mientras tanto, podés escribirnos."
+  enlace="Reintentar"
+>
+  <a
+    class="icon-btn"
+    href={hrefWhatsappGeneral}
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Escribinos por WhatsApp"
+    title="WhatsApp"
+  >
+    <IconoWhatsapp tamano={18} />
+  </a>
+  <a
+    class="icon-btn"
+    href={hrefInstagram}
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Seguinos en Instagram"
+    title={INSTAGRAM}
+  >
+    <IconoInstagram tamano={18} />
+  </a>
+</PaginaError>

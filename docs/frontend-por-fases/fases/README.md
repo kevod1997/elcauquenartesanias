@@ -17,15 +17,15 @@ decisiones técnicas y las validaciones ejecutadas.
 | 8. Orden | ✅ Cerrada (2026-09-25) | [fase-8.md](./fase-8.md) |
 | 9. Integrantes | ✅ Cerrada (2026-09-25) | [fase-9.md](./fase-9.md) |
 | 10. Limpieza y cierre | ✅ Cerrada (2026-09-25) | [fase-10.md](./fase-10.md) |
-| 11. Mejoras opcionales del front | ⏳ Pendiente | |
+| 11. Mejoras opcionales del front | 🔎 Implementada (2026-09-25) | [fase-11.md](./fase-11.md) |
 | 12. Admin mobile y orden con arrastre | ⏳ Pendiente | |
 
 "🔎 Implementada" es una fase con el código commiteado a la que le quedan verificaciones del
 usuario; cuenta como dependencia cumplida.
 
-**Siguiente:** implementar la fase 11 (mejoras opcionales del front) con el prompt 6.2 de
-[prompts.md](../prompts.md), según F11-D1 a F11-D6 de [fase-11.md](./fase-11.md). Depende de la 10,
-cerrada. Después, la fase 12 (depende de la 11).
+**Siguiente:** preparar la fase 12 (admin mobile y orden con arrastre) con el prompt 6.1 de
+[prompts.md](../prompts.md): leer [fase-12.md](./fase-12.md), el patrón del admin (F5-D2 a F5-D6 en
+[fase-5.md](./fase-5.md)) y el orden de [fase-8.md](./fase-8.md). Depende de la 11, implementada.
 
 ## Decisiones para el usuario
 
@@ -38,7 +38,8 @@ Pruebas que el agente no puede ejecutar (visuales, en producción o tras un push
 están en la sección "Verificaciones del usuario" de cada `fase-N.md`. Al confirmarlas todas, se
 borra esa sección y su línea de acá, y la fase pasa a "✅ Cerrada".
 
-Ninguna.
+- Fase 11, tras el deploy: la 404 y los redirects en producción, el login sin `volver` en `admin.*` y
+  el botón de la contraseña con lector de pantalla ([fase-11.md](./fase-11.md#verificaciones-del-usuario)).
 
 ## Pendientes abiertos
 

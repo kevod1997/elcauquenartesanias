@@ -89,7 +89,7 @@ export default function Integrantes() {
       <section className="seccion" aria-labelledby="tituloIntegrantes">
         {encabezado}
         <p className="aviso aviso--error" role="alert">
-          Solo el owner gestiona los integrantes. <a href="/admin">Volver al inicio</a>
+          Solo el owner gestiona los integrantes. <a href="/admin/productos">Ir a productos</a>
         </p>
       </section>
     )

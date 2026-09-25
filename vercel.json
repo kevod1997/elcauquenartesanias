@@ -12,7 +12,7 @@
           "value": "admin.elcauquenartesanias.com.ar"
         }
       ],
-      "destination": "/admin",
+      "destination": "/admin/productos",
       "permanent": false
     },
     {
@@ -34,7 +34,7 @@
           "value": "admin.elcauquenartesanias.com.ar"
         }
       ],
-      "destination": "https://admin.elcauquenartesanias.com.ar/admin",
+      "destination": "https://admin.elcauquenartesanias.com.ar/admin/productos",
       "permanent": false
     },
     {

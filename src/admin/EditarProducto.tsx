@@ -54,6 +54,8 @@ export default function EditarProducto() {
   const [error, setError] = useState<string | null>(null)
   const [enviando, setEnviando] = useState(false)
   const [cambiandoEstado, setCambiandoEstado] = useState<'publicando' | 'volviendo' | null>(null)
+  // `key` de las dos altas rápidas: al guardar el producto se cierran y se vacían (F11-D4).
+  const [guardados, setGuardados] = useState(0)
   const nombreRef = useRef<HTMLInputElement>(null)
   const precioRef = useRef<HTMLInputElement>(null)
   const categoriaRef = useRef<HTMLSelectElement>(null)
@@ -113,6 +115,17 @@ export default function EditarProducto() {
   const cambiar = <K extends keyof Formulario>(campo: K, valor: Formulario[K]) =>
     setFormulario((actual) => ({ ...actual, [campo]: valor }))
 
+  /** Cambio tipeado en un campo: su error ya no describe lo escrito y se borra; se revalida al enviar (F11-D4). */
+  const editar = (campo: 'nombre' | 'precio' | 'categoriaId' | 'descripcion', valor: string) => {
+    cambiar(campo, valor)
+    const clave = campo === 'categoriaId' ? 'categoria' : campo
+    setErrores((actuales) => {
+      if (!(clave in actuales)) return actuales
+      const { [clave]: _, ...resto } = actuales
+      return resto
+    })
+  }
+
   /** Valida y guarda el formulario. Devuelve si quedó guardado (o no había cambios). */
   const guardar = async (): Promise<boolean> => {
     setError(null)
@@ -141,6 +154,7 @@ export default function EditarProducto() {
       if (!producto) history.replaceState(null, '', `?id=${encodeURIComponent(guardado.id)}`)
       setProducto(guardado)
       setFormulario(formularioDe(guardado))
+      setGuardados((n) => n + 1)
       avisar(producto ? 'Producto guardado.' : 'Producto creado.')
       listo = true
     } catch (e) {
@@ -305,7 +319,7 @@ export default function EditarProducto() {
             id="productoNombre"
             etiqueta="Nombre"
             value={formulario.nombre}
-            onChange={(e) => cambiar('nombre', e.target.value)}
+            onChange={(e) => editar('nombre', e.target.value)}
             maxLength={NOMBRE_PRODUCTO_MAXIMO}
             autoComplete="off"
             error={errores.nombre}
@@ -317,7 +331,7 @@ export default function EditarProducto() {
             prefijo="$"
             inputMode="decimal"
             value={formulario.precio}
-            onChange={(e) => cambiar('precio', e.target.value)}
+            onChange={(e) => editar('precio', e.target.value)}
             autoComplete="off"
             ayuda="En pesos, con centavos opcionales (ej. 15000 o 15000,50)."
             error={errores.precio}
@@ -327,10 +341,11 @@ export default function EditarProducto() {
             id="productoCategoria"
             etiqueta="Categoría"
             value={formulario.categoriaId}
-            onChange={(e) => cambiar('categoriaId', e.target.value)}
+            onChange={(e) => editar('categoriaId', e.target.value)}
             error={errores.categoria}
             junto={
               <AltaRapida
+                key={guardados}
                 recurso="categoria"
                 alCrear={async (nueva) => {
                   await cargarCategorias()
@@ -352,7 +367,7 @@ export default function EditarProducto() {
             id="productoDescripcion"
             etiqueta="Descripción"
             value={formulario.descripcion}
-            onChange={(e) => cambiar('descripcion', e.target.value)}
+            onChange={(e) => editar('descripcion', e.target.value)}
             maxLength={DESCRIPCION_MAXIMA}
             rows={3}
             ayuda={`Opcional, hasta ${DESCRIPCION_MAXIMA} caracteres.`}
@@ -363,6 +378,7 @@ export default function EditarProducto() {
             tipos={tipos}
             error={errorMedidas}
             tipoRef={tipoRef}
+            reinicio={guardados}
             alCambiar={(medidas) => cambiar('medidas', medidas)}
             alCrearTipo={cargarTipos}
           />
@@ -447,13 +463,15 @@ interface PropsMedidas {
   tipos: TipoMedida[]
   error: string | null
   tipoRef: RefObject<HTMLSelectElement | null>
+  /** `key` del alta rápida de tipo, que se reinicia al guardar el producto (F11-D4). */
+  reinicio: number
   alCambiar: (medidas: MedidaFormulario[]) => void
   /** Recarga los tipos tras el alta rápida (F6-D6). */
   alCrearTipo: () => Promise<TipoMedida[]>
 }
 
 /** Lista de medidas con "Quitar" y fila de alta (F6-D5). Nunca repite un tipo: el `400` no puede ocurrir. */
-function Medidas({ medidas, tipos, error, tipoRef, alCambiar, alCrearTipo }: PropsMedidas) {
+function Medidas({ medidas, tipos, error, tipoRef, reinicio, alCambiar, alCrearTipo }: PropsMedidas) {
   const [tipoId, setTipoId] = useState('')
   const [valor, setValor] = useState('')
   const [errorValor, setErrorValor] = useState<string | null>(null)
@@ -559,6 +577,7 @@ function Medidas({ medidas, tipos, error, tipoRef, alCambiar, alCrearTipo }: Pro
         </div>
       )}
       <AltaRapida
+        key={reinicio}
         recurso="tipo"
         alCrear={async (nuevo) => {
           await alCrearTipo()
@@ -693,7 +712,10 @@ function AltaRapida({ recurso, alCrear }: PropsAltaRapida) {
             id={`${idBase}Nombre`}
             etiqueta="Nombre"
             value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
+            onChange={(e) => {
+              setNombre(e.target.value)
+              setErrorNombre(null)
+            }}
             maxLength={NOMBRE_MAXIMO}
             autoComplete="off"
             error={errorNombre}

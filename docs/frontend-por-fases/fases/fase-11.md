@@ -120,3 +120,90 @@ categoría" con el nombre repetido se cierra al guardar el producto; la raíz de
 login sin `volver` llevan a `/admin/productos`; y en `Ingresar` y `Restablecer` cada campo de
 contraseña se muestra y se oculta con su botón, con el mouse y con el teclado, y el lector de pantalla
 anuncia el botón con su nombre y su estado (presionado o no).
+
+## Implementado
+
+- `src/catalogo/Pagina.astro`: layout del sitio público (F11-D3), con `titulo` y `descripcion` opcional.
+  `index.astro` pasa a usarlo.
+- `src/catalogo/PaginaError.astro`: el hero del catálogo a pantalla completa con logo, "Error N",
+  título, ayuda, el enlace a `/` y un slot para más acciones. Lo usan `src/pages/404.astro` (F11-D1) y
+  `src/pages/500.astro` (F11-D2, `prerender = false`, con WhatsApp e Instagram en el slot).
+  `catalogo.css` suma `.error`, `.error__ayuda`, `.error__acciones` y `.error__enlace`.
+- `EditarProducto.tsx` (F11-D4): `editar(campo, valor)` cambia el campo y borra su error (`categoriaId`
+  borra `categoria`); el contador `guardados` sube al guardar y es la `key` de las dos `AltaRapida` (la
+  de tipo lo recibe por la prop `reinicio` de `Medidas`); el nombre de `AltaRapida` hace
+  `setErrorNombre(null)` en su `onChange`.
+- F11-D5: `redirects` en `astro.config.ts`; `destinoSeguro()`, la marca de `Admin.astro`, el aviso de
+  `Integrantes.tsx` ("Ir a productos") y los dos destinos de `vercel.json` apuntan a
+  `/admin/productos`. Se borraron `src/pages/admin/index.astro` e `Inicio.tsx`.
+- F11-D6: `CampoContrasena` en `Campo.tsx`, `IconoOjo` (con `tachado`) en `iconos.tsx`, y
+  `.campo__contrasena` y `.campo__revelar` en `admin.css`. `Ingresar` usa uno; `Restablecer`, dos, con
+  `errorNueva` y `errorRepetida` en lugar de `errorCampo`.
+
+## Decisiones técnicas
+
+| Decisión | Motivo |
+| --- | --- |
+| Las dos páginas de error comparten `PaginaError.astro` sobre `Pagina.astro` | Mismo hero y estructura; la 500 solo suma los accesos de contacto por el slot. |
+| Títulos: "No encontramos esta página" (404) y "No pudimos cargar el catálogo" (500); enlaces "Ir al inicio" y "Reintentar" | La 500 solo ocurre en `/` (F11-D2), así que el título nombra lo que falló. |
+| `.error` fija `font-family: Inter` | `.page`, que la fija en el catálogo, no envuelve las páginas de error: sin ella el cuerpo salía en serif. |
+| `editar()` en `EditarProducto` solo para nombre, precio, categoría y descripción; `cambiar()` sigue para las medidas | Son los campos con error propio en `errores` (F11-D4). |
+| `CampoContrasena` escucha `submit` en `input.form` con `addEventListener`, sin `capture` | El listener del formulario corre en el target, antes de que el evento llegue a la raíz donde React atiende el `onSubmit` de la isla. |
+| El botón lleva `aria-label` y `title` con el mismo nombre fijo | El contenido es solo el ícono (`aria-hidden`); `title` da el nombre al mouse. |
+| `autoCapitalize`, `autoCorrect` y `spellCheck` se agregan solo con la contraseña visible | F11-D6: con `type="password"` el navegador ya no los aplica. |
+| En `.campo__contrasena`, el contorno de foco del input se dibuja en el envoltorio (`:has(input:focus-visible)`) | Con el contorno en el input, el botón quedaba como una caja aparte dentro del borde. El botón conserva su contorno. |
+| En `Restablecer`, los errores usan el `error` de `CampoContrasena` (sin `role="alert"`) | Es el cableado de `Campo` (F5-D3): el foco va al campo inválido, que queda descrito por su error. |
+
+## Validaciones ejecutadas
+
+- `pnpm lint`, `pnpm typecheck` (0 errores; 16 hints ya existentes, entre ellos `FormEvent`
+  deprecado), `pnpm test` (84) y `pnpm build` pasan.
+- `.vercel/output/config.json` del build: `^/admin$` → `302` a `/admin/productos` antes de
+  `filesystem`; `^(/500/?)$` y `^(/)$` van a `/_isr`; la última ruta es
+  `{ "src": "^/.*$", "dest": "/404.html", "status": 404 }`. El prerender avisa
+  `/admin/index.html (file not created, response body was empty)`: es el redirect, que el adapter sirve
+  como ruta.
+- `astro dev` con `pnpm api:fixture --error` (curl): `/` → `500` con "No pudimos cargar el catálogo";
+  `/no-existe` y `/admin/no-existe` → `404` con la página propia; `/admin` → `302` a
+  `/admin/productos`. En Chrome se ven las dos páginas con la estética del catálogo.
+- UI local (extensión de Chrome, sesión del editor de prueba, backend local):
+  - `/admin/ingresar` con sesión lleva a `/admin/productos` (el `destino()` sin `volver`);
+  - alta de producto vacía: "Escribí un nombre." y "Escribí el precio."; al tipear en el precio se borra
+    solo el suyo, y al tipear en el nombre, el del nombre;
+  - "Nueva categoría" con un nombre existente: "Ya existe una categoría con ese nombre."; se borra al
+    tipear. Con el nombre repetido en el grupo abierto, guardar el producto lo cerró y lo vació;
+  - `/admin/restablecer?token=falso`: cada botón alterna `type` (`password` ↔ `text`) y `aria-pressed`
+    con clic, Espacio y Enter; visible, el input tiene `autocapitalize="off"`, `autocorrect="off"` y
+    `spellcheck=false`; al enviar, la repetida visible volvió a `password`; "abc" deja el error en
+    "Contraseña nueva" (`aria-describedby="nuevaAyuda nuevaError"`) y dos contraseñas distintas, en
+    "Repetí la contraseña";
+  - `/admin/ingresar` con el backend detenido (así muestra el formulario sin cerrar la sesión): el botón
+    "Mostrar contraseña" alterna con clic, Espacio y Enter.
+  - El producto y la categoría de prueba se borraron por la API (`204`).
+
+## Desvíos
+
+- `PaginaError.astro` no estaba en F11-D3; es un componente del layout para no repetir el hero.
+- `Ingresar` se probó con el backend detenido, no con la sesión cerrada: el agente no escribe
+  contraseñas.
+- Quedan para el usuario, tras el deploy: la 404 en producción, los redirects de `admin.*`, el login
+  real sin `volver` y el lector de pantalla (ver abajo).
+
+## Verificaciones del usuario
+
+Tras el push y el deploy:
+
+1. En una terminal:
+   `curl -sI https://elcauquenartesanias.com.ar/no-existe` → `HTTP/2 404`;
+   `curl -sI https://admin.elcauquenartesanias.com.ar/no-existe` → `307` a `/admin/no-existe`, y ese
+   → `404`; `curl -sI https://admin.elcauquenartesanias.com.ar/` → `307` a `/admin/productos`;
+   `curl -sI https://admin.elcauquenartesanias.com.ar/admin` → `302` a `/admin/productos` (el redirect
+   de Astro); `curl -sI https://elcauquenartesanias.com.ar/admin` → `307` a
+   `https://admin.elcauquenartesanias.com.ar/admin/productos`. Los `307` son los `"permanent": false`
+   de `vercel.json`. En el navegador,
+   `https://elcauquenartesanias.com.ar/no-existe` muestra "No encontramos esta página".
+2. En `admin.*`, "Cerrar sesión" e iniciar sesión desde `/admin/ingresar` (sin `volver`): termina en
+   `/admin/productos`. En el login, el ojo muestra y oculta la contraseña.
+3. Con lector de pantalla (NVDA o Narrador) en `/admin/ingresar`: Tab hasta el botón anuncia "Mostrar
+   contraseña, botón de alternancia, no presionado"; Espacio → "presionado". Lo mismo en
+   `/admin/restablecer?token=x` con "Mostrar contraseña nueva" y "Mostrar contraseña repetida".

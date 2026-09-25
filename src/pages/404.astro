@@ -1,0 +1,12 @@
+---
+// 404 propia (F11-D1), prerenderizada: Vercel la sirve para toda ruta sin archivo ni función, también en
+// `admin.*`, donde "Ir al inicio" lleva a Productos (F11-D5).
+import PaginaError from '../catalogo/PaginaError.astro'
+---
+
+<PaginaError
+  codigo={404}
+  titulo="No encontramos esta página"
+  ayuda="Puede que la dirección esté mal escrita o que la página ya no exista."
+  enlace="Ir al inicio"
+/>

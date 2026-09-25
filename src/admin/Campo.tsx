@@ -1,8 +1,19 @@
-import type { InputHTMLAttributes, ReactNode, Ref, SelectHTMLAttributes, TextareaHTMLAttributes } from 'react'
+import {
+  type InputHTMLAttributes,
+  type ReactNode,
+  type Ref,
+  type SelectHTMLAttributes,
+  type TextareaHTMLAttributes,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
+import { IconoOjo } from './iconos'
 
 // Campo de formulario del admin (F5-D3): label, control, ayuda y error. Con `error`, el control queda con
 // `aria-invalid` y descrito por el texto del error (y la ayuda, si hay). `Campo` arma un `<input>`;
-// `CampoSelect` y `CampoTexto`, un `<select>` y un `<textarea>` con el mismo cableado (F6-D3).
+// `CampoSelect` y `CampoTexto`, un `<select>` y un `<textarea>` con el mismo cableado (F6-D3), y
+// `CampoContrasena`, un `type="password"` con botón para mostrarla (F11-D6).
 
 interface Comunes {
   id: string
@@ -84,4 +95,50 @@ interface PropsTexto extends Comunes, Omit<TextareaHTMLAttributes<HTMLTextAreaEl
 
 export function CampoTexto({ id, etiqueta, ayuda, error, ...textarea }: PropsTexto) {
   return armar({ id, etiqueta, ayuda, error }, (aria) => <textarea {...textarea} {...aria} />)
+}
+
+interface PropsContrasena extends Comunes, Omit<InputHTMLAttributes<HTMLInputElement>, 'id' | 'type'> {
+  /** Nombre fijo del botón, que no cambia con el estado (patrón Button de la APG), ej. "Mostrar contraseña". */
+  mostrar: string
+}
+
+export function CampoContrasena({ id, etiqueta, ayuda, error, mostrar, ...input }: PropsContrasena) {
+  const [visible, setVisible] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  // Al enviar, vuelve a `password` en el DOM antes del `onSubmit` de la isla (React lo escucha en la raíz): un
+  // gestor de contraseñas que mire el `type` encuentra un campo de contraseña.
+  useEffect(() => {
+    const campo = inputRef.current
+    const formulario = campo?.form
+    if (!campo || !formulario) return
+    const ocultar = () => {
+      campo.type = 'password'
+      setVisible(false)
+    }
+    formulario.addEventListener('submit', ocultar)
+    return () => formulario.removeEventListener('submit', ocultar)
+  }, [])
+
+  return armar({ id, etiqueta, ayuda, error }, (aria) => (
+    <div className="campo__contrasena">
+      <input
+        ref={inputRef}
+        {...input}
+        {...aria}
+        type={visible ? 'text' : 'password'}
+        {...(visible && { autoCapitalize: 'off', autoCorrect: 'off', spellCheck: false })}
+      />
+      <button
+        type="button"
+        className="campo__revelar"
+        aria-pressed={visible}
+        aria-label={mostrar}
+        title={mostrar}
+        onClick={() => setVisible((v) => !v)}
+      >
+        <IconoOjo tachado={visible} />
+      </button>
+    </div>
+  ))
 }

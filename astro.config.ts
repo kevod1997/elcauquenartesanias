@@ -8,6 +8,8 @@ export default defineConfig({
   site: 'https://elcauquenartesanias.com.ar',
   integrations: [react()],
   adapter: vercel({ isr: { expiration: 60 } }),
+  // Productos es el inicio del admin (F11-D5). 302 como los de vercel.json: un 301 queda en la caché del navegador.
+  redirects: { '/admin': { status: 302, destination: '/admin/productos' } },
   env: {
     schema: {
       PUBLIC_API_URL: envField.string({

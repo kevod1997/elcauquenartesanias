@@ -1,5 +1,6 @@
 import { type FormEvent, useEffect, useState } from 'react'
 import { auth } from '../api'
+import { CampoContrasena } from './Campo'
 import { mensajeDeError } from './mensajes'
 import { destinoSeguro, obtenerSesion } from './sesion'
 
@@ -50,10 +51,14 @@ export default function Ingresar() {
           <label htmlFor="email">Email</label>
           <input id="email" name="email" type="email" autoComplete="username" required />
         </div>
-        <div className="campo">
-          <label htmlFor="password">Contraseña</label>
-          <input id="password" name="password" type="password" autoComplete="current-password" required />
-        </div>
+        <CampoContrasena
+          id="password"
+          name="password"
+          etiqueta="Contraseña"
+          mostrar="Mostrar contraseña"
+          autoComplete="current-password"
+          required
+        />
         {error && (
           <p className="aviso aviso--error" role="alert">
             {error}

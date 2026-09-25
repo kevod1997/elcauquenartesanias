@@ -29,6 +29,12 @@ cada fase (decisiones FN-Dk y registro), en `fases/fase-N.md`, y el estado, en
   (`beforeunload`) y el lector de pantalla. Crear datos de prueba en producción requiere que el
   usuario lo autorice en el chat de esa sesión (sin eso, el modo automático lo bloquea); borralos al
   terminar.
+- **Al detener en Windows un `pnpm dev` o `pnpm api:fixture` lanzado en segundo plano**, el proceso
+  hijo sigue escuchando en su puerto: buscá el PID con `netstat -ano | grep :<puerto>` y cerralo con
+  `taskkill //PID <pid> //T //F`.
+- **Para ver `/admin/ingresar` con la sesión local iniciada**, detené el backend: sin respuesta de
+  `/admin/sesion` la página muestra el formulario, y la sesión del usuario queda intacta. En ese
+  formulario, Chrome autocompleta y su desplegable tapa el botón del ojo: Escape antes de hacer clic.
 - **La pestaña que maneja la extensión de Chrome queda oculta**, y ahí el `close` de un `<dialog>`
   (la confirmación de `confirmar.ts`) no llega hasta que la pestaña se dibuja: tras confirmar, tomá
   una captura antes de leer el toast o la lista.

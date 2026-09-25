@@ -1,0 +1,27 @@
+---
+// Layout del sitio público (F11-D3): el catálogo y las páginas de error comparten `<head>` y estilos.
+import './catalogo.css'
+
+interface Props {
+  titulo: string
+  descripcion?: string
+}
+
+const { titulo, descripcion } = Astro.props
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{titulo}</title>
+    {descripcion && <meta name="description" content={descripcion} />}
+    <link rel="icon" href="/assets/logo-160.webp" />
+    <link rel="preload" href="/assets/fonts/playfair-latin-var.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/assets/fonts/playfair-latin-italic-var.woff2" as="font" type="font/woff2" crossorigin />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

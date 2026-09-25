@@ -601,6 +601,56 @@ textarea[aria-invalid='true'] {
   border-color: var(--terracota);
 }
 
+/* Contraseña con el botón de mostrarla dentro del borde (F11-D6). */
+.campo__contrasena {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--arena);
+  border-radius: 6px;
+  background: var(--papel);
+  padding-right: 4px;
+}
+.campo__contrasena input {
+  border: none;
+  background: none;
+}
+/* Edge suma su propio ojo a todo `type="password"`. */
+.campo__contrasena input::-ms-reveal {
+  display: none;
+}
+.campo__contrasena:focus-within {
+  border-color: var(--madera);
+}
+/* El foco del input se dibuja en el envoltorio, que incluye el botón; el botón conserva el suyo. */
+.campo__contrasena input:focus-visible {
+  outline: none;
+}
+.campo__contrasena:has(input:focus-visible) {
+  outline: 2px solid var(--madera-oscura);
+  outline-offset: 2px;
+}
+.campo__contrasena:has(input[aria-invalid='true']) {
+  border-color: var(--terracota);
+}
+.campo__revelar {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  color: var(--texto-tenue);
+  cursor: pointer;
+}
+.campo__revelar:hover,
+.campo__revelar[aria-pressed='true'] {
+  color: var(--madera-oscura);
+}
+
 .producto {
   justify-items: stretch;
 }

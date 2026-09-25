@@ -1,5 +1,6 @@
 import { type FormEvent, type ReactNode, useState } from 'react'
 import { auth, ErrorApi } from '../api'
+import { CampoContrasena } from './Campo'
 import { mensajeDeError } from './mensajes'
 
 // `/admin/restablecer` (F4-D4): sin `token` pide el enlace; con `token` (el del mail, también el de
@@ -71,7 +72,9 @@ function DefinirContrasena({ token }: { token: string }) {
   const [enviando, setEnviando] = useState(false)
   const [listo, setListo] = useState(false)
   const [tokenInvalido, setTokenInvalido] = useState(false)
-  const [errorCampo, setErrorCampo] = useState<string | null>(null)
+  // Cada error va en su campo (F11-D6): el largo en la nueva y "no coinciden" en la repetida.
+  const [errorNueva, setErrorNueva] = useState<string | null>(null)
+  const [errorRepetida, setErrorRepetida] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const enviar = async (evento: FormEvent<HTMLFormElement>) => {
@@ -80,17 +83,18 @@ function DefinirContrasena({ token }: { token: string }) {
     const nueva = String(datos.get('nueva'))
     const repetida = String(datos.get('repetida'))
     setError(null)
+    setErrorRepetida(null)
     if (nueva.length < MINIMO || nueva.length > MAXIMO) {
-      setErrorCampo(`Tiene que tener entre ${MINIMO} y ${MAXIMO} caracteres.`)
+      setErrorNueva(`Tiene que tener entre ${MINIMO} y ${MAXIMO} caracteres.`)
       document.getElementById('nueva')?.focus()
       return
     }
+    setErrorNueva(null)
     if (nueva !== repetida) {
-      setErrorCampo('Las dos contraseñas no coinciden.')
+      setErrorRepetida('Las dos contraseñas no coinciden.')
       document.getElementById('repetida')?.focus()
       return
     }
-    setErrorCampo(null)
     setEnviando(true)
     try {
       await auth.definirContrasena({ newPassword: nueva, token })
@@ -128,38 +132,25 @@ function DefinirContrasena({ token }: { token: string }) {
   } else {
     contenido = (
       <form onSubmit={enviar} noValidate>
-        <div className="campo">
-          <label htmlFor="nueva">Contraseña nueva</label>
-          <input
-            id="nueva"
-            name="nueva"
-            type="password"
-            autoComplete="new-password"
-            aria-describedby="ayudaNueva"
-            aria-invalid={errorCampo ? true : undefined}
-            required
-          />
-          <p className="campo__ayuda" id="ayudaNueva">
-            Entre {MINIMO} y {MAXIMO} caracteres.
-          </p>
-        </div>
-        <div className="campo">
-          <label htmlFor="repetida">Repetí la contraseña</label>
-          <input
-            id="repetida"
-            name="repetida"
-            type="password"
-            autoComplete="new-password"
-            aria-describedby={errorCampo ? 'errorCampo' : undefined}
-            aria-invalid={errorCampo ? true : undefined}
-            required
-          />
-          {errorCampo && (
-            <p className="campo__error" id="errorCampo" role="alert">
-              {errorCampo}
-            </p>
-          )}
-        </div>
+        <CampoContrasena
+          id="nueva"
+          name="nueva"
+          etiqueta="Contraseña nueva"
+          mostrar="Mostrar contraseña nueva"
+          autoComplete="new-password"
+          ayuda={`Entre ${MINIMO} y ${MAXIMO} caracteres.`}
+          error={errorNueva}
+          required
+        />
+        <CampoContrasena
+          id="repetida"
+          name="repetida"
+          etiqueta="Repetí la contraseña"
+          mostrar="Mostrar contraseña repetida"
+          autoComplete="new-password"
+          error={errorRepetida}
+          required
+        />
         {error && (
           <p className="aviso aviso--error" role="alert">
             {error}
