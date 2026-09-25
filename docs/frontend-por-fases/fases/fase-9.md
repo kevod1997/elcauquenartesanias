@@ -156,6 +156,8 @@ enlace "solo owner" de la barra y su regla en `admin.css` (F9-D1); el máximo co
   - con `data-rol` en `editor` o sin él, el enlace "Integrantes" queda `display: none`; con `owner`, se ve.
 - Quedan en la base local, desactivados, `delivered+fase9b`, `fase9c` y `fase9d`; `delivered+fase9`
   queda activo como editor de prueba (`EDITOR_TEST_*` en `.env.test.local`).
+- El usuario (2026-09-25), en la UI local con el editor de prueba: la barra sin "Integrantes" y, en
+  `/admin/integrantes`, el aviso de F9-D2.
 
 ## Desvíos
 
@@ -164,15 +166,7 @@ enlace "solo owner" de la barra y su regla en `admin.css` (F9-D1); el máximo co
   escribe contraseñas en el navegador. La página ya se validó en la fase 4.
 - Las pruebas de desactivar por la API usaron un segundo editor (`fase9c`) para dejar activo al de
   `delivered+fase9` y probar su vista en la UI.
+- El cierre no se probó en `admin.*` con un editor real (F9-D7 y "Cerrar cuando"): el usuario dio por
+  suficiente la validación local (2026-09-25). El alta en producción queda para cuando haga falta un
+  editor real.
 
-## Verificaciones del usuario
-
-1. **Vista del editor en local.** Con el backend local y `PUBLIC_API_URL=http://localhost:3001 pnpm dev`,
-   cerrá la sesión del owner e iniciá sesión en `http://localhost:4321/admin/ingresar` con
-   `EDITOR_TEST_EMAIL` y `EDITOR_TEST_PASSWORD` de `.env.test.local`, y avisale al agente, que lo
-   verifica con la extensión: la barra sin "Integrantes" y, en `/admin/integrantes`, "Solo el owner
-   gestiona los integrantes." con el enlace a `/admin`. También podés mirarlo vos.
-2. **Cierre en `admin.*`**, tras el push y el deploy: dale al agente el email de un editor real y
-   autorizá su alta en el chat (F9-D7; es permanente). El agente la hace con la sesión del owner.
-   El editor abre el correo, define su contraseña en `/admin/restablecer`, inicia sesión y confirma
-   que no ve "Integrantes" en la barra.

@@ -15,15 +15,14 @@ decisiones técnicas y las validaciones ejecutadas.
 | 6. Productos con medidas | ✅ Cerrada (2026-09-25) | [fase-6.md](./fase-6.md) |
 | 7. Galería e imágenes | ✅ Cerrada (2026-09-25) | [fase-7.md](./fase-7.md) |
 | 8. Orden | ✅ Cerrada (2026-09-25) | [fase-8.md](./fase-8.md) |
-| 9. Integrantes | 🔎 Implementada | [fase-9.md](./fase-9.md) |
+| 9. Integrantes | ✅ Cerrada (2026-09-25) | [fase-9.md](./fase-9.md) |
 | 10. Limpieza y cierre | ⏳ Pendiente | |
 
 "🔎 Implementada" es una fase con el código commiteado a la que le quedan verificaciones del
 usuario; cuenta como dependencia cumplida.
 
-**Siguiente:** cerrar la fase 9 con las [verificaciones del usuario](./fase-9.md#verificaciones-del-usuario):
-la vista del editor en local y, tras el push, el alta de un editor real en `admin.*` con el email que
-da el usuario. Después, la fase 10 según [fase-10.md](./fase-10.md), que espera el cierre de la 9.
+**Siguiente:** implementar la fase 10 (limpieza y cierre) según [fase-10.md](./fase-10.md); sus
+dependencias (3, 7, 8 y 9) están cerradas.
 
 ## Decisiones para el usuario
 
@@ -36,7 +35,7 @@ Pruebas que el agente no puede ejecutar (visuales, en producción o tras un push
 están en la sección "Verificaciones del usuario" de cada `fase-N.md`. Al confirmarlas todas, se
 borra esa sección y su línea de acá, y la fase pasa a "✅ Cerrada".
 
-- Fase 9: la vista del editor en local y el alta de un editor real en `admin.*` tras el push.
+Ninguna.
 
 ## Pendientes abiertos
 
