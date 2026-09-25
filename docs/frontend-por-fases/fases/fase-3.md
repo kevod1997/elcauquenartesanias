@@ -1,6 +1,6 @@
 # Fase 3 — Sitio público
 
-**Estado:** abierta. Está implementada y validada en local; falta verificar `/catalogo-nuevo` en producción después del push (ver [Pendiente](#pendiente)).
+**Estado:** cerrada el 2026-09-25, después de verificarla en producción.
 **Definición:** [PRD, fase 3](../PRD.md#fase-3--sitio-público). Aplica F3-D1 a F3-D7, sin repetirlas acá.
 
 ## Implementado
@@ -47,12 +47,12 @@
   - Visor, probado por CDP y sin errores en la consola: la ficha de un producto sin fotos abre en modo único (`1 / 1`). El diseño "Fleje greca" abre en `4 / 5`. Siguiente y `→` vuelven al `1 / 5`. `Esc` cierra y restaura el `overflow`.
   - `--vacio` da 200 con el aviso; `--error` da 500 (F3-D3).
 - Contra producción (`PUBLIC_API_URL=https://api.elcauquenartesanias.com.ar pnpm dev`): 200 con el aviso de catálogo vacío. La API devuelve `{"productos":[]}`.
+- Después del deploy:
+  - El usuario confirmó que `https://elcauquenartesanias.com.ar/catalogo-nuevo` responde 200 con el aviso y que `/` sigue sirviendo el sitio viejo. El HTML trae `noindex`.
+  - `curl -sI` a `/catalogo-nuevo`: con `Age: 73`, `X-Vercel-Cache: STALE`; el pedido siguiente, `HIT` con `Age: 1`. Después de otros 65 s se repitió el ciclo (`STALE` con `Age: 78`, luego `HIT` con `Age: 2`). La ISR regenera al vencer los 60 s.
 
 ## Desvíos
 
 - F3-D4 dice `url640` como imagen previa del visor. Para los diseños se usa `url160`, como en `main.js` (ver Decisiones).
 - Se corrigió un `aria-label` con mojibake de `main.js` ("Ver mÃ¡s productos de esta hilera").
 
-## Pendiente
-
-- Después del push, verificar `/catalogo-nuevo` en producción, con ISR (el usuario; pasos en [README](./README.md#fase-3)).
