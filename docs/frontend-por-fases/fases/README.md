@@ -11,7 +11,7 @@ tomadas (y su porqué) y las validaciones ejecutadas.
 | 3. Sitio público | ✅ Cerrada (2026-09-25) | [fase-3.md](./fase-3.md) |
 | 4. Login y sesión | 🔎 Implementada (2026-09-25) | [fase-4.md](./fase-4.md) |
 | 5. Categorías y tipos de medida | 🔎 Implementada (2026-09-25) | [fase-5.md](./fase-5.md) |
-| 6. Productos con medidas | ⏳ Pendiente | |
+| 6. Productos con medidas | ⏳ Pendiente (preparada 2026-09-25) | [fase-6.md](./fase-6.md) |
 | 7. Galería e imágenes | ⏳ Pendiente | |
 | 8. Orden | ⏳ Pendiente | |
 | 9. Integrantes | ⏳ Pendiente | |
@@ -20,10 +20,12 @@ tomadas (y su porqué) y las validaciones ejecutadas.
 "🔎 Implementada" es una fase con el código commiteado a la que le quedan verificaciones del
 usuario; cuenta como dependencia cumplida.
 
-**Siguiente:** preparar la fase 6 con el prompt 6.1 del PRD. Leé la fase 6 del PRD y
-[fase-5.md](./fase-5.md), que lista el patrón del admin a reusar (`Campo.tsx`, `confirmar.ts`,
-`avisos.ts`, `recursos.ts`, la lista `secciones` de `Admin.astro`); `Categorias.tsx` es el ejemplo
-completo de listado con alta, edición y borrado. Para la API, [fase-2.md](./fase-2.md).
+**Siguiente:** implementar la fase 6 con el prompt 6.2 del PRD. Leé la fase 6 del PRD (F6-D1 a
+F6-D8) y [fase-5.md](./fase-5.md), que lista el patrón del admin a reusar (`Campo.tsx`,
+`confirmar.ts`, `avisos.ts`, `recursos.ts`, la lista `secciones` de `Admin.astro`);
+`Categorias.tsx` es el ejemplo completo de listado y formulario. Los estilos del formulario de
+producto (`.campo__precio`, `.estado--*`, `.chip`) están en `admin/admin.css` del prototipo. Para
+la API, [fase-2.md](./fase-2.md).
 
 ## Decisiones para el usuario
 
@@ -79,14 +81,16 @@ Después del push a `main` (y con la fase 4 desplegada), logueado en `admin.*/ad
 
 Agrupados por la fase que los resuelve. Al resolver uno, se borra de acá.
 
-### Fase 6
-
-- Crear una categoría o un tipo de medida desde el formulario de producto, como el prototipo, y
-  enlazar a `/admin/categorias` y `/admin/tipos-de-medida` (F5-D1). Reusar el patrón F5-D2 a F5-D5.
-
 ### Fase 7
 
 - Probar la subida de imágenes desde el browser: primer uso real del CORS de R2 con `ADMIN_ORIGIN`.
+- La galería, publicar y volver a borrador van en el formulario `/admin/productos/editar?id=`
+  (F6-D1), y la foto principal en las filas de `/admin/productos` (F6-D2). Un producto nuevo tiene
+  id recién después de "Crear producto".
+
+### Fase 8
+
+- El listado de `/admin/productos` (F6-D2) ya muestra el orden global; reordenar se suma ahí.
 
 ### Fase 9
 
