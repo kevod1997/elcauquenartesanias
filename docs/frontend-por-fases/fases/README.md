@@ -21,10 +21,10 @@ decisiones técnicas y las validaciones ejecutadas.
 "🔎 Implementada" es una fase con el código commiteado a la que le quedan verificaciones del
 usuario; cuenta como dependencia cumplida.
 
-**Siguiente:** preparar la fase 8 (orden) con el prompt 6.1 de [prompts.md](../prompts.md). Leé
-[fase-6.md](./fase-6.md) (el listado de `/admin/productos`, donde se suma reordenar) y
-[fase-7.md](./fase-7.md) (miniatura del listado y cómo `galeria.ts` separa reglas puras con tests). La
-fase 9 (integrantes) también está sin preparar y depende solo de la 4.
+**Siguiente:** implementar la fase 8 (orden, ya preparada: F8-D1 a F8-D7) con el prompt 6.2 de
+[prompts.md](../prompts.md). Leé [fase-8.md](./fase-8.md), `src/admin/Productos.tsx` (el listado
+donde se suma reordenar) y `src/admin/galeria.ts` (`mover`, y cómo separa reglas puras con tests). La
+fase 9 (integrantes) está sin preparar y depende solo de la 4.
 
 ## Decisiones para el usuario
 
@@ -42,10 +42,6 @@ Ninguna.
 ## Pendientes abiertos
 
 Agrupados por la fase que los resuelve. Al resolver uno, se borra de acá.
-
-### Fase 8
-
-- El listado de `/admin/productos` (F6-D2) ya muestra el orden global; reordenar se suma ahí.
 
 ### Fase 9
 
