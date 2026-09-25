@@ -1,0 +1,72 @@
+---
+// Una hilera del carrusel mobile. En desktop es transparente para la grilla (`display: contents`).
+interface Props {
+  cantidad: number
+}
+
+const { cantidad } = Astro.props
+---
+
+<div class:list={['product-row', { 'product-row--single': cantidad === 1 }]}>
+  <div class="product-row__track">
+    <slot />
+  </div>
+  {
+    cantidad > 1 && (
+      <>
+        <button
+          class="product-row__arrow product-row__arrow--prev is-hidden"
+          type="button"
+          disabled
+          aria-label="Ver productos anteriores de esta hilera"
+        >
+          <svg width="11" height="18" viewBox="0 0 11 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 1L2 9l7 8"></path></svg>
+        </button>
+        <button class="product-row__arrow product-row__arrow--next" type="button" aria-label="Ver más productos de esta hilera">
+          <svg width="11" height="18" viewBox="0 0 11 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 1l7 8-7 8"></path></svg>
+        </button>
+      </>
+    )
+  }
+</div>
+
+<script>
+  for (const fila of document.querySelectorAll<HTMLElement>('.product-row:not(.product-row--single)')) {
+    const carril = fila.querySelector('.product-row__track') as HTMLElement
+    const retroceder = fila.querySelector('.product-row__arrow--prev') as HTMLButtonElement
+    const avanzar = fila.querySelector('.product-row__arrow--next') as HTMLButtonElement
+
+    const actualizarFlechas = () => {
+      const estaAlInicio = carril.scrollLeft <= 2
+      const llegoAlFinal = carril.scrollLeft >= carril.scrollWidth - carril.clientWidth - 2
+      retroceder.classList.toggle('is-hidden', estaAlInicio)
+      avanzar.classList.toggle('is-hidden', llegoAlFinal)
+      retroceder.disabled = estaAlInicio
+      avanzar.disabled = llegoAlFinal
+    }
+
+    const moverHilera = (direccion: number) => {
+      const tarjeta = carril.querySelector('.card')
+      const distancia = tarjeta ? tarjeta.getBoundingClientRect().width + 14 : carril.clientWidth
+      const reducirMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      carril.scrollBy({ left: direccion * distancia, behavior: reducirMovimiento ? 'auto' : 'smooth' })
+    }
+
+    carril.addEventListener('scroll', actualizarFlechas, { passive: true })
+    retroceder.addEventListener('click', () => moverHilera(-1))
+    avanzar.addEventListener('click', () => moverHilera(1))
+
+    const observador = new IntersectionObserver(
+      (entradas) => {
+        if (entradas[0]?.isIntersecting) {
+          avanzar.classList.add('is-prompting')
+          observador.disconnect()
+        }
+      },
+      { threshold: 0.45 },
+    )
+    observador.observe(fila)
+
+    requestAnimationFrame(actualizarFlechas)
+  }
+</script>

@@ -1,0 +1,88 @@
+---
+import { hrefWhatsappProducto } from './contacto'
+import IconoWhatsapp from './IconoWhatsapp.astro'
+import { disenos, formatearPrecio, type ProductoPublico, textoMedida } from './presentacion'
+
+interface Props {
+  producto: ProductoPublico
+  /** Posición en el catálogo: ordena la grilla de desktop y abre el visor de este producto. */
+  indice: number
+}
+
+const { producto, indice } = Astro.props
+const principal = producto.galeria[0]
+const listaDisenos = disenos(producto.galeria)
+---
+
+<article class="card" style={`--orden-producto: ${indice}`}>
+  {
+    principal ? (
+      <button
+        type="button"
+        class="card__foto"
+        aria-label={`Ver ficha completa de ${producto.nombre}`}
+        data-visor-producto={indice}
+        data-visor-imagen="0"
+      >
+        <img
+          src={principal.url640}
+          width="640"
+          height="640"
+          alt={`Ficha de ${producto.nombre}`}
+          loading="lazy"
+          decoding="async"
+        />
+        <span class="card__lupa">
+          <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><circle cx="6" cy="6" r="4.6"></circle><path d="M9.4 9.4L13 13"></path></svg>
+          <span>Ver ficha</span>
+        </span>
+      </button>
+    ) : (
+      <div class="card__foto" />
+    )
+  }
+
+  <div class="card__body">
+    <div class="card__head">
+      <h3 class="card__nombre">{producto.nombre}</h3>
+      <span class="card__precio">{formatearPrecio(producto.precio)}</span>
+    </div>
+
+    {producto.descripcion !== null && <p class="card__desc">{producto.descripcion}</p>}
+
+    {
+      producto.medidas.length > 0 && (
+        <div class="medidas">
+          {producto.medidas.map((medida) => (
+            <span>{textoMedida(medida)}</span>
+          ))}
+        </div>
+      )
+    }
+
+    {
+      listaDisenos.length > 0 && (
+        <div class="variantes">
+          <span class="variantes__label">Diseños</span>
+          <div class="variantes__lista">
+            {listaDisenos.map((diseno) => (
+              <button
+                type="button"
+                title={diseno.etiqueta}
+                aria-label={`Ver ${diseno.etiqueta.toLowerCase()}`}
+                data-visor-producto={indice}
+                data-visor-imagen={diseno.indice}
+              >
+                <img src={diseno.url160} width="160" height="160" alt={diseno.etiqueta} loading="lazy" decoding="async" />
+              </button>
+            ))}
+          </div>
+        </div>
+      )
+    }
+
+    <a class="btn-wa" href={hrefWhatsappProducto(producto.nombre)} target="_blank" rel="noopener noreferrer">
+      <IconoWhatsapp tamano={18} /> Consultar por WhatsApp
+    </a>
+  </div>
+</article>

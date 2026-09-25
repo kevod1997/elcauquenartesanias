@@ -12,7 +12,8 @@
     "typecheck": "astro check",
     "lint": "biome check && node scripts/check-vercelignore.mjs && node scripts/gen-api.mjs --check",
     "gen:api": "node scripts/gen-api.mjs",
-    "test": "vitest run"
+    "test": "vitest run",
+    "api:fixture": "node scripts/api-fixture/servidor.mjs"
   },
   "dependencies": {
     "@astrojs/react": "7.0.0",

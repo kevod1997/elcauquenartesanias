@@ -1,0 +1,966 @@
+/* ---------- Fuentes ---------- */
+
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('/assets/fonts/playfair-latin-var.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: italic;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/assets/fonts/playfair-latin-italic-var.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: Inter;
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('/assets/fonts/inter-latin-var.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  --crema: #f7f2eb;
+  --crema-2: #f2eadf;
+  --arena: #e4d5c1;
+  --madera: #6b4c2a;
+  --madera-oscura: #4a331e;
+  --cacao: #3b2a1a;
+  --tinta: #2c1f0e;
+  --verde: #3e5030;
+  --verde-oscuro: #334227;
+  --texto-suave: #5c4b36;
+  --texto-tenue: #7a6a56;
+  --dorado: #b79e7f;
+
+  /* Duraciones y curvas */
+  --t-rapida: 160ms;
+  --t-media: 280ms;
+  --t-lenta: 560ms;
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  /* Cantidades de movimiento. prefers-reduced-motion las lleva a cero
+     y deja intactos los fundidos de opacidad. */
+  --lift: 4px;
+  --foto-escala: 1.045;
+  --panel-entrada: 12px;
+  --panel-escala: 0.97;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--crema);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--verde);
+}
+a:hover {
+  color: var(--madera);
+}
+
+:where(a, button):focus-visible {
+  outline: 2px solid var(--verde);
+  outline-offset: 3px;
+}
+
+:where(.hero, .contacto, .footer, .visor) :where(a, button):focus-visible {
+  outline-color: var(--dorado);
+}
+
+.page {
+  font-family: Inter, sans-serif;
+  color: var(--tinta);
+  background: linear-gradient(180deg, #f7f2eb 0%, #f2eadf 42%, #ede2d1 100%);
+  min-height: 100%;
+}
+
+/* ---------- Hero ---------- */
+
+.hero {
+  position: relative;
+  color: var(--crema);
+  padding: clamp(48px, 12vw, 96px) 20px clamp(44px, 10vw, 84px);
+  text-align: center;
+  background: radial-gradient(110% 80% at 50% 0%, #6b4c2a 0%, #4a331e 45%, #3b2a1a 100%);
+}
+
+/* Accesos rápidos: mismos destinos que la sección de contacto, arriba a la
+   derecha, para no obligar a bajar hasta el final. Quietos, no fijos: la
+   grilla de placas no admite chrome flotante encima. */
+.hero__accesos {
+  position: absolute;
+  top: clamp(14px, 3vw, 26px);
+  right: clamp(14px, 3vw, 26px);
+  display: flex;
+  /* 10px: deja las dos áreas de toque de 44px justas, sin solaparse */
+  gap: 10px;
+}
+
+/* Un solo disco de filete fino para los accesos del hero y los de contacto:
+   cambia el diámetro, nunca el tratamiento. --disco es lo único que cada
+   sitio ajusta. */
+.acceso,
+.icon-btn {
+  --disco: 34px;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--disco);
+  height: var(--disco);
+  border-radius: 999px;
+  color: rgba(247, 242, 235, 0.82);
+  border: 1px solid rgba(247, 242, 235, 0.26);
+  text-decoration: none;
+  transition:
+    background-color var(--t-rapida) var(--ease),
+    border-color var(--t-rapida) var(--ease),
+    color var(--t-rapida) var(--ease);
+}
+
+.acceso:hover,
+.icon-btn:hover {
+  background: rgba(247, 242, 235, 0.12);
+  border-color: rgba(247, 242, 235, 0.6);
+  color: var(--crema);
+}
+
+/* El disco se queda por debajo de 44px para no pesar sobre el logo ni sobre
+   la fila de contacto, pero el área de toque llega a 44px igual. */
+.acceso::after,
+.icon-btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: max(44px, var(--disco));
+  height: max(44px, var(--disco));
+  transform: translate(-50%, -50%);
+}
+
+.hero__logo {
+  width: clamp(96px, 24vw, 132px);
+  height: clamp(96px, 24vw, 132px);
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  margin: 0 auto 22px;
+}
+
+.hero__eyebrow {
+  margin: 0 0 18px;
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--dorado);
+}
+
+.hero__title {
+  font-family: 'Playfair Display', serif;
+  font-weight: 500;
+  font-size: clamp(30px, 8vw, 54px);
+  line-height: 1.1;
+  margin: 0;
+  letter-spacing: -0.015em;
+}
+
+.hero__title span {
+  font-style: italic;
+}
+
+/* ---------- Catálogo ---------- */
+
+.catalogo {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: clamp(48px, 10vw, 88px) 20px clamp(56px, 10vw, 96px);
+}
+
+.catalogo__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 28px;
+}
+
+.catalogo__title {
+  font-family: 'Playfair Display', serif;
+  font-weight: 500;
+  font-size: clamp(26px, 7vw, 38px);
+  margin: 0;
+  color: var(--cacao);
+}
+
+.catalogo__note {
+  margin: 0;
+  font-size: 13px;
+  color: var(--texto-tenue);
+}
+
+.grid {
+  display: grid;
+  /* min(): sin esto la pista de 290px desborda en pantallas de 320 px o menos */
+  grid-template-columns: repeat(auto-fill, minmax(min(290px, 100%), 1fr));
+  gap: clamp(20px, 4vw, 32px);
+}
+
+/* En desktop las envolturas de las hileras son transparentes para la grilla:
+   se conserva exactamente su distribución y el orden original del catálogo. */
+.product-row,
+.product-row__track {
+  display: contents;
+}
+
+.product-row .card {
+  order: var(--orden-producto);
+}
+
+.product-row__arrow {
+  display: none;
+}
+
+/* Sin productos publicados: un aviso en lugar de la grilla. */
+.catalogo__vacio {
+  margin: 0;
+  padding: 32px 0;
+  font-size: 15px;
+  color: var(--texto-suave);
+}
+
+/* ---------- Tarjeta de producto ---------- */
+
+.card {
+  background: #ffffff;
+  border: 1px solid rgba(107, 76, 42, 0.15);
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 1px 2px rgba(59, 42, 26, 0.05);
+  transition:
+    transform var(--t-media) var(--ease),
+    box-shadow var(--t-media) var(--ease),
+    border-color var(--t-media) var(--ease);
+}
+
+.card:hover,
+.card:focus-within {
+  transform: translateY(calc(-1 * var(--lift)));
+  border-color: rgba(183, 158, 127, 0.85);
+  box-shadow: 0 14px 30px -12px rgba(59, 42, 26, 0.3);
+}
+
+.card__foto {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  padding: 0;
+  border: none;
+  overflow: hidden;
+  cursor: pointer;
+  background: linear-gradient(160deg, #f4ece1 0%, #e4d5c1 100%);
+}
+
+.card__foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform var(--t-lenta) var(--ease);
+}
+
+/* Velo cálido: le da piso a la lupa sin apagar la madera de la ficha.
+   Constante, no en hover: la lupa está siempre a la vista. */
+.card__foto::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to top, rgba(59, 42, 26, 0.5) 0%, rgba(59, 42, 26, 0.12) 16%, rgba(59, 42, 26, 0) 28%);
+}
+
+.card:hover .card__foto img,
+.card__foto:focus-visible img {
+  transform: scale(var(--foto-escala));
+}
+
+/* La lupa: cita la tarjeta de medidas de las propias placas
+   (crema, filete dorado, filas separadas por una línea de un píxel).
+   Sin animación de entrada: aparecer al pasar el cursor era ruido. */
+.card__lupa {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  /* max-content: sin esto el ancho shrink-to-fit del absoluto recorta el texto */
+  width: max-content;
+  max-width: calc(100% - 28px);
+  padding: 7px 12px 7px 10px;
+  border-radius: 7px;
+  background: var(--crema);
+  border: 1px solid rgba(183, 158, 127, 0.9);
+  box-shadow: 0 6px 16px -8px rgba(59, 42, 26, 0.55);
+  color: var(--cacao);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.card__lupa span {
+  padding-left: 9px;
+  border-left: 1px solid rgba(183, 158, 127, 0.75);
+}
+
+.card__body {
+  padding: 20px 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.card__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.card__nombre {
+  font-family: 'Playfair Display', serif;
+  font-weight: 600;
+  font-size: 21px;
+  line-height: 1.2;
+  margin: 0;
+  color: var(--cacao);
+}
+
+.card__precio {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--verde);
+  white-space: nowrap;
+}
+
+.card__desc {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--texto-suave);
+  text-wrap: pretty;
+}
+
+.medidas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.medidas span {
+  font-size: 12px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: var(--crema-2);
+  color: var(--madera);
+  letter-spacing: 0.02em;
+}
+
+.variantes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.variantes__label {
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--texto-tenue);
+}
+
+.variantes__lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.variantes__lista button {
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  background: none;
+  border: 1px solid rgba(107, 76, 42, 0.25);
+  transition:
+    border-color var(--t-rapida) var(--ease),
+    box-shadow var(--t-rapida) var(--ease);
+}
+
+.variantes__lista button:hover {
+  border-color: var(--dorado);
+  box-shadow: 0 4px 12px -6px rgba(59, 42, 26, 0.5);
+}
+
+.variantes__lista img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.btn-wa {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 48px;
+  border-radius: 10px;
+  background: var(--verde);
+  color: var(--crema);
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 500;
+  transition: background-color var(--t-rapida) var(--ease);
+}
+
+.btn-wa:hover {
+  background: var(--verde-oscuro);
+  color: var(--crema);
+}
+
+/* ---------- Contacto ---------- */
+
+.contacto {
+  color: var(--crema);
+  padding: clamp(48px, 10vw, 88px) 20px;
+  background: linear-gradient(160deg, #4a331e 0%, #3b2a1a 55%, #32220f 100%);
+}
+
+.contacto__inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+  gap: clamp(28px, 5vw, 56px);
+}
+
+.label {
+  margin: 0 0 10px;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dorado);
+}
+
+.contacto__redes {
+  display: flex;
+  flex-wrap: wrap;
+  /* 10px, igual que el hero: dos áreas de toque de 44px sin solaparse */
+  gap: 10px;
+}
+
+/* Un punto más grandes que los del hero porque acá sí son el destino de la
+   sección, no un atajo al mHechas a mano. */
+.icon-btn {
+  --disco: 40px;
+}
+
+.pagos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pagos span {
+  font-size: 14px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: rgba(247, 242, 235, 0.09);
+}
+
+.footer {
+  background: var(--tinta);
+  color: var(--dorado);
+  text-align: center;
+  padding: 22px 20px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px 18px;
+  font-size: 13px;
+}
+
+.footer p {
+  margin: 0;
+}
+
+.footer__credito {
+  font-size: 12px;
+  color: rgba(183, 158, 127, 0.62);
+}
+
+.footer__credito a {
+  color: rgba(247, 242, 235, 0.72);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(247, 242, 235, 0.3);
+  transition:
+    color var(--t-rapida) var(--ease),
+    border-color var(--t-rapida) var(--ease);
+}
+
+.footer__credito a:hover {
+  color: var(--crema);
+  border-bottom-color: var(--crema);
+}
+
+/* ---------- Mobile ----------
+   Contacto y formas de pago comparten fila: la sección deja de ser una
+   pantalla propia y pasa a ser un pie. */
+
+@media (max-width: 560px) {
+  .catalogo {
+    padding-right: 0;
+    padding-left: 0;
+  }
+
+  .catalogo__head {
+    display: block;
+    margin-bottom: 22px;
+    padding: 0 20px;
+  }
+
+  .catalogo__note {
+    display: block;
+    margin-top: 8px;
+    line-height: 1.35;
+    font-size: clamp(11.5px, 3.5vw, 13px);
+    white-space: nowrap;
+  }
+
+  .catalogo__sep {
+    display: inline;
+  }
+
+  .catalogo__vacio {
+    padding-inline: 20px;
+  }
+
+  .grid {
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+  }
+
+  .product-row {
+    position: relative;
+    display: block;
+    min-width: 0;
+  }
+
+  .product-row__track {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-left: 20px;
+    padding: 0 20px 8px;
+    scrollbar-width: none;
+    overscroll-behavior-inline: contain;
+  }
+
+  .product-row__track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .product-row .card {
+    order: initial;
+    min-width: calc(100% - 38px);
+    scroll-snap-align: start;
+  }
+
+  .product-row--single .card {
+    min-width: 100%;
+  }
+
+  .medidas {
+    flex-wrap: nowrap;
+    gap: 5px;
+  }
+
+  .medidas span {
+    padding-right: 6px;
+    padding-left: 6px;
+    font-size: clamp(9px, 2.8vw, 11px);
+    white-space: nowrap;
+  }
+
+  .product-row__arrow {
+    position: absolute;
+    top: clamp(150px, 42vw, 182px);
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid rgba(247, 242, 235, 0.45);
+    border-radius: 999px;
+    cursor: pointer;
+    background: rgba(59, 42, 26, 0.82);
+    box-shadow: 0 7px 18px -8px rgba(59, 42, 26, 0.7);
+    color: var(--crema);
+    opacity: 1;
+    transition: opacity var(--t-rapida) var(--ease);
+  }
+
+  .product-row__arrow--prev {
+    left: 8px;
+  }
+
+  .product-row__arrow--next {
+    right: 8px;
+  }
+
+  .product-row__arrow.is-hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .product-row__arrow--next.is-prompting svg {
+    animation: pista-horizontal 240ms ease-out 2 alternate;
+  }
+
+  .contacto {
+    padding: 30px 20px;
+  }
+
+  .contacto__inner {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: 22px;
+  }
+
+  .label {
+    margin-bottom: 8px;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+  }
+
+  .contacto__redes {
+    gap: 8px;
+  }
+
+  .icon-btn {
+    --disco: 36px;
+  }
+
+  .icon-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .pagos {
+    gap: 6px;
+  }
+
+  .pagos span {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+
+  .footer {
+    padding: 18px 20px;
+  }
+  .footer__linea {
+    font-size: 12px;
+  }
+  .footer__credito {
+    font-size: 11px;
+  }
+}
+
+@keyframes pista-horizontal {
+  from {
+    transform: translateX(-3px);
+    opacity: 0.65;
+  }
+  to {
+    transform: translateX(2px);
+    opacity: 1;
+  }
+}
+
+/* ---------- Visor ---------- */
+
+.visor {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  margin: 0;
+  padding: clamp(12px, 3vw, 32px);
+  border: none;
+  background: none;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity var(--t-media) var(--ease);
+}
+
+.visor[open] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+}
+
+.visor.is-closing {
+  opacity: 0;
+}
+
+.visor::backdrop {
+  background: radial-gradient(120% 90% at 50% 0%, rgba(74, 53, 32, 0.92) 0%, rgba(24, 16, 9, 0.95) 70%);
+  backdrop-filter: blur(10px);
+  opacity: 0;
+  transition: opacity 280ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.visor[open]::backdrop {
+  opacity: 1;
+}
+.visor.is-closing::backdrop {
+  opacity: 0;
+}
+
+@starting-style {
+  .visor[open] {
+    opacity: 0;
+  }
+  .visor[open]::backdrop {
+    opacity: 0;
+  }
+  .visor[open] .visor__panel {
+    opacity: 0;
+    transform: translateY(var(--panel-entrada)) scale(var(--panel-escala));
+  }
+}
+
+.visor__panel {
+  position: relative;
+  width: 100%;
+  max-width: 860px;
+  height: 100%;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-radius: 18px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #fbf7f1 0%, #f1e7d9 100%);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition:
+    opacity var(--t-media) var(--ease),
+    transform var(--t-media) var(--ease);
+}
+
+.visor.is-closing .visor__panel {
+  opacity: 0;
+  transform: translateY(var(--panel-entrada)) scale(var(--panel-escala));
+}
+
+.visor__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(107, 76, 42, 0.14);
+}
+
+.visor__titulo {
+  margin: 0;
+  font-family: 'Playfair Display', serif;
+  font-size: 17px;
+  color: var(--cacao);
+}
+
+.visor__cerrar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  background: rgba(59, 42, 26, 0.08);
+  color: var(--cacao);
+  transition: background-color var(--t-rapida) var(--ease);
+}
+
+.visor__cerrar:hover {
+  background: rgba(59, 42, 26, 0.16);
+}
+
+.visor__stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  padding: 12px;
+  background: var(--crema);
+}
+
+.visor__foto {
+  position: absolute;
+  inset: 12px;
+  width: calc(100% - 24px);
+  height: calc(100% - 24px);
+  object-fit: contain;
+  border-radius: 8px;
+  opacity: 0;
+  transition: opacity var(--t-media) var(--ease);
+}
+
+.visor__foto.is-activa {
+  opacity: 1;
+}
+
+.visor__nav {
+  position: absolute;
+  top: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  margin-top: -24px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  background: rgba(59, 42, 26, 0.72);
+  color: var(--crema);
+  backdrop-filter: blur(4px);
+  transition:
+    background-color var(--t-rapida) var(--ease),
+    transform var(--t-rapida) var(--ease);
+}
+
+.visor__nav:hover {
+  background: var(--cacao);
+}
+.visor__nav--prev {
+  left: 18px;
+}
+.visor__nav--next {
+  right: 18px;
+}
+.visor__nav--prev:hover {
+  transform: translateX(calc(-0.5 * var(--lift)));
+}
+.visor__nav--next:hover {
+  transform: translateX(calc(0.5 * var(--lift)));
+}
+
+.visor__contador {
+  position: absolute;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(59, 42, 26, 0.72);
+  color: var(--crema);
+}
+
+.visor__tiras {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 12px 16px;
+  border-top: 1px solid rgba(107, 76, 42, 0.14);
+}
+
+.visor__tiras button {
+  width: 54px;
+  height: 54px;
+  flex: none;
+  padding: 0;
+  border-radius: 9px;
+  cursor: pointer;
+  background-size: cover;
+  background-position: center;
+  border: 2px solid rgba(107, 76, 42, 0.2);
+  opacity: 0.72;
+  transition:
+    opacity var(--t-rapida) var(--ease),
+    border-color var(--t-rapida) var(--ease);
+}
+
+.visor__tiras button:hover {
+  opacity: 1;
+}
+
+.visor__tiras button[aria-current='true'] {
+  border-color: var(--verde);
+  opacity: 1;
+}
+
+/* Una sola imagen: sin flechas, contador ni tira */
+.visor--unica .visor__nav,
+.visor--unica .visor__contador,
+.visor--unica .visor__tiras {
+  display: none;
+}
+
+/* ---------- Movimiento reducido ----------
+   MQ5 recomienda sustituir el movimiento, no eliminarlo: los desplazamientos
+   y escalas van a cero, los fundidos de opacidad se mantienen. */
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --lift: 0px;
+    --foto-escala: 1;
+    --panel-entrada: 0px;
+    --panel-escala: 1;
+    --t-lenta: 280ms;
+  }
+
+  .product-row__arrow--next.is-prompting svg {
+    animation: none;
+  }
+}

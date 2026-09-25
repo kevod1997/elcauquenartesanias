@@ -1,0 +1,188 @@
+---
+import type { ImagenVisor } from './presentacion'
+
+interface Props {
+  /** Imágenes de cada producto, por su índice en el catálogo. */
+  galerias: ImagenVisor[][]
+}
+
+// `<` escapado: un `</script>` dentro de un texto cerraría el bloque.
+const datos = JSON.stringify(Astro.props.galerias).replaceAll('<', '\\u003c')
+---
+
+<script is:inline type="application/json" id="visorDatos" set:html={datos} />
+
+<dialog class="visor" id="visor" aria-labelledby="visorTitulo">
+  <div class="visor__panel">
+    <div class="visor__head">
+      <p class="visor__titulo" id="visorTitulo"></p>
+      <button class="visor__cerrar" type="button" data-cerrar aria-label="Cerrar">
+        <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3 3l11 11M14 3L3 14"></path></svg>
+      </button>
+    </div>
+
+    <div class="visor__stage">
+      <img class="visor__foto is-activa" id="visorFotoA" alt="" decoding="async" />
+      <img class="visor__foto" id="visorFotoB" alt="" aria-hidden="true" decoding="async" />
+      <button class="visor__nav visor__nav--prev" type="button" id="btnAnterior" aria-label="Anterior">
+        <svg width="11" height="18" viewBox="0 0 11 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 1L2 9l7 8"></path></svg>
+      </button>
+      <button class="visor__nav visor__nav--next" type="button" id="btnSiguiente" aria-label="Siguiente">
+        <svg width="11" height="18" viewBox="0 0 11 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 1l7 8-7 8"></path></svg>
+      </button>
+      <span class="visor__contador" id="visorContador"></span>
+    </div>
+
+    <div class="visor__tiras" id="visorTiras"></div>
+  </div>
+</dialog>
+
+<script>
+  import type { ImagenVisor } from './presentacion'
+
+  const porId = <T extends HTMLElement>(id: string) => document.getElementById(id) as T
+
+  const galerias = JSON.parse(porId('visorDatos').textContent ?? '[]') as ImagenVisor[][]
+  const visor = porId<HTMLDialogElement>('visor')
+  const visorTitulo = porId('visorTitulo')
+  const visorContador = porId('visorContador')
+  const visorTiras = porId('visorTiras')
+  const capas = [porId<HTMLImageElement>('visorFotoA'), porId<HTMLImageElement>('visorFotoB')] as const
+  const panel = visor.querySelector('.visor__panel') as HTMLElement
+
+  let items: ImagenVisor[] = []
+  let idx = 0
+  let activa: 0 | 1 = 0
+
+  function abrir(galeria: ImagenVisor[], i: number) {
+    items = galeria
+    idx = i
+    visor.classList.toggle('visor--unica', items.length <= 1)
+    document.body.style.overflow = 'hidden'
+    pintarTiras()
+
+    /* Arranca con el tamaño que la tarjeta ya dejó en caché: el visor abre
+       con imagen desde el primer cuadro y la completa entra en el fundido. */
+    const actual = items[idx]
+    const previa = capas[activa]
+    if (actual) {
+      previa.src = actual.previa
+      previa.alt = actual.etiqueta
+    }
+    previa.classList.add('is-activa')
+
+    visor.showModal()
+    pintar()
+  }
+
+  function cerrar() {
+    if (visor.classList.contains('is-closing')) return
+    visor.classList.add('is-closing')
+
+    /* La propiedad `overlay` es solo Chrome, así que el cierre se espera a mano.
+       El temporizador cubre el caso en que transitionend no llegue a dispararse. */
+    let hecho = false
+    const unaVez = (e?: Event) => {
+      if (e && e.target !== panel) return
+      if (hecho) return
+      hecho = true
+      panel.removeEventListener('transitionend', unaVez)
+      visor.close()
+      visor.classList.remove('is-closing')
+      document.body.style.overflow = ''
+    }
+    panel.addEventListener('transitionend', unaVez)
+    setTimeout(unaVez, 450)
+  }
+
+  function mover(d: number) {
+    const n = items.length || 1
+    idx = (idx + d + n) % n
+    pintar()
+  }
+
+  function pintarTiras() {
+    visorTiras.replaceChildren(
+      ...items.map((it, i) => {
+        const b = document.createElement('button')
+        b.type = 'button'
+        b.title = it.etiqueta
+        b.setAttribute('aria-label', it.etiqueta)
+        b.style.backgroundImage = `url("${it.url160}")`
+        b.addEventListener('click', () => {
+          idx = i
+          pintar()
+        })
+        return b
+      }),
+    )
+  }
+
+  function pintar() {
+    const actual = items[idx]
+    if (!actual) return
+
+    const entrante = capas[activa === 0 ? 1 : 0]
+    const saliente = capas[activa]
+
+    entrante.src = actual.url1600
+    entrante.alt = actual.etiqueta
+
+    const aplicar = () => {
+      saliente.classList.remove('is-activa')
+      saliente.setAttribute('aria-hidden', 'true')
+      saliente.alt = ''
+      entrante.classList.add('is-activa')
+      entrante.removeAttribute('aria-hidden')
+      activa = activa === 0 ? 1 : 0
+      precargarVecinas()
+    }
+    entrante.decode().then(aplicar, aplicar)
+
+    visorTitulo.textContent = actual.etiqueta
+    visorContador.textContent = `${idx + 1} / ${items.length}`
+    Array.from(visorTiras.children).forEach((b, i) => {
+      b.setAttribute('aria-current', i === idx ? 'true' : 'false')
+    })
+  }
+
+  /* Precarga las vecinas para que el fundido no tenga que esperar la red.
+     Se dispara con el visor ya abierto, así que no compite con la portada. */
+  function precargarVecinas() {
+    if (items.length < 2) return
+    for (const d of [-1, 1]) {
+      const vecina = items[(idx + d + items.length) % items.length]
+      if (!vecina) continue
+      const pre = new Image()
+      pre.fetchPriority = 'low'
+      pre.src = vecina.url1600
+    }
+  }
+
+  /* ---------- Controles ---------- */
+
+  document.addEventListener('click', (e) => {
+    const disparador = (e.target as Element).closest<HTMLElement>('[data-visor-producto]')
+    if (!disparador) return
+    const galeria = galerias[Number(disparador.dataset.visorProducto)]
+    if (galeria?.length) abrir(galeria, Number(disparador.dataset.visorImagen))
+  })
+
+  visor.addEventListener('click', (e) => {
+    if (e.target === visor) cerrar()
+  })
+
+  visor.addEventListener('cancel', (e) => {
+    e.preventDefault() /* Esc: cerramos con la animación, no de golpe */
+    cerrar()
+  })
+
+  visor.querySelector('[data-cerrar]')?.addEventListener('click', cerrar)
+  porId('btnAnterior').addEventListener('click', () => mover(-1))
+  porId('btnSiguiente').addEventListener('click', () => mover(1))
+
+  visor.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') mover(1)
+    if (e.key === 'ArrowLeft') mover(-1)
+  })
+</script>
