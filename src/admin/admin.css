@@ -1,0 +1,291 @@
+/* Estilos del admin (F4-D5): tokens, fuentes, barra, botones y campos portados de `admin/admin.css` del
+   prototipo. La fase 5 suma el patrón de listados y formularios sobre esta base. */
+
+/* ---------- Fuentes (mismos archivos que el catálogo público) ---------- */
+
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('/assets/fonts/playfair-latin-var.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: Inter;
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('/assets/fonts/inter-latin-var.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* ---------- Tokens ---------- */
+
+:root {
+  --crema: #f7f2eb;
+  --papel: #fcfaf6;
+  --crema-2: #f2eadf;
+  --arena: #e4d5c1;
+  --madera: #6b4c2a;
+  --madera-oscura: #4a331e;
+  --cacao: #3b2a1a;
+  --tinta: #2c1f0e;
+  --texto-suave: #5c4b36;
+  --texto-tenue: #8a7a66;
+  --dorado: #b79e7f;
+
+  --verde: #3e5030;
+  --verde-suave: #e1e8d7;
+  --ambar: #a15f1f;
+  --ambar-suave: #f3e2c7;
+  --terracota: #8b3a2b;
+  --terracota-suave: #f1dad3;
+
+  --t-rapida: 140ms;
+  --t-media: 240ms;
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+* {
+  box-sizing: border-box;
+}
+[hidden] {
+  /* biome-ignore lint/complexity/noImportantStyles: `hidden` tiene que ganarle a cualquier `display` de clase */
+  display: none !important;
+}
+
+body {
+  margin: 0;
+  background: var(--crema);
+  color: var(--tinta);
+  font-family: Inter, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+:where(button, a, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--madera-oscura);
+  outline-offset: 2px;
+  border-radius: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    /* biome-ignore lint/complexity/noImportantStyles: anula cualquier animación */
+    animation-duration: 0.01ms !important;
+    /* biome-ignore lint/complexity/noImportantStyles: anula cualquier transición */
+    transition-duration: 0.01ms !important;
+  }
+}
+
+a {
+  color: var(--madera);
+}
+
+/* ---------- Cabecera del panel ---------- */
+
+.panel__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 18px clamp(16px, 4vw, 40px);
+  background: linear-gradient(180deg, var(--madera-oscura) 0%, var(--cacao) 100%);
+  color: var(--crema);
+}
+
+.panel__marca {
+  margin: 0;
+  font-family: 'Playfair Display', serif;
+  font-weight: 500;
+  font-size: 20px;
+  letter-spacing: -0.01em;
+}
+
+.panel__marca a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.panel__marca span {
+  color: var(--dorado);
+  font-style: italic;
+}
+
+.panel__acciones {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.panel__integrante {
+  font-size: 14px;
+  color: var(--arena);
+}
+
+.panel__contenido {
+  padding: clamp(20px, 4vw, 40px) clamp(16px, 4vw, 40px);
+}
+
+/* ---------- Botones ---------- */
+
+.btn {
+  appearance: none;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  padding: 9px 16px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color var(--t-rapida) var(--ease),
+    border-color var(--t-rapida) var(--ease),
+    color var(--t-rapida) var(--ease),
+    opacity var(--t-rapida) var(--ease);
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.btn--primario {
+  background: var(--dorado);
+  color: var(--cacao);
+}
+.btn--primario:hover:not(:disabled) {
+  background: #c7ae8c;
+}
+
+.btn--secundario {
+  background: transparent;
+  border-color: var(--madera);
+  color: var(--madera);
+}
+.btn--secundario:hover:not(:disabled) {
+  background: var(--crema-2);
+}
+
+.btn--fantasma {
+  background: transparent;
+  border-color: rgba(247, 242, 235, 0.35);
+  color: var(--crema);
+}
+.btn--fantasma:hover:not(:disabled) {
+  background: rgba(247, 242, 235, 0.1);
+}
+
+/* ---------- Campos ---------- */
+
+.campo {
+  display: grid;
+  gap: 6px;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+.campo label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--cacao);
+}
+.campo__ayuda {
+  margin: 0;
+  font-size: 12px;
+  color: var(--texto-tenue);
+}
+.campo__error {
+  margin: 0;
+  font-size: 12px;
+  color: var(--terracota);
+}
+
+input[type='text'],
+input[type='email'],
+input[type='password'] {
+  font: inherit;
+  font-size: 14px;
+  padding: 9px 11px;
+  border: 1px solid var(--arena);
+  border-radius: 6px;
+  background: var(--papel);
+  color: var(--tinta);
+  width: 100%;
+}
+input:focus {
+  border-color: var(--madera);
+}
+input[aria-invalid='true'] {
+  border-color: var(--terracota);
+}
+
+/* ---------- Acceso (ingresar y restablecer) ---------- */
+
+.acceso {
+  max-width: 380px;
+  margin: clamp(24px, 8vh, 80px) auto 0;
+  padding: 28px clamp(20px, 5vw, 32px);
+  display: grid;
+  gap: 18px;
+  background: var(--papel);
+  border: 1px solid var(--arena);
+  border-radius: 12px;
+}
+
+.acceso__titulo {
+  margin: 0;
+  font-family: 'Playfair Display', serif;
+  font-weight: 500;
+  font-size: 24px;
+  color: var(--cacao);
+}
+
+.acceso__marca {
+  margin: 0;
+  font-size: 13px;
+  color: var(--texto-tenue);
+}
+
+.acceso form {
+  display: grid;
+  gap: 16px;
+}
+
+.acceso__pie {
+  margin: 0;
+  font-size: 13px;
+  color: var(--texto-suave);
+}
+
+/* ---------- Avisos ---------- */
+
+.aviso {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 7px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.aviso--error {
+  background: var(--terracota-suave);
+  color: var(--terracota);
+}
+.aviso--ok {
+  background: var(--verde-suave);
+  color: var(--verde);
+}
+
+.cargando {
+  color: var(--texto-tenue);
+  font-size: 14px;
+}

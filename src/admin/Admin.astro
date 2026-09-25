@@ -1,0 +1,76 @@
+---
+// Layout del admin (F4-D5). Con `protegida`, muestra la barra con el integrante y "Cerrar sesión";
+// la isla de la página espera la sesión con `exigirSesion()` antes de mostrar su contenido (F4-D3).
+import './admin.css'
+
+interface Props {
+  titulo: string
+  protegida?: boolean
+}
+
+const { titulo, protegida = true } = Astro.props
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>{titulo} · Panel de El Cauquén</title>
+    <link rel="icon" href="/assets/logo-160.webp" />
+  </head>
+  <body>
+    {
+      protegida && (
+        <header class="panel__bar" id="barra">
+          <p class="panel__marca">
+            <a href="/admin">
+              El Cauquén <span>· Panel</span>
+            </a>
+          </p>
+          <div class="panel__acciones" id="barraSesion" hidden>
+            <span class="panel__integrante" id="barraIntegrante" />
+            <button type="button" class="btn btn--fantasma" id="btnCerrarSesion">
+              Cerrar sesión
+            </button>
+          </div>
+        </header>
+      )
+    }
+    <main class="panel__contenido">
+      <slot />
+    </main>
+  </body>
+</html>
+
+<script>
+  import { auth } from '../api'
+  import { mensajeDeError } from './mensajes'
+  import { obtenerSesion } from './sesion'
+
+  const barra = document.getElementById('barra')
+  if (barra) {
+    // Sin sesión o con error, la barra queda sin integrante: el guard y los errores son de la isla.
+    obtenerSesion()
+      .then((integrante) => {
+        if (!integrante) return
+        // El rol queda en la barra para que la fase 9 muestre "Integrantes" solo al owner (F4-D3).
+        barra.dataset['rol'] = integrante.rol
+        document.getElementById('barraIntegrante')!.textContent = integrante.nombre
+        document.getElementById('barraSesion')!.hidden = false
+      })
+      .catch(() => {})
+    const boton = document.getElementById('btnCerrarSesion') as HTMLButtonElement
+    boton.addEventListener('click', async () => {
+      boton.disabled = true
+      try {
+        await auth.cerrarSesion()
+        location.assign('/admin/ingresar')
+      } catch (error) {
+        boton.disabled = false
+        alert(mensajeDeError(error))
+      }
+    })
+  }
+</script>

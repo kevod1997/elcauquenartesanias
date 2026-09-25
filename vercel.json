@@ -3,6 +3,52 @@
   "framework": "astro",
   "cleanUrls": true,
   "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "admin.elcauquenartesanias.com.ar"
+        }
+      ],
+      "destination": "/admin",
+      "permanent": false
+    },
+    {
+      "source": "/:ruta((?!admin(?:/|$)|_astro/|assets/).*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "admin.elcauquenartesanias.com.ar"
+        }
+      ],
+      "destination": "/admin/:ruta",
+      "permanent": false
+    },
+    {
+      "source": "/admin",
+      "missing": [
+        {
+          "type": "host",
+          "value": "admin.elcauquenartesanias.com.ar"
+        }
+      ],
+      "destination": "https://admin.elcauquenartesanias.com.ar/admin",
+      "permanent": false
+    },
+    {
+      "source": "/admin/:ruta*",
+      "missing": [
+        {
+          "type": "host",
+          "value": "admin.elcauquenartesanias.com.ar"
+        }
+      ],
+      "destination": "https://admin.elcauquenartesanias.com.ar/admin/:ruta*",
+      "permanent": false
+    }
+  ],
   "headers": [
     {
       "source": "/assets/(.*)",

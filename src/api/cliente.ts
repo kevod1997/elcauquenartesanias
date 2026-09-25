@@ -7,7 +7,20 @@ export type CodigoError = components['schemas']['Error']['error']['codigo']
  * Códigos propios del front, fuera del contrato: `SIN_CONEXION` cuando `fetch` falla (red, CORS, abort) y
  * `RESPUESTA_INESPERADA` cuando la respuesta de error no tiene la forma `{ error: { codigo, mensaje } }`.
  */
-export type CodigoErrorCliente = CodigoError | 'SIN_CONEXION' | 'RESPUESTA_INESPERADA'
+export type CodigoErrorCliente = CodigoError | CodigoErrorAuth | 'SIN_CONEXION' | 'RESPUESTA_INESPERADA'
+
+/**
+ * Códigos de `/api/auth/*` (Better Auth, fuera de `openapi.json`) que traduce `./auth`, más el propio
+ * `DEMASIADOS_INTENTOS` para su `429` sin `code` (F4-D2).
+ */
+export type CodigoErrorAuth =
+  | 'INVALID_EMAIL_OR_PASSWORD'
+  | 'INVALID_EMAIL'
+  | 'INTEGRANTE_DESACTIVADO'
+  | 'INVALID_TOKEN'
+  | 'PASSWORD_TOO_SHORT'
+  | 'PASSWORD_TOO_LONG'
+  | 'DEMASIADOS_INTENTOS'
 
 /** Error traducido de la API. `status` es 0 si no hubo respuesta. */
 export class ErrorApi extends Error {

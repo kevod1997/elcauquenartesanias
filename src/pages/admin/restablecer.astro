@@ -1,0 +1,8 @@
+---
+import Admin from '../../admin/Admin.astro'
+import Restablecer from '../../admin/Restablecer.tsx'
+---
+
+<Admin titulo="Restablecer contraseña" protegida={false}>
+  <Restablecer client:only="react" />
+</Admin>

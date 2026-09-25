@@ -9,7 +9,7 @@ tomadas (y su porqué) y las validaciones ejecutadas.
 | 1. Decisiones y esquema | ✅ Cerrada (2026-09-25) | [fase-1.md](./fase-1.md) |
 | 2. Capa de API tipada | ✅ Cerrada (2026-09-25) | [fase-2.md](./fase-2.md) |
 | 3. Sitio público | ✅ Cerrada (2026-09-25) | [fase-3.md](./fase-3.md) |
-| 4. Login y sesión | ⏳ Pendiente (preparada el 2026-09-25) | [fase-4.md](./fase-4.md) |
+| 4. Login y sesión | 🔎 Implementada (2026-09-25) | [fase-4.md](./fase-4.md) |
 | 5. Categorías y tipos de medida | ⏳ Pendiente | |
 | 6. Productos con medidas | ⏳ Pendiente | |
 | 7. Galería e imágenes | ⏳ Pendiente | |
@@ -20,10 +20,9 @@ tomadas (y su porqué) y las validaciones ejecutadas.
 "🔎 Implementada" es una fase con el código commiteado a la que le quedan verificaciones del
 usuario; cuenta como dependencia cumplida.
 
-**Siguiente:** implementar la fase 4 (login y sesión) con las decisiones F4-D1 a F4-D6 del PRD,
-ya cerradas; el tipado de `/api/auth/*` (D3) es F4-D2. Para usar la API, leé los tipos y las
-decisiones de [fase-2.md](./fase-2.md). Las fases 4 a 9 pueden correr sin supervisión
-con el loop de [§6.4 del PRD](../PRD.md#64-loop-sin-supervisión).
+**Siguiente:** preparar la fase 5 (categorías y tipos de medida) con el prompt 6.1 del PRD. Leé la
+fase 5 del PRD y [fase-4.md](./fase-4.md) (layout, `sesion.ts` con `exigirSesion` y
+`redirigirSiNoAutenticado`, `mensajes.ts`); para la API, [fase-2.md](./fase-2.md).
 
 ## Decisiones para el usuario
 
@@ -36,6 +35,27 @@ Pruebas que el agente no puede ejecutar (visuales, en producción o tras un push
 fase, con los pasos exactos. Al confirmar todas las de una fase, se borra su grupo y la fase pasa
 a "✅ Cerrada".
 
+### Fase 4
+
+Después del push a `main` y del paso "Hacer (usuario)" de la fase 4 (dominio `admin.*` en Vercel,
+CNAME "DNS only" en Cloudflare, `ADMIN_ORIGIN` y `RESET_PASSWORD_URL` en Railway):
+
+1. Redirects (F4-D1): `https://admin.elcauquenartesanias.com.ar/` lleva a `/admin`;
+   `/restablecer?token=abc` lleva a `/admin/restablecer?token=abc`;
+   `https://elcauquenartesanias.com.ar/admin/ingresar` lleva a `admin.*/admin/ingresar`; `/` y
+   `/catalogo-nuevo` del dominio principal siguen igual. Si ninguno redirige, Vercel no tomó los
+   `redirects` de `vercel.json` (ver desvíos de [fase-4.md](./fase-4.md)).
+2. Guard: en una ventana privada, `admin.*/admin` redirige a `/admin/ingresar?volver=%2Fadmin`.
+3. Login: con las credenciales del owner real, entra y vuelve a `/admin` con su nombre en la barra.
+   Una contraseña mala muestra "El email o la contraseña no son correctos." sobre el botón.
+4. Con sesión, abrir `/admin/ingresar` lleva directo a `/admin`.
+5. "Cerrar sesión" lleva a `/admin/ingresar`, y `/admin` vuelve a pedir login.
+6. Reset: en `/admin/restablecer`, pedir el enlace con el email del owner; llega el mail, el enlace
+   abre `admin.*/admin/restablecer?token=…`. Probar dos contraseñas distintas (error debajo del
+   segundo campo, con foco) y después una válida; el aviso de éxito enlaza al login y la contraseña
+   nueva funciona. Volver a abrir el mismo enlace y enviar: muestra "El enlace venció o ya se usó".
+7. Teclado: con Tab se recorren los campos y botones con el foco visible.
+
 ## Pendientes abiertos
 
 Agrupados por la fase que los resuelve. Al resolver uno, se borra de acá.
@@ -46,8 +66,12 @@ Agrupados por la fase que los resuelve. Al resolver uno, se borra de acá.
 
 ### Fase 9
 
-- Mostrar "Integrantes" en la barra solo al `owner`, con el `rol` que el layout toma de
-  `GET /admin/sesion` (F4-D3). El editor activa su cuenta en `/admin/restablecer?token=…` (F4-D4).
+- Mostrar "Integrantes" en la barra solo al `owner`, con el `rol` que el layout deja en
+  `data-rol` de `#barra` (F4-D3). El editor activa su cuenta en `/admin/restablecer?token=…` (F4-D4).
+
+### Fase 5
+
+- Reemplazar el `alert` de "Cerrar sesión" fallido por el patrón de avisos que fije la fase.
 
 ### Mejoras opcionales (sin fase)
 

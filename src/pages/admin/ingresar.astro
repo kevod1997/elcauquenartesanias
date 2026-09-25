@@ -1,0 +1,8 @@
+---
+import Admin from '../../admin/Admin.astro'
+import Ingresar from '../../admin/Ingresar.tsx'
+---
+
+<Admin titulo="Iniciar sesión" protegida={false}>
+  <Ingresar client:only="react" />
+</Admin>
