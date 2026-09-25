@@ -3,7 +3,8 @@
 //   pnpm api:fixture --vacio    { productos: [] }
 //   pnpm api:fixture --error    500 con la forma de error del contrato
 // Sirve también los .webp de public/assets/ a los que apuntan las URLs de la galería. Puerto: PORT o 4400.
-// Después: PUBLIC_API_URL=http://localhost:4400 pnpm dev (o build + preview) y abrí /catalogo-nuevo.
+// Después: PUBLIC_API_URL=http://localhost:4400 pnpm dev y compará /catalogo-nuevo con /index.html (el sitio viejo;
+// en dev, / da 404).
 import { readFile } from 'node:fs/promises'
 import { createServer } from 'node:http'
 import { productos } from './productos.ts'

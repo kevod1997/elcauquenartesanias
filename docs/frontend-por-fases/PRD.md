@@ -318,7 +318,7 @@ viejo sigue en `/`.
 
 ### Fase 10 — Limpieza y cierre
 
-**Construir:** pasar el catálogo de `/catalogo-nuevo` a `/`, sin `noindex`, y borrar el sitio viejo de `public/` (D4); quitar el prototipo sin uso; revisar `vercel.json` y `.vercelignore`; documentar la operación.
+**Construir:** pasar el catálogo de `/catalogo-nuevo` a `/`, sin `noindex`, y borrar el sitio viejo de `public/` (D4): `index.html`, `main.js` y `styles.css`. `public/assets/` queda, porque lo usan las fuentes y el logo de `src/catalogo/` y las imágenes de `pnpm api:fixture`; quitar el prototipo sin uso; revisar `vercel.json` y `.vercelignore`; documentar la operación.
 
 **Hacer (usuario):** confirmar que el catálogo en producción ya está cargado antes del push del cambio de `/`.
 
@@ -353,8 +353,6 @@ Prepará la fase N de docs/frontend-por-fases/PRD.md, sin implementar código.
    Para las preguntas técnicas que aún
    requieran fuentes externas, usá /research o Context7 con preguntas concretas,
    alternativas y versiones; verificá en fuentes primarias lo que sustenta cada decisión.
-   Si la documentación no cubre un detalle de una dependencia, leé su código en
-   node_modules (es la versión instalada) y citá el archivo.
 3. Cerrá las decisiones técnicas con esa evidencia. Si una elección cambia una
    regla de producto, el contrato del backend o el alcance de la fase, presentá
    las alternativas y tu recomendación al usuario; esperá su decisión.
