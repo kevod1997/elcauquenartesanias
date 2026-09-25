@@ -21,10 +21,10 @@ decisiones técnicas y las validaciones ejecutadas.
 "🔎 Implementada" es una fase con el código commiteado a la que le quedan verificaciones del
 usuario; cuenta como dependencia cumplida.
 
-**Siguiente:** preparar la fase 9 (integrantes, depende solo de la 4) con el prompt 6.1 de
-[prompts.md](../prompts.md). Leé [fase-9.md](./fase-9.md), el pendiente de "Fase 9" más abajo,
-`src/admin/Categorias.tsx` (el patrón de listado de F5-D2 a F5-D6) y `src/admin/Admin.astro` (la
-barra con `data-rol`). La fase 10 espera el cierre de la 9.
+**Siguiente:** implementar la fase 9 (integrantes) según F9-D1 a F9-D7 de [fase-9.md](./fase-9.md),
+con `src/admin/Categorias.tsx` como patrón de listado y `src/admin/Admin.astro` para la barra. Su
+cierre en `admin.*` necesita el email de un editor real que da el usuario (F9-D7). La fase 10 espera
+el cierre de la 9.
 
 ## Decisiones para el usuario
 
@@ -43,14 +43,15 @@ Ninguna.
 
 Agrupados por la fase que los resuelve. Al resolver uno, se borra de acá.
 
-### Fase 9
-
-- Mostrar "Integrantes" en la barra solo al `owner`, con el `rol` que el layout deja en
-  `data-rol` de `#barra` (F4-D3). El editor activa su cuenta en `/admin/restablecer?token=…` (F4-D4).
-
 ### Mejoras opcionales (sin fase)
 
 - Ancho y alto de cada derivado en la galería pública (requiere cambio en el backend).
+- Glosario del backend (`CONTEXT.md`, sección Acceso): sumar **Desactivado**, "integrante que ya no
+  puede iniciar sesión ni recibir correos de contraseña; no se reactiva y conserva su email"
+  (_Evitar_: dado de baja, borrado, inactivo). El contrato dice que el correo "activa" a un editor
+  recién creado, que ya tiene `activo: true`; conviene "define su contraseña" (F9-D4).
+- Reactivar un editor desactivado y saber si un editor ya definió su contraseña, para mostrarlo en
+  `/admin/integrantes` (requiere cambio en el backend; hoy F9-D3 muestra solo activo o desactivado).
 - Corregir los textos del sitio actual que `/catalogo-nuevo` copia tal cual: "Piezas unicas"
   (sin tilde) en el hero y la `description`, y "hechas a mano en Hechas a mano" en la `description`.
 - Mostrar "Diámetro" en lugar de "Ø" en las medidas del sitio actual (`public/main.js`) y del fixture
