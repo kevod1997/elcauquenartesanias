@@ -29,9 +29,8 @@ Agrupados por la fase que los resuelve. Al resolver uno, se borra de acá.
 - Borrar los docs sin versionar: `docs/contrato-api-borrador.md`, `docs/Logica Negocio El Cauquen.md`,
   `docs/research/hono-better-auth-postgres.md` (copias del backend) y `docs/handoff-backend.md`
   (ya volcado al PRD y a `AGENTS.md`; conservarlo es opción del usuario).
-- Push a `main` y confirmar que el deploy de producción en Vercel termina con el preset Astro.
-- Verificar en producción que `/` se ve igual y los `Cache-Control` de `/assets/fonts/*` y
-  `/assets/*` (comandos en [fase-1.md](./fase-1.md#pendientes-del-usuario)).
+- Push a `main` del arreglo de `.vercelignore` (los assets daban 404) y confirmar que se ven las
+  fotos, el logo y las fuentes. Los `Cache-Control` ya se verificaron en producción.
 
 ### Fase 7
 

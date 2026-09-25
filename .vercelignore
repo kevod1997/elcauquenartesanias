@@ -1,9 +1,10 @@
+# Rutas ancladas a la raíz con "/": sin ancla, "assets/" excluiría también public/assets/
 # Los JPEG originales quedan en el repo como fuente, fuera de public/: el sitio sirve solo los .webp
-assets/
+/assets/
 
 # Prototipo del admin, notas y configuración de herramientas: no van al build
-admin/
-docs/
-.agents/
-.claude/
-skills-lock.json
+/admin/
+/docs/
+/.agents/
+/.claude/
+/skills-lock.json

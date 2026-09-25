@@ -35,13 +35,12 @@
 ## Desvíos
 
 - **Tres docs sin versionar quedan para el usuario:** `docs/contrato-api-borrador.md` (el PRD pide borrarlo), `docs/Logica Negocio El Cauquen.md` y `docs/research/hono-better-auth-postgres.md` (copias idénticas de las del backend). El entorno bloqueó el borrado de archivos sin versionar. `docs/handoff-backend.md` también queda sin versionar: su contenido ya está en el PRD, en este `AGENTS.md` y en el README del backend.
-- **Headers de `vercel.json` con el adapter:** la documentación de Vercel no confirma explícitamente que `headers` y `cleanUrls` de `vercel.json` se apliquen sobre la salida de la Build Output API del adapter. Se verifica después del deploy (paso 3 de pendientes). Si no se aplican, usar la opción `staticHeaders` del adapter o reglas en `astro.config.ts`.
+- **Assets en 404 tras el primer deploy (`71658f3`):** `.vercelignore` tenía `assets/` sin ancla, que con la sintaxis de gitignore excluye también `public/assets/`; el sitio salió sin fotos, logo ni fuentes. Se anclaron todas las rutas con `/` (`/assets/`). Comprobado con `git check-ignore --no-index`: con el patrón viejo `public/assets/logo.webp` queda excluido; con el nuevo, incluido, y `assets/logo.jpg` sigue excluido.
+- **Headers de `vercel.json` con el adapter:** se aplican sobre la salida de la Build Output API. Verificado en producción tras `71658f3`: `/assets/fonts/inter-latin-var.woff2` devuelve `max-age=31536000, immutable` y `/assets/logo.webp`, `max-age=86400, stale-while-revalidate=2592000` (en 404, antes del arreglo de `.vercelignore`).
 
 ## Pendientes del usuario
 
 Cierran la fase; ver la lista ordenada en [README](./README.md).
 
 1. Borrar los docs sin versionar (o decidir conservar `docs/handoff-backend.md`).
-2. Push a `main` y confirmar que el deploy de producción en Vercel usa el preset Astro y termina bien.
-3. Verificar producción: `https://elcauquenartesanias.com.ar/` se ve igual que antes, y
-   `curl -sI https://elcauquenartesanias.com.ar/assets/fonts/inter-latin-var.woff2` devuelve `Cache-Control: public, max-age=31536000, immutable` y `curl -sI https://elcauquenartesanias.com.ar/assets/logo.webp` devuelve `public, max-age=86400, stale-while-revalidate=2592000`.
+2. Push a `main` del arreglo de `.vercelignore`. El agente verifica después que `/assets/*` responda 200 en producción y el usuario confirma que se ven las fotos, el logo y las fuentes.
