@@ -32,10 +32,6 @@ para el formulario de producto). Depende de la 10, cerrada.
 Lo que un agente no pudo decidir sin cambiar el producto, el contrato o el alcance. Al decidir
 una, se borra de acá.
 
-- ¿Entran en la fase 11 la página por producto (`GET /api/productos/:id`) y el filtro por categoría
-  (`GET /api/categorias`) del catálogo público? Quedaron fuera de la fase 3 por F3-D1; hasta decidir,
-  siguen en "Mejoras opcionales".
-
 ## Verificaciones del usuario
 
 Pruebas que el agente no puede ejecutar (visuales, en producción o tras un push). Los pasos exactos
@@ -55,17 +51,11 @@ Agrupados por la fase que los resuelve. Al resolver uno, se borra de acá.
 
 ### Mejoras opcionales (sin fase)
 
-Requieren cambios en el backend, fuera del alcance del front (PRD §2):
-
-- Ancho y alto de cada derivado en la galería pública.
-- Glosario del backend (`CONTEXT.md`, sección Acceso): sumar **Desactivado**, "integrante que ya no
-  puede iniciar sesión ni recibir correos de contraseña; no se reactiva y conserva su email"
-  (_Evitar_: dado de baja, borrado, inactivo). El contrato dice que el correo "activa" a un editor
-  recién creado, que ya tiene `activo: true`; conviene "define su contraseña" (F9-D4).
-- Reactivar un editor desactivado y saber si un editor ya definió su contraseña, para mostrarlo en
-  `/admin/integrantes` (hoy F9-D3 muestra solo activo o desactivado).
-
-Solo front, pendientes de decisión del usuario (ver "Decisiones para el usuario"):
-
+- Requieren cambios en el backend (fuera del alcance del front, PRD §2): ancho y alto de cada
+  derivado, "Desactivado" y "define su contraseña" en el glosario, y reactivar un editor y saber si
+  definió su contraseña. Se retoman desde
+  [`../elcauquen-backend/docs/handoff-frontend-2026-09-25.md`](../../../../elcauquen-backend/docs/handoff-frontend-2026-09-25.md);
+  al desplegarse, el front corre `pnpm gen:api` y las implementa en una fase nueva.
 - Página por producto con `GET /api/productos/:id` y filtro por categoría con `GET /api/categorias`
-  en el catálogo público: fuera de la fase 3 por decisión del usuario (F3-D1).
+  en el catálogo público: fuera de la fase 3 (F3-D1) y de la fase 11, por decisión del usuario
+  (2026-09-25).
