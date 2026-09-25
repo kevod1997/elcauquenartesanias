@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel · El Cauquén</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preload" href="../assets/fonts/playfair-latin-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/inter-latin-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<header class="panel__bar">
+  <p class="panel__marca">El Cauquén <span>· Panel</span></p>
+  <div class="panel__acciones">
+    <button type="button" class="btn btn--fantasma" id="btnGuardarOrden" disabled>Guardar orden</button>
+    <button type="button" class="btn btn--fantasma" id="btnConfiguracion">Categorías y medidas</button>
+    <button type="button" class="btn btn--primario" id="btnNuevo">Nuevo producto</button>
+  </div>
+</header>
+
+<main class="ledger" aria-label="Listado de productos">
+  <div class="ledger__cabecera">
+    <span>Orden</span>
+    <span></span>
+    <span>Producto</span>
+    <span>Precio</span>
+    <span>Estado</span>
+    <span></span>
+  </div>
+  <div id="filas"></div>
+  <p class="ledger__vacio" id="vacio" hidden>
+    Todavía no cargaste ningún producto.
+    <button type="button" id="btnVacioNuevo">Sumá el primero.</button>
+  </p>
+</main>
+
+<dialog class="modal" id="modalProducto" aria-labelledby="modalNombreLabel">
+  <div class="modal__head">
+    <label id="modalNombreLabel" for="fNombre" style="position:absolute;left:-9999px;">Nombre del producto</label>
+    <input class="modal__nombre" id="fNombre" type="text" placeholder="Nombre del producto" maxlength="80" autocomplete="off">
+    <button type="button" class="modal__cerrar" data-cerrar aria-label="Cerrar">
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3 3l11 11M14 3L3 14"></path></svg>
+    </button>
+  </div>
+
+  <p class="modal__banner" id="modalError" hidden></p>
+
+  <div class="modal__cuerpo">
+    <section class="modal__seccion">
+      <div class="campo">
+        <label for="fPrecio">Precio</label>
+        <div class="campo__precio">
+          <span>$</span>
+          <input id="fPrecio" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+        </div>
+      </div>
+
+      <fieldset class="campo">
+        <legend>Categoría</legend>
+        <select id="selectCategoria" aria-label="Categoría del producto"></select>
+        <div class="chips__nueva" id="formNuevaCategoria" hidden>
+          <input id="fNuevaCategoria" type="text" placeholder="Nombre de categoría" aria-label="Nombre de la nueva categoría" maxlength="40">
+          <button type="button" class="btn btn--secundario" id="btnConfirmarCategoria">Crear</button>
+          <button type="button" class="btn btn--fantasma" id="btnCancelarCategoria">Cancelar</button>
+        </div>
+        <button type="button" class="link-config" id="linkGestionarCategorias">Gestionar categorías</button>
+      </fieldset>
+    </section>
+
+    <section class="modal__seccion">
+      <div class="campo">
+        <label for="fDescripcion">Descripción</label>
+        <textarea id="fDescripcion" rows="3" maxlength="400" placeholder="Materiales, terminación, uso..."></textarea>
+      </div>
+
+      <fieldset class="campo">
+        <legend>Medidas</legend>
+        <p class="campo__ayuda">Elegí el tipo de medida y cargá el valor.</p>
+        <div class="medidas-input__lista" id="medidas"></div>
+        <div class="medidas-input__nueva">
+          <select id="selectTipoMedida" class="medidas-input__select" aria-label="Tipo de medida a agregar"></select>
+          <div class="campo__valor" id="valorMedidaWrap">
+            <input id="fNuevaMedida" type="text" placeholder="Ej: 13" aria-label="Valor de la medida" maxlength="30">
+            <span id="medidaUnidadSufijo" hidden></span>
+          </div>
+          <button type="button" class="btn btn--secundario" id="btnAgregarMedida">Agregar</button>
+        </div>
+        <div class="chips__nueva" id="formNuevoTipoMedida" hidden>
+          <input id="fNuevoTipoMedida" type="text" placeholder="Nombre del tipo (ej: Alto)" aria-label="Nombre del nuevo tipo de medida" maxlength="30">
+          <input id="fNuevoTipoMedidaUnidad" class="input--unidad" type="text" placeholder="Unidad" aria-label="Unidad del nuevo tipo de medida" maxlength="8" value="cm">
+          <button type="button" class="btn btn--secundario" id="btnConfirmarTipoMedida">Crear</button>
+          <button type="button" class="btn btn--fantasma" id="btnCancelarTipoMedida">Cancelar</button>
+        </div>
+        <button type="button" class="link-config" id="linkGestionarTiposMedida">Gestionar tipos de medida</button>
+      </fieldset>
+    </section>
+
+    <section class="modal__seccion">
+      <fieldset class="campo">
+        <legend>Galería <span id="galeriaContador" style="font-weight:400;color:var(--texto-tenue);"></span></legend>
+        <p class="campo__ayuda">La primera foto es la imagen principal. Un diseño nunca puede ser la principal.</p>
+        <div class="galeria" id="galeria"></div>
+        <input type="file" id="fArchivo" accept="image/*" aria-label="Elegir fotos para la galería" hidden multiple>
+      </fieldset>
+    </section>
+  </div>
+
+  <footer class="modal__pie">
+    <button type="button" class="btn btn--peligro" id="btnEliminarProducto" hidden>Eliminar producto</button>
+    <div class="modal__pieAcciones">
+      <button type="button" class="btn btn--fantasma" data-cerrar>Cancelar</button>
+      <button type="button" class="btn btn--secundario" id="btnGuardarBorrador">Guardar como borrador</button>
+      <button type="button" class="btn btn--primario" id="btnPublicar">Publicar</button>
+    </div>
+  </footer>
+</dialog>
+
+<dialog class="modal modal--config" id="modalConfiguracion" aria-labelledby="modalConfigTitulo">
+  <div class="modal__head">
+    <p class="modal__titulo" id="modalConfigTitulo">Categorías y medidas</p>
+    <button type="button" class="modal__cerrar" data-cerrar aria-label="Cerrar">
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3 3l11 11M14 3L3 14"></path></svg>
+    </button>
+  </div>
+
+  <div class="modal__tabs" role="tablist">
+    <button type="button" class="modal__tab" id="tabCategorias" role="tab" aria-selected="true" aria-controls="panelCategorias">Categorías</button>
+    <button type="button" class="modal__tab" id="tabTiposMedida" role="tab" aria-selected="false" aria-controls="panelTiposMedida">Tipos de medida</button>
+  </div>
+
+  <div class="modal__cuerpo">
+    <section class="modal__seccion" id="panelCategorias" role="tabpanel" aria-labelledby="tabCategorias">
+      <div class="crud-lista" id="listaCategorias"></div>
+      <p class="campo__ayuda" id="categoriasVacio" hidden>Todavía no creaste ninguna categoría.</p>
+      <div class="chips__nueva">
+        <input id="fNuevaCategoriaConfig" type="text" placeholder="Nombre de categoría" aria-label="Nombre de la nueva categoría" maxlength="40">
+        <button type="button" class="btn btn--secundario" id="btnCrearCategoriaConfig">Crear categoría</button>
+      </div>
+    </section>
+
+    <section class="modal__seccion" id="panelTiposMedida" role="tabpanel" aria-labelledby="tabTiposMedida" hidden>
+      <div class="crud-lista" id="listaTiposMedida"></div>
+      <p class="campo__ayuda" id="tiposMedidaVacio" hidden>Todavía no creaste ningún tipo de medida.</p>
+      <div class="chips__nueva">
+        <input id="fNuevoTipoMedidaConfig" type="text" placeholder="Nombre del tipo (ej: Alto)" aria-label="Nombre del nuevo tipo de medida" maxlength="30">
+        <input id="fNuevoTipoMedidaUnidadConfig" class="input--unidad" type="text" placeholder="Unidad" aria-label="Unidad del nuevo tipo de medida" maxlength="8" value="cm">
+        <button type="button" class="btn btn--secundario" id="btnCrearTipoMedidaConfig">Crear tipo</button>
+      </div>
+    </section>
+  </div>
+</dialog>
+
+<dialog class="confirmar" id="modalConfirmar" aria-labelledby="confirmarTitulo">
+  <p class="confirmar__titulo" id="confirmarTitulo"></p>
+  <p class="confirmar__detalle" id="confirmarDetalle"></p>
+  <div class="confirmar__acciones">
+    <button type="button" class="btn btn--fantasma" data-confirmar-cancelar>Cancelar</button>
+    <button type="button" class="btn btn--peligro-solido" data-confirmar-ok>Eliminar</button>
+  </div>
+</dialog>
+
+<output class="toast" id="toast" aria-live="polite"></output>
+
+<script src="admin.js"></script>
+</body>
+</html>

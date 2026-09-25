@@ -6,7 +6,7 @@ tomadas (y su porqué) y las validaciones ejecutadas.
 | Fase | Estado | Registro |
 | --- | --- | --- |
 | 0. Preparación externa | ✅ Cerrada (2026-09-24) | Pasos del usuario, sin registro de código. |
-| 1. Decisiones y esquema | ⏳ Pendiente | |
+| 1. Decisiones y esquema | 🟡 Implementada; falta confirmar el deploy | [fase-1.md](./fase-1.md) |
 | 2. Capa de API tipada | ⏳ Pendiente | |
 | 3. Sitio público | ⏳ Pendiente | |
 | 4. Login y sesión | ⏳ Pendiente | |
@@ -17,12 +17,21 @@ tomadas (y su porqué) y las validaciones ejecutadas.
 | 9. Integrantes | ⏳ Pendiente | |
 | 10. Limpieza y cierre | ⏳ Pendiente | |
 
-**Siguiente:** implementar la fase 1 (prompt 6.2); la preparación ya cerró sus decisiones D1–D5.
-Leer la definición de la fase 1 en el PRD, en especial D4 (sitio viejo en `public/`).
+**Siguiente:** cerrar la fase 1 con los pasos del usuario de abajo. Después, la fase 2 (prompt 6.2):
+leer su definición en el PRD, D3 de la fase 1 y `AGENTS.md`; la fase 2 no tiene decisiones abiertas.
 
 ## Pendientes abiertos
 
 Agrupados por la fase que los resuelve. Al resolver uno, se borra de acá.
+
+### Fase 1 (usuario, en este orden)
+
+- Borrar los docs sin versionar: `docs/contrato-api-borrador.md`, `docs/Logica Negocio El Cauquen.md`,
+  `docs/research/hono-better-auth-postgres.md` (copias del backend) y `docs/handoff-backend.md`
+  (ya volcado al PRD y a `AGENTS.md`; conservarlo es opción del usuario).
+- Push a `main` y confirmar que el deploy de producción en Vercel termina con el preset Astro.
+- Verificar en producción que `/` se ve igual y los `Cache-Control` de `/assets/fonts/*` y
+  `/assets/*` (comandos en [fase-1.md](./fase-1.md#pendientes-del-usuario)).
 
 ### Fase 7
 

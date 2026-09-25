@@ -1,0 +1,47 @@
+# Fase 1 — Decisiones y esquema
+
+**Estado:** abierta hasta que el usuario confirme el deploy de producción (ver [Pendientes](#pendientes-del-usuario)).
+**Fecha:** 2026-09-24.
+**Definición:** [PRD, fase 1](../PRD.md#fase-1--decisiones-y-esquema). Las decisiones D1–D5 ya estaban cerradas; este registro cubre la implementación.
+
+## Implementado
+
+- Proyecto Astro en la raíz: `package.json` (scripts `dev`, `build`, `preview`, `typecheck`, `lint`), `astro.config.ts` con `@astrojs/react` y `@astrojs/vercel`, `tsconfig.json` sobre `astro/tsconfigs/strictest`, `biome.json` y `pnpm-workspace.yaml`.
+- Versiones fijadas: `astro` 7.3.5, `@astrojs/react` 7.0.0, `@astrojs/vercel` 11.0.11, `react`/`react-dom` 19.3.0, `typescript` 6.0.3, `@astrojs/check` 0.9.10, `@biomejs/biome` 2.5.14.
+- Sitio viejo movido con `git mv` a `public/`: `index.html`, `main.js`, `styles.css`, los `.webp` y `assets/fonts/` (con sus licencias OFL). Los `.jpeg`/`.jpg` quedan en `assets/`.
+- `vercel.json` con `"framework": "astro"`; `.vercelignore` y `.gitignore` ajustados (`dist/`, `.astro/`, `assets/`, `admin/`).
+- `AGENTS.md` y `CLAUDE.md` (`@AGENTS.md`) del front.
+- Working tree: se versionan el prototipo (`admin/`) y su handoff, que el PRD cita como fuentes; se confirma el borrado de los handoffs del 17/09 (el handoff del prototipo dice que se borraron a propósito). El renormalizado de CRLF eliminó las marcas `M` sin cambios de contenido.
+
+## Decisiones técnicas
+
+| Decisión | Motivo |
+| --- | --- |
+| TypeScript 6.0.3, no 7 | `@astrojs/check` 0.9.10 declara `typescript: ^5 \|\| ^6` como peer. |
+| Biome como linter, con la base del backend (`lineWidth` 120, comillas simples, sin `;`) y las reglas recomendadas | Mismo estilo en los dos repos. El backend usa `preset: none`; acá se dejan las recomendadas porque no hay código previo que las incumpla. |
+| Sin páginas en `src/pages/` | `/` tiene que seguir siendo el sitio viejo (D4); cualquier página ahora sería un placeholder publicado. El build avisa `Missing pages directory` hasta la fase 3 o 4. |
+| Adapter de Vercel sin `isr` | La `expiration` se fija en la fase 3 (D5). Sin páginas `prerender = false`, la salida es estática. |
+| Orden de los headers de `/assets/*`: la regla de fuentes va última | En producción, `/assets/fonts/*` recibía `max-age=86400` porque la regla genérica, declarada después, pisaba a la de fuentes (Vercel aplica la última que coincide). |
+| `minimumReleaseAgeExclude: astro@7.3.5` en `pnpm-workspace.yaml` | pnpm 12 lo agregó solo al instalar: 7.3.5 tiene menos días que la política de antigüedad mínima. Se puede quitar cuando la versión envejezca. |
+| Lockfile compatible con pnpm 10 | Vercel instala con pnpm 9 o 10 para `lockfileVersion: 9.0` ([package managers](https://vercel.com/docs/package-managers)); pnpm 12 no está soportado. Se probó `pnpm@10 install --frozen-lockfile` y el build. |
+
+## Validaciones ejecutadas
+
+- `pnpm typecheck`: 0 errores, 0 advertencias. `pnpm lint`: sin hallazgos. `pnpm build`: completa (0 páginas; `public/` copiado a `.vercel/output/static`).
+- En una copia limpia: `npx pnpm@10 install --frozen-lockfile` (pnpm 10.34.5) y `npx pnpm@10 build` completan.
+- `pnpm preview` en `http://localhost:4321`: `/` responde 200 con el mismo `index.html`; `styles.css`, `main.js`, `logo.webp`, las fuentes y los derivados `-640.webp` responden 200; `/assets/velas.jpeg` responde 404 (quedó fuera, como pide D4).
+- Salida del build contra `HEAD`: `index.html`, `main.js`, `styles.css` y las licencias OFL son idénticos al versionado salvo el CRLF de la copia local; el resto de `dist/` coincide con `public/` (más `_astro/`, sin referencias desde el sitio). Sin diferencias visibles por construcción.
+
+## Desvíos
+
+- **Tres docs sin versionar quedan para el usuario:** `docs/contrato-api-borrador.md` (el PRD pide borrarlo), `docs/Logica Negocio El Cauquen.md` y `docs/research/hono-better-auth-postgres.md` (copias idénticas de las del backend). El entorno bloqueó el borrado de archivos sin versionar. `docs/handoff-backend.md` también queda sin versionar: su contenido ya está en el PRD, en este `AGENTS.md` y en el README del backend.
+- **Headers de `vercel.json` con el adapter:** la documentación de Vercel no confirma explícitamente que `headers` y `cleanUrls` de `vercel.json` se apliquen sobre la salida de la Build Output API del adapter. Se verifica después del deploy (paso 3 de pendientes). Si no se aplican, usar la opción `staticHeaders` del adapter o reglas en `astro.config.ts`.
+
+## Pendientes del usuario
+
+Cierran la fase; ver la lista ordenada en [README](./README.md).
+
+1. Borrar los docs sin versionar (o decidir conservar `docs/handoff-backend.md`).
+2. Push a `main` y confirmar que el deploy de producción en Vercel usa el preset Astro y termina bien.
+3. Verificar producción: `https://elcauquenartesanias.com.ar/` se ve igual que antes, y
+   `curl -sI https://elcauquenartesanias.com.ar/assets/fonts/inter-latin-var.woff2` devuelve `Cache-Control: public, max-age=31536000, immutable` y `curl -sI https://elcauquenartesanias.com.ar/assets/logo.webp` devuelve `public, max-age=86400, stale-while-revalidate=2592000`.

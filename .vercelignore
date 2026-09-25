@@ -1,8 +1,8 @@
-# Los JPEG originales quedan en el repo como fuente, pero el sitio sirve solo .webp
-assets/*.jpeg
-assets/*.jpg
+# Los JPEG originales quedan en el repo como fuente, fuera de public/: el sitio sirve solo los .webp
+assets/
 
-# Notas y configuración de herramientas: no van al deploy
+# Prototipo del admin, notas y configuración de herramientas: no van al build
+admin/
 docs/
 .agents/
 .claude/
