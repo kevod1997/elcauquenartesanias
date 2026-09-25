@@ -103,3 +103,76 @@ enlace "solo owner" de la barra y su regla en `admin.css` (F9-D1); el máximo co
 `validarNombre` (F9-D4).
 
 **Cerrar cuando:** el owner invita a un editor real, le llega el mail, activa su cuenta y entra; el editor no ve la sección.
+
+## Implementado
+
+- `src/pages/admin/integrantes.astro` y `src/admin/Integrantes.tsx`: aviso del editor (F9-D2), listado
+  (F9-D3), alta de editor (F9-D4) y desactivación con confirmación (F9-D5).
+- `src/admin/Admin.astro`: "Integrantes" en `secciones` con `soloOwner`, dibujado con
+  `data-solo-owner`; `admin.css` lo oculta mientras `.panel__bar` no tenga `data-rol='owner'` (F9-D1).
+- `src/admin/recursos.ts`: `validarNombre(nombre, maximo = NOMBRE_MAXIMO)`.
+- `admin.css`: `.estado--desactivado` y `.lista__rol`.
+
+## Decisiones técnicas
+
+| Decisión | Motivo |
+| --- | --- |
+| `resolverAcceso(e)` en la isla: `401` va al login y `403` `SIN_PERMISO` a la vista de F9-D2; el listado, el alta y la desactivación lo llaman primero | Un solo lugar para "cualquier llamada" de F9-D2; el `403` no se muestra como error de campo ni de lista. |
+| El máximo de 100 es `NOMBRE_INTEGRANTE_MAXIMO` en `Integrantes.tsx`, no en `recursos.ts` | Solo lo usa el alta de integrantes; `recursos.ts` recibe el máximo como parámetro. |
+| Al desactivar, solo el éxito y el `404` recargan la lista y enfocan el título; `422` y los demás errores quedan en el aviso sin recargar | Con `422` o un error de red la lista no cambió, y el foco sigue en el botón que abrió el diálogo. |
+| El rol se muestra con el término de la API ("owner", "editor") en `.lista__rol`, junto a la etiqueta | Son los términos del glosario (F9 "Glosario"). |
+| "Desactivado" usa `.estado` con `.estado--desactivado` (crema y texto suave) | Neutro: el verde y el ámbar ya significan publicado y borrador. |
+| El aviso de F9-D2 es `.aviso--error` con `role="alert"` y el enlace "Volver al inicio" dentro | Mismo aviso que los errores de lista; el título "Integrantes" queda arriba. |
+| El email del alta lleva `autoComplete="off"` y `spellCheck={false}` | Es el email de otra persona: el autocompletado del navegador propone el del owner. |
+
+## Validaciones ejecutadas
+
+- `pnpm lint`, `pnpm typecheck` (0 errores; hints ya existentes, entre ellos `FormEvent` deprecado),
+  `pnpm test` (84) y `pnpm build` pasan.
+- Contra el backend local (owner, `Origin: http://localhost:4321`), con un script Node de `fetch` fuera
+  del repo:
+  - `GET /admin/integrantes` → `200`, ordenado por nombre ("Editor fase 4" ×5, "Owner Local");
+  - alta de `delivered+fase9@resend.dev` → `201` con `rol: editor`, `activo: true`; el mismo email en
+    mayúsculas → `409` `EMAIL_EN_USO` ("Ya existe un integrante con ese email."); `a@b` → `400`
+    `SOLICITUD_INVALIDA`;
+  - con el token de `verification`, `POST /api/auth/reset-password` → `200`; el editor inicia sesión
+    (`200`), `GET /admin/sesion` da `rol: editor`, y `GET` y `POST /admin/integrantes` → `403`
+    `SIN_PERMISO`;
+  - sobre `delivered+fase9c@resend.dev` (mismos pasos): desactivar → `200` con `activo: false`, su
+    sesión da `401`, repetir → `200`, iniciar sesión → `403`; desactivar al owner → `422`
+    `INTEGRANTE_NO_DESACTIVABLE`; un id inexistente → `404` `INTEGRANTE_NO_ENCONTRADO`.
+- `astro dev`: `/admin/integrantes` responde `200` con `noindex`, la isla `Integrantes.tsx` y el enlace
+  con `data-solo-owner`.
+- En la UI local (extensión de Chrome, sesión de owner, `PUBLIC_API_URL=http://localhost:3001`):
+  - enviar vacío: "Escribí un nombre." y "Escribí un email." en sus campos, foco en "Nombre";
+  - `no-es-email` → "Revisá el email: no tiene un formato válido." (del cliente), `a@b` → el mismo texto
+    (del `400`: el navegador lo acepta, `typeMismatch` es `false`), el email repetido en mayúsculas →
+    "Ya existe un integrante con ese email."; foco en "Email", descrito por la ayuda y el error;
+  - alta de "Editor Prueba UI" (`delivered+fase9b@resend.dev`): toast de F9-D4, formulario vacío y la
+    fila en la lista con "Desactivar";
+  - "Desactivar" abrió el diálogo de F9-D5 con el foco en "Cancelar"; al confirmar (también sobre
+    `delivered+fase9d@resend.dev`): toast "Editor desactivado.", la fila con "Desactivado" y sin botón,
+    foco en el título;
+  - con `data-rol` en `editor` o sin él, el enlace "Integrantes" queda `display: none`; con `owner`, se ve.
+- Quedan en la base local, desactivados, `delivered+fase9b`, `fase9c` y `fase9d`; `delivered+fase9`
+  queda activo como editor de prueba (`EDITOR_TEST_*` en `.env.test.local`).
+
+## Desvíos
+
+- F9-D7 pedía curl; se usó `fetch` de Node con los mismos pedidos, como en las fases 7 y 8.
+- La contraseña del editor de prueba se definió por la API, no en `/admin/restablecer`: el agente no
+  escribe contraseñas en el navegador. La página ya se validó en la fase 4.
+- Las pruebas de desactivar por la API usaron un segundo editor (`fase9c`) para dejar activo al de
+  `delivered+fase9` y probar su vista en la UI.
+
+## Verificaciones del usuario
+
+1. **Vista del editor en local.** Con el backend local y `PUBLIC_API_URL=http://localhost:3001 pnpm dev`,
+   cerrá la sesión del owner e iniciá sesión en `http://localhost:4321/admin/ingresar` con
+   `EDITOR_TEST_EMAIL` y `EDITOR_TEST_PASSWORD` de `.env.test.local`, y avisale al agente, que lo
+   verifica con la extensión: la barra sin "Integrantes" y, en `/admin/integrantes`, "Solo el owner
+   gestiona los integrantes." con el enlace a `/admin`. También podés mirarlo vos.
+2. **Cierre en `admin.*`**, tras el push y el deploy: dale al agente el email de un editor real y
+   autorizá su alta en el chat (F9-D7; es permanente). El agente la hace con la sesión del owner.
+   El editor abre el correo, define su contraseña en `/admin/restablecer`, inicia sesión y confirma
+   que no ve "Integrantes" en la barra.

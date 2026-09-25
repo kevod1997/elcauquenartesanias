@@ -6,10 +6,13 @@ import { ErrorApi } from '../api'
 export const NOMBRE_MAXIMO = 40
 export const UNIDAD_MAXIMA = 10
 
-/** Error del `nombre` ya recortado, o `null` si cumple el esquema. El repetido lo decide el `409`. */
-export function validarNombre(nombre: string): string | null {
+/**
+ * Error del `nombre` ya recortado, o `null` si cumple el esquema. El repetido lo decide el `409`. El
+ * máximo cambia por recurso: el alta de integrantes acepta 100 (F9-D4).
+ */
+export function validarNombre(nombre: string, maximo = NOMBRE_MAXIMO): string | null {
   if (nombre.length === 0) return 'Escribí un nombre.'
-  if (nombre.length > NOMBRE_MAXIMO) return `Puede tener hasta ${NOMBRE_MAXIMO} caracteres.`
+  if (nombre.length > maximo) return `Puede tener hasta ${maximo} caracteres.`
   return null
 }
 

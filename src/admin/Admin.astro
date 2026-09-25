@@ -10,11 +10,13 @@ interface Props {
 
 const { titulo, protegida = true } = Astro.props
 
-// Secciones de la barra (F5-D1, F6-D1); la fase 9 suma "Integrantes".
+// Secciones de la barra (F5-D1, F6-D1). "Integrantes" lleva `soloOwner`: `admin.css` lo oculta hasta que
+// la barra tenga `data-rol="owner"` (F9-D1).
 const secciones = [
   { href: '/admin/productos', texto: 'Productos' },
   { href: '/admin/categorias', texto: 'Categorías' },
   { href: '/admin/tipos-de-medida', texto: 'Tipos de medida' },
+  { href: '/admin/integrantes', texto: 'Integrantes', soloOwner: true },
 ]
 const actual = Astro.url.pathname.replace(/\/$/, '')
 // Por prefijo: "Productos" queda marcado también en `/admin/productos/editar`.
@@ -41,8 +43,12 @@ const esActual = (href: string) => actual === href || actual.startsWith(`${href}
           </p>
           <nav class="panel__nav" aria-label="Secciones">
             {
-              secciones.map(({ href, texto }) => (
-                <a href={href} aria-current={esActual(href) ? 'page' : undefined}>
+              secciones.map(({ href, texto, soloOwner }) => (
+                <a
+                  href={href}
+                  aria-current={esActual(href) ? 'page' : undefined}
+                  data-solo-owner={soloOwner ? '' : undefined}
+                >
                   {texto}
                 </a>
               ))
@@ -77,7 +83,7 @@ const esActual = (href: string) => actual === href || actual.startsWith(`${href}
     obtenerSesion()
       .then((integrante) => {
         if (!integrante) return
-        // El rol queda en la barra para que la fase 9 muestre "Integrantes" solo al owner (F4-D3).
+        // Con el rol en la barra, `admin.css` muestra "Integrantes" solo al owner (F4-D3, F9-D1).
         barra.dataset['rol'] = integrante.rol
         document.getElementById('barraIntegrante')!.textContent = integrante.nombre
         document.getElementById('barraSesion')!.hidden = false

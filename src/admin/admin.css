@@ -157,6 +157,11 @@ a {
   color: var(--crema);
   border-bottom-color: var(--dorado);
 }
+/* Solo el owner ve "Integrantes", también antes de que resuelva la sesión (F9-D1). No es un control de
+   acceso: la API responde `403` al editor. */
+.panel__bar:not([data-rol='owner']) [data-solo-owner] {
+  display: none;
+}
 
 /* ---------- Botones ---------- */
 
@@ -537,6 +542,15 @@ input[aria-invalid='true'] {
 .estado--borrador {
   background: var(--ambar-suave);
   color: var(--ambar);
+}
+.estado--desactivado {
+  background: var(--crema-2);
+  color: var(--texto-suave);
+}
+
+.lista__rol {
+  font-size: 13px;
+  color: var(--texto-suave);
 }
 
 select,

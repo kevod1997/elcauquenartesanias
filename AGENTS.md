@@ -16,8 +16,8 @@ cada fase (decisiones FN-Dk y registro), en `fases/fase-N.md`, y el estado, en
   producción), pasala en la línea de comando, que tiene prioridad.
 - **Al validar el admin en local**, el backend corre en `http://localhost:3001` (`pnpm dev` en
   `../elcauquen-backend`; el 3000 lo ocupa otro proyecto) con `ADMIN_ORIGIN=http://localhost:4321`.
-  El owner de prueba está en `.env.test.local` (`OWNER_TEST_EMAIL`, `OWNER_TEST_PASSWORD`); el
-  login es `POST /api/auth/sign-in/email` con el header `Origin: http://localhost:4321`.
+  El owner y un editor activo de prueba están en `.env.test.local` (`OWNER_TEST_*`, `EDITOR_TEST_*`);
+  el login es `POST /api/auth/sign-in/email` con el header `Origin: http://localhost:4321`.
 - **El backend local manda mails reales por Resend**: invitá solo a `delivered+<etiqueta>@resend.dev`.
   El token de invitación o de reset está en la tabla `verification`, con `identifier`
   `reset-password:<token>` (`docker exec elcauquen-backend-postgres-1 psql -U postgres -d elcauquen`).
@@ -26,6 +26,9 @@ cada fase (decisiones FN-Dk y registro), en `fases/fase-N.md`, y el estado, en
   (`beforeunload`) y el lector de pantalla. Crear datos de prueba en producción requiere que el
   usuario lo autorice en el chat de esa sesión (sin eso, el modo automático lo bloquea); borralos al
   terminar.
+- **La pestaña que maneja la extensión de Chrome queda oculta**, y ahí el `close` de un `<dialog>`
+  (la confirmación de `confirmar.ts`) no llega hasta que la pestaña se dibuja: tras confirmar, tomá
+  una captura antes de leer el toast o la lista.
 - **El backend local sube al bucket R2 de producción**: usá solo imágenes de `public/assets/` y
   borrá por la API las imágenes de prueba al terminar.
 - **Una isla y su módulo de reglas se llaman igual salvo mayúsculas** (`Galeria.tsx` y `galeria.ts`):
