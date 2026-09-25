@@ -421,7 +421,9 @@ present proposed changes before implementing them in order of severity.
 `scripts/loop-fases.ps1` corre 6.1 y después 6.2 para cada fase, cada prompt en una sesión
 `claude -p` nueva, y les agrega al final este bloque. Cada sesión es una iteración: una fase y un
 prompt, sin contexto previo; lo único que pasa a la siguiente es lo commiteado (el PRD,
-`fases/README.md` y `fases/fase-N.md`). 6.3 no corre en el loop. El script lee los tres bloques
+`fases/README.md` y `fases/fase-N.md`). El modelo es el de la configuración de Claude Code y el
+esfuerzo lo fija el script (`medium` en 6.1, `low` en 6.2); mientras corre, Windows no se
+suspende. 6.3 no corre en el loop. El script lee los tres bloques
 de esta sección del PRD: editarlos acá cambia el loop.
 
 ```text

@@ -13,6 +13,8 @@ Set-Location $raiz
 $prd = 'docs/frontend-por-fases/PRD.md'
 $readme = 'docs/frontend-por-fases/fases/README.md'
 $logs = Join-Path $raiz 'logs/loop'
+# El modelo sale de la configuración de Claude Code; el esfuerzo se fija por prompt.
+$esfuerzo = @{ '6.1' = 'medium'; '6.2' = 'low' }
 
 function Get-Bloque([string]$seccion) {
   $texto = Get-Content $prd -Raw -Encoding UTF8
@@ -40,22 +42,34 @@ catch { throw 'El backend local no responde en :3001. Corré `pnpm dev` en ../el
 New-Item -ItemType Directory -Force $logs | Out-Null
 $modoLoop = Get-Bloque '6.4'
 
-foreach ($n in $Desde..$Hasta) {
-  if ((Get-Estado $n) -match 'Implementada|Cerrada') { Write-Host "Fase $n ya implementada: la salteo."; continue }
+# Que Windows no se suspenda mientras corre el loop; al salir, aunque falle, vuelve a lo normal.
+Add-Type -Namespace Win32 -Name Energia -MemberDefinition @'
+[DllImport("kernel32.dll")] public static extern uint SetThreadExecutionState(uint esFlags);
+'@
+$ES_CONTINUOUS = [uint32]'0x80000000'
+$ES_SYSTEM_REQUIRED = [uint32]1
+[Win32.Energia]::SetThreadExecutionState($ES_CONTINUOUS -bor $ES_SYSTEM_REQUIRED) | Out-Null
 
-  foreach ($p in '6.1', '6.2') {
-    Write-Host "Fase $n, prompt $p..."
-    $prompt = ((Get-Bloque $p) + "`n" + $modoLoop) -replace '\bN\b', "$n"
-    $log = Join-Path $logs "fase-$n-$p.json"
-    $prompt | claude -p --permission-mode auto --output-format json | Out-File $log -Encoding utf8
-    $resultado = Get-Content $log -Raw -Encoding UTF8 | ConvertFrom-Json
-    if ($LASTEXITCODE -ne 0 -or $resultado.is_error) { throw "Falló el prompt $p de la fase ${n}: revisá $log." }
-    if (-not (Test-ArbolLimpio)) { throw "La fase $n dejó cambios sin commitear tras ${p}: revisá $log." }
-  }
+try {
+  foreach ($n in $Desde..$Hasta) {
+    if ((Get-Estado $n) -match 'Implementada|Cerrada') { Write-Host "Fase $n ya implementada: la salteo."; continue }
 
-  if ((Get-Estado $n) -notmatch 'Implementada|Cerrada') {
-    throw "La fase $n no quedó implementada: revisá $logs/fase-$n-6.2.json y 'Decisiones para el usuario'."
+    foreach ($p in '6.1', '6.2') {
+      Write-Host "Fase $n, prompt $p..."
+      $prompt = ((Get-Bloque $p) + "`n" + $modoLoop) -replace '\bN\b', "$n"
+      $log = Join-Path $logs "fase-$n-$p.json"
+      $prompt | claude -p --permission-mode auto --effort $esfuerzo[$p] --output-format json | Out-File $log -Encoding utf8
+      $resultado = Get-Content $log -Raw -Encoding UTF8 | ConvertFrom-Json
+      if ($LASTEXITCODE -ne 0 -or $resultado.is_error) { throw "Falló el prompt $p de la fase ${n}: revisá $log." }
+      if (-not (Test-ArbolLimpio)) { throw "La fase $n dejó cambios sin commitear tras ${p}: revisá $log." }
+    }
+
+    if ((Get-Estado $n) -notmatch 'Implementada|Cerrada') {
+      throw "La fase $n no quedó implementada: revisá $logs/fase-$n-6.2.json y 'Decisiones para el usuario'."
+    }
   }
+} finally {
+  [Win32.Energia]::SetThreadExecutionState($ES_CONTINUOUS) | Out-Null
 }
 
 Write-Host "Listo. Revisá 'Decisiones para el usuario' y 'Verificaciones del usuario' en $readme."
