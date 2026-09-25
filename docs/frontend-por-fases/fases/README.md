@@ -7,7 +7,7 @@ tomadas (y su porqué) y las validaciones ejecutadas.
 | --- | --- | --- |
 | 0. Preparación externa | ✅ Cerrada (2026-09-24) | Pasos del usuario, sin registro de código. |
 | 1. Decisiones y esquema | ✅ Cerrada (2026-09-25) | [fase-1.md](./fase-1.md) |
-| 2. Capa de API tipada | ⏳ Pendiente | |
+| 2. Capa de API tipada | ✅ Cerrada (2026-09-25) | [fase-2.md](./fase-2.md) |
 | 3. Sitio público | ⏳ Pendiente | |
 | 4. Login y sesión | ⏳ Pendiente | |
 | 5. Categorías y tipos de medida | ⏳ Pendiente | |
@@ -17,8 +17,9 @@ tomadas (y su porqué) y las validaciones ejecutadas.
 | 9. Integrantes | ⏳ Pendiente | |
 | 10. Limpieza y cierre | ⏳ Pendiente | |
 
-**Siguiente:** implementar la fase 2 (prompt 6.2). Leer su definición en el PRD y D3 de la fase 1;
-no tiene decisiones abiertas.
+**Siguiente:** fase 3 (sitio público) o fase 4 (login y sesión), en cualquier orden. La 3 deja
+abierta la `expiration` de la ISR (D5), así que puede requerir el prompt 6.1; la 4, el tipado de
+`/api/auth/*` (D3). Para usar la API, leé los tipos y las decisiones de [fase-2.md](./fase-2.md).
 
 ## Pendientes abiertos
 

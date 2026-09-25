@@ -1,0 +1,4295 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "API de El Cauquén",
+    "version": "0.1.0",
+    "description": "Formas HTTP generadas del código. Convenciones, reglas y flujos: docs/contrato-api-borrador.md. Las rutas /admin/* usan la cookie de sesión de Better Auth (/api/auth/*, fuera de este documento)."
+  },
+  "components": {
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "codigo": {
+                "type": "string",
+                "enum": [
+                  "SOLICITUD_INVALIDA",
+                  "ORDEN_INVALIDO",
+                  "ORDEN_GALERIA_INVALIDO",
+                  "NO_AUTENTICADO",
+                  "SIN_PERMISO",
+                  "RUTA_NO_ENCONTRADA",
+                  "INTEGRANTE_NO_ENCONTRADO",
+                  "CATEGORIA_NO_ENCONTRADA",
+                  "TIPO_MEDIDA_NO_ENCONTRADO",
+                  "PRODUCTO_NO_ENCONTRADO",
+                  "IMAGEN_NO_ENCONTRADA",
+                  "EMAIL_EN_USO",
+                  "NOMBRE_EN_USO",
+                  "ORDEN_DESACTUALIZADO",
+                  "SUBIDA_INCOMPLETA",
+                  "ULTIMA_IMAGEN_VALIDA",
+                  "INTEGRANTE_NO_DESACTIVABLE",
+                  "CATEGORIA_INEXISTENTE",
+                  "TIPO_MEDIDA_INEXISTENTE",
+                  "GALERIA_COMPLETA",
+                  "DISENO_EN_PRINCIPAL",
+                  "SIN_IMAGEN_PRINCIPAL",
+                  "ERROR_INTERNO",
+                  "ALMACENAMIENTO_NO_CONFIGURADO"
+                ]
+              },
+              "mensaje": {
+                "type": "string",
+                "description": "Texto en español para mostrar."
+              }
+            },
+            "required": [
+              "codigo",
+              "mensaje"
+            ]
+          }
+        },
+        "required": [
+          "error"
+        ],
+        "description": "Forma de error de todas las rutas propias. `codigo` es estable y pensado para máquinas.\n\n| Código | Status | Cuándo |\n| --- | --- | --- |\n| `SOLICITUD_INVALIDA` | `400` | Cuerpo que no es JSON, sin `Content-Type: application/json` o que no cumple el esquema; `mensaje` detalla los campos. |\n| `ORDEN_INVALIDO` | `400` | El `orden` enviado no tiene exactamente los productos existentes (falta alguno o sobra uno ajeno). |\n| `ORDEN_GALERIA_INVALIDO` | `400` | El `orden` de la galería no tiene exactamente las imágenes del producto. |\n| `NO_AUTENTICADO` | `401` | Sin cookie de sesión, o sesión inválida o expirada. |\n| `SIN_PERMISO` | `403` | Sesión válida sin el rol requerido (un `editor` en `/admin/integrantes`). |\n| `RUTA_NO_ENCONTRADA` | `404` | Ninguna ruta coincide con el método y la ruta pedidos. |\n| `INTEGRANTE_NO_ENCONTRADO` | `404` | El `:id` de integrante no existe. |\n| `CATEGORIA_NO_ENCONTRADA` | `404` | El `:id` de categoría no existe. |\n| `TIPO_MEDIDA_NO_ENCONTRADO` | `404` | El `:id` de tipo de medida no existe. |\n| `PRODUCTO_NO_ENCONTRADO` | `404` | El `:id` de producto no existe; en `/api/productos/{id}`, tampoco si es un borrador. |\n| `IMAGEN_NO_ENCONTRADA` | `404` | El `:imagenId` no existe o no es de ese producto. |\n| `EMAIL_EN_USO` | `409` | Ya hay un integrante con ese email (sin distinguir mayúsculas). |\n| `NOMBRE_EN_USO` | `409` | Ya hay una categoría (o tipo de medida) con ese nombre, sin distinguir mayúsculas. |\n| `ORDEN_DESACTUALIZADO` | `409` | `ordenVersion` no es la actual: otro integrante creó, borró o reordenó productos. |\n| `SUBIDA_INCOMPLETA` | `409` | Se confirmó (o reintentó) una imagen cuyo archivo todavía no está en el almacenamiento. |\n| `ULTIMA_IMAGEN_VALIDA` | `409` | Se intentó borrar la última imagen válida (procesada y no diseño) de un producto publicado; primero hay que volverlo a borrador. |\n| `INTEGRANTE_NO_DESACTIVABLE` | `422` | Se intentó desactivar al `owner`; solo se desactivan editores. |\n| `CATEGORIA_INEXISTENTE` | `422` | El `categoriaId` del body no existe (por ejemplo, otro integrante la borró). |\n| `TIPO_MEDIDA_INEXISTENTE` | `422` | Un `tipoMedidaId` de `medidas` no existe. |\n| `GALERIA_COMPLETA` | `422` | El producto ya tiene seis imágenes, contando las que todavía no se confirmaron. |\n| `DISENO_EN_PRINCIPAL` | `422` | El cambio dejaría un diseño en la posición 0 habiendo imágenes que no lo son. |\n| `SIN_IMAGEN_PRINCIPAL` | `422` | El producto publicado (o por publicar) quedaría sin una imagen válida (procesada y no diseño) en la posición 0. |\n| `ERROR_INTERNO` | `500` | Falla inesperada del servidor; el detalle queda en el log, no en la respuesta. |\n| `ALMACENAMIENTO_NO_CONFIGURADO` | `503` | Faltan las variables `R2_*` (solo posible fuera de producción). |"
+      },
+      "IntegranteDeSesion": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "rol": {
+            "type": "string",
+            "enum": [
+              "owner",
+              "editor"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "nombre",
+          "email",
+          "rol"
+        ]
+      },
+      "Integrante": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "rol": {
+            "type": "string",
+            "enum": [
+              "owner",
+              "editor"
+            ]
+          },
+          "activo": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "nombre",
+          "email",
+          "rol",
+          "activo"
+        ]
+      },
+      "Categoria": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "nombre": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "nombre"
+        ]
+      },
+      "TipoMedida": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "unidad": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "nombre",
+          "unidad"
+        ]
+      },
+      "Producto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "precio": {
+            "$ref": "#/components/schemas/Precio"
+          },
+          "categoriaId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "descripcion": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "medidas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Medida"
+            },
+            "description": "En el orden enviado."
+          },
+          "galeria": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ImagenGaleria"
+            },
+            "maxItems": 6,
+            "description": "Hasta seis imágenes en todas las etapas, en orden; `galeria[0]` es la imagen principal (nunca un diseño, salvo que todas lo sean)."
+          },
+          "estado": {
+            "type": "string",
+            "enum": [
+              "borrador",
+              "publicado"
+            ]
+          },
+          "creadoEn": {
+            "type": "string",
+            "description": "ISO 8601, UTC."
+          },
+          "actualizadoEn": {
+            "type": "string",
+            "description": "ISO 8601, UTC."
+          }
+        },
+        "required": [
+          "id",
+          "nombre",
+          "precio",
+          "categoriaId",
+          "descripcion",
+          "medidas",
+          "galeria",
+          "estado",
+          "creadoEn",
+          "actualizadoEn"
+        ]
+      },
+      "Precio": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "integer",
+            "exclusiveMinimum": 0
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "ARS"
+            ]
+          }
+        },
+        "required": [
+          "amount",
+          "currency"
+        ],
+        "description": "Entero en centavos, moneda fija `ARS`."
+      },
+      "Medida": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "tipoMedidaId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "valor": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tipoMedidaId",
+          "valor"
+        ]
+      },
+      "ImagenGaleria": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "etapa": {
+            "type": "string",
+            "enum": [
+              "pendiente_subida",
+              "pendiente_procesamiento",
+              "procesando",
+              "procesada",
+              "fallida"
+            ]
+          },
+          "procesada": {
+            "type": "boolean",
+            "description": "`etapa === \"procesada\"`."
+          },
+          "url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Igual a `url640`."
+          },
+          "url160": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Derivado WebP de 160 px; `null` mientras no esté procesada."
+          },
+          "url640": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Derivado WebP de 640 px; `null` mientras no esté procesada."
+          },
+          "url1600": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Derivado WebP de 1600 px; `null` mientras no esté procesada."
+          },
+          "esDiseno": {
+            "type": "boolean"
+          },
+          "nombreDiseno": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "error": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Motivo en español si `etapa` es `fallida`."
+          }
+        },
+        "required": [
+          "id",
+          "etapa",
+          "procesada",
+          "url",
+          "url160",
+          "url640",
+          "url1600",
+          "esDiseno",
+          "nombreDiseno",
+          "error"
+        ]
+      },
+      "ProductoPublico": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "precio": {
+            "$ref": "#/components/schemas/Precio"
+          },
+          "categoriaId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "descripcion": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "medidas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MedidaPublica"
+            },
+            "description": "En el orden del producto."
+          },
+          "galeria": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ImagenPublica"
+            },
+            "maxItems": 6,
+            "description": "Solo las imágenes procesadas, en el orden de la galería; `galeria[0]` es la imagen principal (nunca un diseño)."
+          }
+        },
+        "required": [
+          "id",
+          "nombre",
+          "precio",
+          "categoriaId",
+          "descripcion",
+          "medidas",
+          "galeria"
+        ]
+      },
+      "MedidaPublica": {
+        "type": "object",
+        "properties": {
+          "tipo": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Nombre del tipo; `null` si no tiene tipo."
+          },
+          "unidad": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "`null` si el tipo no tiene unidad o no hay tipo."
+          },
+          "valor": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "tipo",
+          "unidad",
+          "valor"
+        ]
+      },
+      "ImagenPublica": {
+        "type": "object",
+        "properties": {
+          "url160": {
+            "type": "string"
+          },
+          "url640": {
+            "type": "string"
+          },
+          "url1600": {
+            "type": "string"
+          },
+          "esDiseno": {
+            "type": "boolean"
+          },
+          "nombreDiseno": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "`null` si no es un diseño o no tiene nombre."
+          }
+        },
+        "required": [
+          "url160",
+          "url640",
+          "url1600",
+          "esDiseno",
+          "nombreDiseno"
+        ],
+        "description": "URLs de los derivados WebP, por lado mayor en px."
+      }
+    },
+    "parameters": {}
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Chequeo de vida del proceso; no consulta la base ni R2",
+        "responses": {
+          "200": {
+            "description": "El proceso responde.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "ok"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/sesion": {
+      "get": {
+        "summary": "Integrante de la sesión actual",
+        "responses": {
+          "200": {
+            "description": "Integrante de la sesión.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "integrante": {
+                      "$ref": "#/components/schemas/IntegranteDeSesion"
+                    }
+                  },
+                  "required": [
+                    "integrante"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`NO_AUTENTICADO`: Sin cookie de sesión, o sesión inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "NO_AUTENTICADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/integrantes": {
+      "get": {
+        "summary": "Lista los integrantes, ordenados por nombre",
+        "responses": {
+          "200": {
+            "description": "Integrantes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "integrantes": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Integrante"
+                      }
+                    }
+                  },
+                  "required": [
+                    "integrantes"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`NO_AUTENTICADO`: Sin cookie de sesión, o sesión inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "NO_AUTENTICADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`SIN_PERMISO`: Sesión válida sin el rol requerido (un `editor` en `/admin/integrantes`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "SIN_PERMISO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Da de alta un editor sin contraseña y le envía el correo para definirla",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nombre": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Se guarda en minúsculas."
+                  }
+                },
+                "required": [
+                  "nombre",
+                  "email"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Editor creado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "integrante": {
+                      "$ref": "#/components/schemas/Integrante"
+                    }
+                  },
+                  "required": [
+                    "integrante"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`SOLICITUD_INVALIDA`: Cuerpo que no es JSON, sin `Content-Type: application/json` o que no cumple el esquema; `mensaje` detalla los campos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "SOLICITUD_INVALIDA"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`NO_AUTENTICADO`: Sin cookie de sesión, o sesión inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "NO_AUTENTICADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`SIN_PERMISO`: Sesión válida sin el rol requerido (un `editor` en `/admin/integrantes`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "SIN_PERMISO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "`EMAIL_EN_USO`: Ya hay un integrante con ese email (sin distinguir mayúsculas).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "EMAIL_EN_USO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/integrantes/{id}/desactivar": {
+      "post": {
+        "summary": "Desactiva un editor y cierra sus sesiones; idempotente",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Editor desactivado (`activo: false`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "integrante": {
+                      "$ref": "#/components/schemas/Integrante"
+                    }
+                  },
+                  "required": [
+                    "integrante"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`NO_AUTENTICADO`: Sin cookie de sesión, o sesión inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "NO_AUTENTICADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`SIN_PERMISO`: Sesión válida sin el rol requerido (un `editor` en `/admin/integrantes`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "SIN_PERMISO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`INTEGRANTE_NO_ENCONTRADO`: El `:id` de integrante no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "INTEGRANTE_NO_ENCONTRADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "`INTEGRANTE_NO_DESACTIVABLE`: Se intentó desactivar al `owner`; solo se desactivan editores.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "INTEGRANTE_NO_DESACTIVABLE"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/categorias": {
+      "get": {
+        "summary": "Lista las categorías, ordenadas por nombre sin distinguir mayúsculas",
+        "responses": {
+          "200": {
+            "description": "Categorías.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "categorias": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Categoria"
+                      }
+                    }
+                  },
+                  "required": [
+                    "categorias"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`NO_AUTENTICADO`: Sin cookie de sesión, o sesión inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "NO_AUTENTICADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Crea una categoría",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nombre": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 40
+                  }
+                },
+                "required": [
+                  "nombre"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Categoría creada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Categoria"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`SOLICITUD_INVALIDA`: Cuerpo que no es JSON, sin `Content-Type: application/json` o que no cumple el esquema; `mensaje` detalla los campos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "SOLICITUD_INVALIDA"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`NO_AUTENTICADO`: Sin cookie de sesión, o sesión inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "NO_AUTENTICADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "`NOMBRE_EN_USO`: Ya hay una categoría (o tipo de medida) con ese nombre, sin distinguir mayúsculas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "NOMBRE_EN_USO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/categorias/{id}": {
+      "patch": {
+        "summary": "Renombra una categoría",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nombre": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 40
+                  }
+                },
+                "required": [
+                  "nombre"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Categoría renombrada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Categoria"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`SOLICITUD_INVALIDA`: Cuerpo que no es JSON, sin `Content-Type: application/json` o que no cumple el esquema; `mensaje` detalla los campos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "SOLICITUD_INVALIDA"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`NO_AUTENTICADO`: Sin cookie de sesión, o sesión inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "NO_AUTENTICADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`CATEGORIA_NO_ENCONTRADA`: El `:id` de categoría no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "CATEGORIA_NO_ENCONTRADA"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "`NOMBRE_EN_USO`: Ya hay una categoría (o tipo de medida) con ese nombre, sin distinguir mayúsculas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "NOMBRE_EN_USO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Borra una categoría; sus productos quedan con `categoriaId: null`",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Categoría borrada."
+          },
+          "401": {
+            "description": "`NO_AUTENTICADO`: Sin cookie de sesión, o sesión inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "NO_AUTENTICADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`CATEGORIA_NO_ENCONTRADA`: El `:id` de categoría no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "CATEGORIA_NO_ENCONTRADA"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/tipos-medida": {
+      "get": {
+        "summary": "Lista los tipos de medida, ordenados por nombre sin distinguir mayúsculas",
+        "responses": {
+          "200": {
+            "description": "Tipos de medida.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "tiposMedida": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TipoMedida"
+                      }
+                    }
+                  },
+                  "required": [
+                    "tiposMedida"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`NO_AUTENTICADO`: Sin cookie de sesión, o sesión inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "NO_AUTENTICADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Crea un tipo de medida",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nombre": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 40
+                  },
+                  "unidad": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "maxLength": 10,
+                    "default": null,
+                    "description": "Ausente, `null` o `\"\"` se guarda como `null`."
+                  }
+                },
+                "required": [
+                  "nombre"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Tipo de medida creado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TipoMedida"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`SOLICITUD_INVALIDA`: Cuerpo que no es JSON, sin `Content-Type: application/json` o que no cumple el esquema; `mensaje` detalla los campos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "SOLICITUD_INVALIDA"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`NO_AUTENTICADO`: Sin cookie de sesión, o sesión inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "NO_AUTENTICADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "`NOMBRE_EN_USO`: Ya hay una categoría (o tipo de medida) con ese nombre, sin distinguir mayúsculas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "NOMBRE_EN_USO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/tipos-medida/{id}": {
+      "patch": {
+        "summary": "Edita nombre, unidad o ambos",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nombre": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 40
+                  },
+                  "unidad": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "maxLength": 10,
+                    "description": "Ausente, `null` o `\"\"` se guarda como `null`."
+                  }
+                },
+                "description": "Al menos uno de `nombre` o `unidad`; solo cambia lo enviado."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tipo de medida editado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TipoMedida"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`SOLICITUD_INVALIDA`: Cuerpo que no es JSON, sin `Content-Type: application/json` o que no cumple el esquema; `mensaje` detalla los campos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "SOLICITUD_INVALIDA"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`NO_AUTENTICADO`: Sin cookie de sesión, o sesión inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "NO_AUTENTICADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`TIPO_MEDIDA_NO_ENCONTRADO`: El `:id` de tipo de medida no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "TIPO_MEDIDA_NO_ENCONTRADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "`NOMBRE_EN_USO`: Ya hay una categoría (o tipo de medida) con ese nombre, sin distinguir mayúsculas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "NOMBRE_EN_USO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Borra un tipo de medida; sus medidas quedan con `tipoMedidaId: null`",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Tipo de medida borrado."
+          },
+          "401": {
+            "description": "`NO_AUTENTICADO`: Sin cookie de sesión, o sesión inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "NO_AUTENTICADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`TIPO_MEDIDA_NO_ENCONTRADO`: El `:id` de tipo de medida no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "TIPO_MEDIDA_NO_ENCONTRADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/productos": {
+      "get": {
+        "summary": "Lista todos los productos, borradores incluidos, en el orden global",
+        "responses": {
+          "200": {
+            "description": "Productos en el orden global.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "productos": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Producto"
+                      }
+                    },
+                    "orden": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Los ids de `productos`, en el mismo orden."
+                    },
+                    "ordenVersion": {
+                      "type": "integer",
+                      "description": "Versión que corresponde exactamente a esta lista."
+                    }
+                  },
+                  "required": [
+                    "productos",
+                    "orden",
+                    "ordenVersion"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`NO_AUTENTICADO`: Sin cookie de sesión, o sesión inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "NO_AUTENTICADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Crea un producto en borrador, al final del orden global",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nombre": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "precio": {
+                    "$ref": "#/components/schemas/Precio"
+                  },
+                  "categoriaId": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "default": null,
+                    "description": "`null`: sin categoría."
+                  },
+                  "descripcion": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "maxLength": 400,
+                    "default": null,
+                    "description": "Ausente, `null` o `\"\"` se guarda como `null`."
+                  },
+                  "medidas": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "tipoMedidaId": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "default": null,
+                          "description": "Ausente o `null`: sin tipo."
+                        },
+                        "valor": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 30
+                        }
+                      },
+                      "required": [
+                        "valor"
+                      ]
+                    },
+                    "maxItems": 20,
+                    "default": [],
+                    "description": "Hasta 20; un `tipoMedidaId` no nulo no puede repetirse. En `PATCH` reemplaza la lista completa."
+                  }
+                },
+                "required": [
+                  "nombre",
+                  "precio"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Producto creado (`estado: \"borrador\"`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Producto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`SOLICITUD_INVALIDA`: Cuerpo que no es JSON, sin `Content-Type: application/json` o que no cumple el esquema; `mensaje` detalla los campos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "SOLICITUD_INVALIDA"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`NO_AUTENTICADO`: Sin cookie de sesión, o sesión inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "NO_AUTENTICADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "`CATEGORIA_INEXISTENTE`: El `categoriaId` del body no existe (por ejemplo, otro integrante la borró).\n\n`TIPO_MEDIDA_INEXISTENTE`: Un `tipoMedidaId` de `medidas` no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "CATEGORIA_INEXISTENTE",
+                            "TIPO_MEDIDA_INEXISTENTE"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/productos/orden": {
+      "put": {
+        "summary": "Reemplaza el orden global con la lista completa de ids",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "orden": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Ids de todos los productos, sin repetir, en el orden global."
+                  },
+                  "ordenVersion": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Tal como la devolvió el listado."
+                  }
+                },
+                "required": [
+                  "orden",
+                  "ordenVersion"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Orden guardado, con la versión nueva.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "orden": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "ordenVersion": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "orden",
+                    "ordenVersion"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`SOLICITUD_INVALIDA`: Cuerpo que no es JSON, sin `Content-Type: application/json` o que no cumple el esquema; `mensaje` detalla los campos.\n\n`ORDEN_INVALIDO`: El `orden` enviado no tiene exactamente los productos existentes (falta alguno o sobra uno ajeno).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "SOLICITUD_INVALIDA",
+                            "ORDEN_INVALIDO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`NO_AUTENTICADO`: Sin cookie de sesión, o sesión inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "NO_AUTENTICADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "`ORDEN_DESACTUALIZADO`: `ordenVersion` no es la actual: otro integrante creó, borró o reordenó productos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "ORDEN_DESACTUALIZADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/productos/{id}": {
+      "patch": {
+        "summary": "Edita un producto; no cambia `estado` ni su posición",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nombre": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "precio": {
+                    "$ref": "#/components/schemas/Precio"
+                  },
+                  "categoriaId": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "`null`: sin categoría."
+                  },
+                  "descripcion": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "maxLength": 400,
+                    "description": "Ausente, `null` o `\"\"` se guarda como `null`."
+                  },
+                  "medidas": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "tipoMedidaId": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "default": null,
+                          "description": "Ausente o `null`: sin tipo."
+                        },
+                        "valor": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 30
+                        }
+                      },
+                      "required": [
+                        "valor"
+                      ]
+                    },
+                    "maxItems": 20,
+                    "description": "Hasta 20; un `tipoMedidaId` no nulo no puede repetirse. En `PATCH` reemplaza la lista completa."
+                  }
+                },
+                "description": "Al menos un campo; solo cambia lo enviado. `estado` se descarta."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Producto editado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Producto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`SOLICITUD_INVALIDA`: Cuerpo que no es JSON, sin `Content-Type: application/json` o que no cumple el esquema; `mensaje` detalla los campos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "SOLICITUD_INVALIDA"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`NO_AUTENTICADO`: Sin cookie de sesión, o sesión inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "NO_AUTENTICADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`PRODUCTO_NO_ENCONTRADO`: El `:id` de producto no existe; en `/api/productos/{id}`, tampoco si es un borrador.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "PRODUCTO_NO_ENCONTRADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "`CATEGORIA_INEXISTENTE`: El `categoriaId` del body no existe (por ejemplo, otro integrante la borró).\n\n`TIPO_MEDIDA_INEXISTENTE`: Un `tipoMedidaId` de `medidas` no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "CATEGORIA_INEXISTENTE",
+                            "TIPO_MEDIDA_INEXISTENTE"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Borra definitivamente un producto con sus medidas",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Producto borrado."
+          },
+          "401": {
+            "description": "`NO_AUTENTICADO`: Sin cookie de sesión, o sesión inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "NO_AUTENTICADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`PRODUCTO_NO_ENCONTRADO`: El `:id` de producto no existe; en `/api/productos/{id}`, tampoco si es un borrador.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "PRODUCTO_NO_ENCONTRADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/productos/{id}/publicar": {
+      "post": {
+        "summary": "Publica el producto si su imagen principal es válida; idempotente",
+        "description": "La imagen principal (`galeria[0]`) tiene que estar procesada y no ser un diseño; si no, el producto queda como estaba. No cambia `ordenVersion` ni el lugar en el orden global.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Producto publicado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Producto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`NO_AUTENTICADO`: Sin cookie de sesión, o sesión inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "NO_AUTENTICADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`PRODUCTO_NO_ENCONTRADO`: El `:id` de producto no existe; en `/api/productos/{id}`, tampoco si es un borrador.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "PRODUCTO_NO_ENCONTRADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "`SIN_IMAGEN_PRINCIPAL`: El producto publicado (o por publicar) quedaría sin una imagen válida (procesada y no diseño) en la posición 0.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "SIN_IMAGEN_PRINCIPAL"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/productos/{id}/volver-a-borrador": {
+      "post": {
+        "summary": "Pasa el producto a borrador; idempotente",
+        "description": "No cambia `ordenVersion` ni el lugar en el orden global.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Producto en borrador.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Producto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`NO_AUTENTICADO`: Sin cookie de sesión, o sesión inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "NO_AUTENTICADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`PRODUCTO_NO_ENCONTRADO`: El `:id` de producto no existe; en `/api/productos/{id}`, tampoco si es un borrador.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "PRODUCTO_NO_ENCONTRADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/productos/{id}/imagenes/orden": {
+      "put": {
+        "summary": "Reemplaza el orden de la galería con la lista completa de ids",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "orden": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Ids de todas las imágenes del producto, sin repetir; la primera es la principal."
+                  }
+                },
+                "required": [
+                  "orden"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Galería en el orden nuevo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "galeria": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ImagenGaleria"
+                      }
+                    }
+                  },
+                  "required": [
+                    "galeria"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`SOLICITUD_INVALIDA`: Cuerpo que no es JSON, sin `Content-Type: application/json` o que no cumple el esquema; `mensaje` detalla los campos.\n\n`ORDEN_GALERIA_INVALIDO`: El `orden` de la galería no tiene exactamente las imágenes del producto.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "SOLICITUD_INVALIDA",
+                            "ORDEN_GALERIA_INVALIDO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`NO_AUTENTICADO`: Sin cookie de sesión, o sesión inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "NO_AUTENTICADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`PRODUCTO_NO_ENCONTRADO`: El `:id` de producto no existe; en `/api/productos/{id}`, tampoco si es un borrador.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "PRODUCTO_NO_ENCONTRADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "`DISENO_EN_PRINCIPAL`: El cambio dejaría un diseño en la posición 0 habiendo imágenes que no lo son.\n\n`SIN_IMAGEN_PRINCIPAL`: El producto publicado (o por publicar) quedaría sin una imagen válida (procesada y no diseño) en la posición 0.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "DISENO_EN_PRINCIPAL",
+                            "SIN_IMAGEN_PRINCIPAL"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "`ALMACENAMIENTO_NO_CONFIGURADO`: Faltan las variables `R2_*` (solo posible fuera de producción).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "ALMACENAMIENTO_NO_CONFIGURADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/productos/{id}/imagenes/upload-url": {
+      "post": {
+        "summary": "Autoriza subir un archivo directo a R2 y crea la imagen en `pendiente_subida`",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "contentType": {
+                    "type": "string",
+                    "enum": [
+                      "image/jpeg",
+                      "image/png",
+                      "image/webp"
+                    ]
+                  },
+                  "tamanoBytes": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 10485760
+                  }
+                },
+                "required": [
+                  "contentType",
+                  "tamanoBytes"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Subida autorizada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "imagenId": {
+                      "type": "string"
+                    },
+                    "uploadUrl": {
+                      "type": "string",
+                      "description": "URL firmada para `PUT` con el `Content-Type` y tamaño pedidos."
+                    },
+                    "expiraEn": {
+                      "type": "string",
+                      "description": "ISO 8601; 15 minutos."
+                    }
+                  },
+                  "required": [
+                    "imagenId",
+                    "uploadUrl",
+                    "expiraEn"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`SOLICITUD_INVALIDA`: Cuerpo que no es JSON, sin `Content-Type: application/json` o que no cumple el esquema; `mensaje` detalla los campos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "SOLICITUD_INVALIDA"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`NO_AUTENTICADO`: Sin cookie de sesión, o sesión inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "NO_AUTENTICADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`PRODUCTO_NO_ENCONTRADO`: El `:id` de producto no existe; en `/api/productos/{id}`, tampoco si es un borrador.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "PRODUCTO_NO_ENCONTRADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "`GALERIA_COMPLETA`: El producto ya tiene seis imágenes, contando las que todavía no se confirmaron.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "GALERIA_COMPLETA"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "`ALMACENAMIENTO_NO_CONFIGURADO`: Faltan las variables `R2_*` (solo posible fuera de producción).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "ALMACENAMIENTO_NO_CONFIGURADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/productos/{id}/imagenes/{imagenId}/confirmar": {
+      "post": {
+        "summary": "Verifica que el archivo esté en R2 y encola el procesamiento; idempotente",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "imagenId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Imagen confirmada (o ya confirmada, sin encolar otro trabajo).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "imagen": {
+                      "$ref": "#/components/schemas/ImagenGaleria"
+                    }
+                  },
+                  "required": [
+                    "imagen"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`NO_AUTENTICADO`: Sin cookie de sesión, o sesión inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "NO_AUTENTICADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`IMAGEN_NO_ENCONTRADA`: El `:imagenId` no existe o no es de ese producto.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "IMAGEN_NO_ENCONTRADA"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "`SUBIDA_INCOMPLETA`: Se confirmó (o reintentó) una imagen cuyo archivo todavía no está en el almacenamiento.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "SUBIDA_INCOMPLETA"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "`ALMACENAMIENTO_NO_CONFIGURADO`: Faltan las variables `R2_*` (solo posible fuera de producción).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "ALMACENAMIENTO_NO_CONFIGURADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/productos/{id}/imagenes/{imagenId}/reintentar": {
+      "post": {
+        "summary": "Vuelve a encolar una imagen `fallida`; en otra etapa confirmada la devuelve como está",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "imagenId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Imagen reencolada o sin cambios.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "imagen": {
+                      "$ref": "#/components/schemas/ImagenGaleria"
+                    }
+                  },
+                  "required": [
+                    "imagen"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`NO_AUTENTICADO`: Sin cookie de sesión, o sesión inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "NO_AUTENTICADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`IMAGEN_NO_ENCONTRADA`: El `:imagenId` no existe o no es de ese producto.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "IMAGEN_NO_ENCONTRADA"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "`SUBIDA_INCOMPLETA`: Se confirmó (o reintentó) una imagen cuyo archivo todavía no está en el almacenamiento.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "SUBIDA_INCOMPLETA"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "`ALMACENAMIENTO_NO_CONFIGURADO`: Faltan las variables `R2_*` (solo posible fuera de producción).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "ALMACENAMIENTO_NO_CONFIGURADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/productos/{id}/imagenes/{imagenId}": {
+      "get": {
+        "summary": "Consulta la etapa de una imagen (polling cada 1–2 s)",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "imagenId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Imagen.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "imagen": {
+                      "$ref": "#/components/schemas/ImagenGaleria"
+                    }
+                  },
+                  "required": [
+                    "imagen"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`NO_AUTENTICADO`: Sin cookie de sesión, o sesión inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "NO_AUTENTICADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`IMAGEN_NO_ENCONTRADA`: El `:imagenId` no existe o no es de ese producto.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "IMAGEN_NO_ENCONTRADA"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "`ALMACENAMIENTO_NO_CONFIGURADO`: Faltan las variables `R2_*` (solo posible fuera de producción).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "ALMACENAMIENTO_NO_CONFIGURADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "Marca o desmarca un diseño y cambia su nombre",
+        "description": "Desmarcar una imagen cuando todas son diseños la pasa a la posición 0. Marcar diseño la imagen principal da `422`.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "imagenId",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "esDiseno": {
+                    "type": "boolean"
+                  },
+                  "nombreDiseno": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "maxLength": 60,
+                    "description": "Se recorta; `\"\"` o `null` lo quitan. Queda `null` si la imagen no es diseño."
+                  }
+                },
+                "description": "Al menos un campo; solo cambia lo enviado."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Imagen editada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "imagen": {
+                      "$ref": "#/components/schemas/ImagenGaleria"
+                    }
+                  },
+                  "required": [
+                    "imagen"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`SOLICITUD_INVALIDA`: Cuerpo que no es JSON, sin `Content-Type: application/json` o que no cumple el esquema; `mensaje` detalla los campos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "SOLICITUD_INVALIDA"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`NO_AUTENTICADO`: Sin cookie de sesión, o sesión inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "NO_AUTENTICADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`PRODUCTO_NO_ENCONTRADO`: El `:id` de producto no existe; en `/api/productos/{id}`, tampoco si es un borrador.\n\n`IMAGEN_NO_ENCONTRADA`: El `:imagenId` no existe o no es de ese producto.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "PRODUCTO_NO_ENCONTRADO",
+                            "IMAGEN_NO_ENCONTRADA"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "`DISENO_EN_PRINCIPAL`: El cambio dejaría un diseño en la posición 0 habiendo imágenes que no lo son.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "DISENO_EN_PRINCIPAL"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "`ALMACENAMIENTO_NO_CONFIGURADO`: Faltan las variables `R2_*` (solo posible fuera de producción).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "ALMACENAMIENTO_NO_CONFIGURADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Borra una imagen en cualquier etapa; sus archivos se borran de R2 después, con reintentos",
+        "description": "Si quedaría un diseño en la posición 0 habiendo imágenes que no lo son, sube la primera válida o, si no hay, la primera que no es diseño. En un publicado, la principal sigue siendo válida.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "imagenId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Imagen borrada."
+          },
+          "401": {
+            "description": "`NO_AUTENTICADO`: Sin cookie de sesión, o sesión inválida o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "NO_AUTENTICADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`PRODUCTO_NO_ENCONTRADO`: El `:id` de producto no existe; en `/api/productos/{id}`, tampoco si es un borrador.\n\n`IMAGEN_NO_ENCONTRADA`: El `:imagenId` no existe o no es de ese producto.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "PRODUCTO_NO_ENCONTRADO",
+                            "IMAGEN_NO_ENCONTRADA"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "`ULTIMA_IMAGEN_VALIDA`: Se intentó borrar la última imagen válida (procesada y no diseño) de un producto publicado; primero hay que volverlo a borrador.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "ULTIMA_IMAGEN_VALIDA"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/productos": {
+      "get": {
+        "summary": "Lista los productos publicados, en el orden global",
+        "responses": {
+          "200": {
+            "description": "Productos publicados.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "productos": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ProductoPublico"
+                      }
+                    }
+                  },
+                  "required": [
+                    "productos"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/productos/{id}": {
+      "get": {
+        "summary": "Un producto publicado",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Producto publicado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductoPublico"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`PRODUCTO_NO_ENCONTRADO`: El `:id` de producto no existe; en `/api/productos/{id}`, tampoco si es un borrador.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "codigo": {
+                          "type": "string",
+                          "enum": [
+                            "PRODUCTO_NO_ENCONTRADO"
+                          ]
+                        },
+                        "mensaje": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "codigo",
+                        "mensaje"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/categorias": {
+      "get": {
+        "summary": "Lista las categorías visibles (con productos publicados), por nombre sin distinguir mayúsculas",
+        "responses": {
+          "200": {
+            "description": "Categorías visibles.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "categorias": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Categoria"
+                      }
+                    }
+                  },
+                  "required": [
+                    "categorias"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "webhooks": {}
+}

@@ -10,3 +10,5 @@ el avance, en [`fases/`](./docs/frontend-por-fases/fases/README.md).
   `npx pnpm@10 install --frozen-lockfile` y `npx pnpm@10 build`: Vercel instala con pnpm 9 o 10
   aunque el lockfile se escriba con pnpm 12.
 - **TypeScript queda en 6**: `astro check` no acepta la 7.
+- **`pnpm peers check` marca `typescript` para `openapi-typescript`** (pide `^5`): genera bien con
+  la 6 y el chequeo de `pnpm lint` lo cubre; no bajes TypeScript por eso.
