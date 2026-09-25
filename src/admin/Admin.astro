@@ -9,6 +9,13 @@ interface Props {
 }
 
 const { titulo, protegida = true } = Astro.props
+
+// Secciones de la barra (F5-D1); la fase 6 suma "Productos" y la 9, "Integrantes".
+const secciones = [
+  { href: '/admin/categorias', texto: 'Categorías' },
+  { href: '/admin/tipos-de-medida', texto: 'Tipos de medida' },
+]
+const actual = Astro.url.pathname.replace(/\/$/, '')
 ---
 
 <!doctype html>
@@ -29,6 +36,15 @@ const { titulo, protegida = true } = Astro.props
               El Cauquén <span>· Panel</span>
             </a>
           </p>
+          <nav class="panel__nav" aria-label="Secciones">
+            {
+              secciones.map(({ href, texto }) => (
+                <a href={href} aria-current={href === actual ? 'page' : undefined}>
+                  {texto}
+                </a>
+              ))
+            }
+          </nav>
           <div class="panel__acciones" id="barraSesion" hidden>
             <span class="panel__integrante" id="barraIntegrante" />
             <button type="button" class="btn btn--fantasma" id="btnCerrarSesion">
@@ -41,11 +57,14 @@ const { titulo, protegida = true } = Astro.props
     <main class="panel__contenido">
       <slot />
     </main>
+    <!-- Región de avisos (F5-D5): existe vacía desde el inicio para que los lectores la anuncien. -->
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
   </body>
 </html>
 
 <script>
   import { auth } from '../api'
+  import { avisar } from './avisos'
   import { mensajeDeError } from './mensajes'
   import { obtenerSesion } from './sesion'
 
@@ -69,7 +88,7 @@ const { titulo, protegida = true } = Astro.props
         location.assign('/admin/ingresar')
       } catch (error) {
         boton.disabled = false
-        alert(mensajeDeError(error))
+        avisar(mensajeDeError(error), 'error')
       }
     })
   }

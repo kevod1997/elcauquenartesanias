@@ -1,5 +1,5 @@
 /* Estilos del admin (F4-D5): tokens, fuentes, barra, botones y campos portados de `admin/admin.css` del
-   prototipo. La fase 5 suma el patrón de listados y formularios sobre esta base. */
+   prototipo, más el patrón de listados, formularios, confirmación y toast de la fase 5. */
 
 /* ---------- Fuentes (mismos archivos que el catálogo público) ---------- */
 
@@ -135,6 +135,29 @@ a {
   padding: clamp(20px, 4vw, 40px) clamp(16px, 4vw, 40px);
 }
 
+/* ---------- Navegación de la barra (F5-D1) ---------- */
+
+.panel__nav {
+  display: flex;
+  gap: 18px;
+  margin-right: auto;
+  font-size: 14px;
+}
+
+.panel__nav a {
+  color: var(--arena);
+  text-decoration: none;
+  padding: 4px 0;
+  border-bottom: 2px solid transparent;
+}
+.panel__nav a:hover {
+  color: var(--crema);
+}
+.panel__nav a[aria-current='page'] {
+  color: var(--crema);
+  border-bottom-color: var(--dorado);
+}
+
 /* ---------- Botones ---------- */
 
 .btn {
@@ -182,6 +205,28 @@ a {
 }
 .btn--fantasma:hover:not(:disabled) {
   background: rgba(247, 242, 235, 0.1);
+}
+
+.btn--peligro {
+  background: transparent;
+  border-color: var(--terracota);
+  color: var(--terracota);
+}
+.btn--peligro:hover:not(:disabled) {
+  background: var(--terracota-suave);
+}
+
+.btn--peligro-solido {
+  background: var(--terracota);
+  color: var(--papel);
+}
+.btn--peligro-solido:hover:not(:disabled) {
+  background: #732e22;
+}
+
+.btn--chico {
+  padding: 6px 12px;
+  font-size: 13px;
 }
 
 /* ---------- Campos ---------- */
@@ -288,4 +333,162 @@ input[aria-invalid='true'] {
 .cargando {
   color: var(--texto-tenue);
   font-size: 14px;
+}
+
+/* ---------- Secciones con listado (F5-D2) ---------- */
+
+.seccion {
+  max-width: 640px;
+  margin: 0 auto;
+  display: grid;
+  gap: 18px;
+}
+
+.seccion__titulo {
+  margin: 0;
+  font-family: 'Playfair Display', serif;
+  font-weight: 500;
+  font-size: 28px;
+  color: var(--cacao);
+}
+
+.alta,
+.edicion {
+  display: grid;
+  gap: 14px;
+}
+
+.alta {
+  padding: 18px 20px;
+  background: var(--papel);
+  border: 1px solid var(--arena);
+  border-radius: 12px;
+  justify-items: start;
+}
+.alta .campo {
+  justify-self: stretch;
+}
+
+.lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--papel);
+  border: 1px solid var(--arena);
+  border-radius: 12px;
+}
+
+.lista__fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+}
+.lista__fila + .lista__fila {
+  border-top: 1px solid var(--arena);
+}
+.lista__fila--edicion {
+  display: block;
+  background: var(--crema-2);
+}
+
+.lista__nombre {
+  display: grid;
+  gap: 2px;
+  font-size: 15px;
+  color: var(--tinta);
+}
+
+.lista__detalle {
+  font-size: 12px;
+  color: var(--texto-tenue);
+}
+
+.lista__acciones {
+  display: flex;
+  gap: 8px;
+}
+
+.lista__vacia {
+  margin: 0;
+  color: var(--texto-tenue);
+  font-size: 14px;
+}
+
+/* ---------- Confirmación (F5-D4) ---------- */
+
+.confirmar {
+  border: none;
+  padding: 22px 24px;
+  width: min(360px, 90vw);
+  border-radius: 12px;
+  background: var(--crema);
+  color: var(--tinta);
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.4);
+}
+.confirmar::backdrop {
+  background: rgba(44, 31, 14, 0.55);
+}
+.confirmar__titulo {
+  margin: 0 0 6px;
+  font-family: 'Playfair Display', serif;
+  font-weight: 500;
+  font-size: 19px;
+  color: var(--cacao);
+}
+.confirmar__detalle {
+  margin: 0 0 18px;
+  font-size: 13px;
+  color: var(--texto-suave);
+}
+.confirmar__acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* ---------- Toast (F5-D5) ---------- */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transform: translate(-50%, 12px);
+  background: var(--cacao);
+  color: var(--crema);
+  padding: 11px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity var(--t-media) var(--ease),
+    transform var(--t-media) var(--ease);
+  z-index: 40;
+}
+.toast.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  pointer-events: auto;
+}
+.toast--error {
+  background: var(--terracota);
+}
+
+.toast__cerrar {
+  appearance: none;
+  border: 1px solid rgba(247, 242, 235, 0.5);
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  padding: 3px 10px;
+  cursor: pointer;
 }

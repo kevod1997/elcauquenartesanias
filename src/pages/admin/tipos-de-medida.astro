@@ -1,0 +1,8 @@
+---
+import Admin from '../../admin/Admin.astro'
+import TiposDeMedida from '../../admin/TiposDeMedida.tsx'
+---
+
+<Admin titulo="Tipos de medida">
+  <TiposDeMedida client:only="react" />
+</Admin>

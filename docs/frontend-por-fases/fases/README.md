@@ -10,7 +10,7 @@ tomadas (y su porqué) y las validaciones ejecutadas.
 | 2. Capa de API tipada | ✅ Cerrada (2026-09-25) | [fase-2.md](./fase-2.md) |
 | 3. Sitio público | ✅ Cerrada (2026-09-25) | [fase-3.md](./fase-3.md) |
 | 4. Login y sesión | 🔎 Implementada (2026-09-25) | [fase-4.md](./fase-4.md) |
-| 5. Categorías y tipos de medida | ⏳ Pendiente (preparada 2026-09-25) | [fase-5.md](./fase-5.md) |
+| 5. Categorías y tipos de medida | 🔎 Implementada (2026-09-25) | [fase-5.md](./fase-5.md) |
 | 6. Productos con medidas | ⏳ Pendiente | |
 | 7. Galería e imágenes | ⏳ Pendiente | |
 | 8. Orden | ⏳ Pendiente | |
@@ -20,11 +20,10 @@ tomadas (y su porqué) y las validaciones ejecutadas.
 "🔎 Implementada" es una fase con el código commiteado a la que le quedan verificaciones del
 usuario; cuenta como dependencia cumplida.
 
-**Siguiente:** implementar la fase 5 con el prompt 6.2 del PRD. Leé la fase 5 del PRD (F5-D1 a
-F5-D7, que fijan el patrón de listado, formularios, confirmación y avisos del admin) y
-[fase-4.md](./fase-4.md) (layout, `sesion.ts` con `exigirSesion` y `redirigirSiNoAutenticado`,
-`mensajes.ts`, `Restablecer.tsx` como base de formulario); para la API, [fase-2.md](./fase-2.md).
-Los estilos a portar están en `admin/admin.css` del prototipo.
+**Siguiente:** preparar la fase 6 con el prompt 6.1 del PRD. Leé la fase 6 del PRD y
+[fase-5.md](./fase-5.md), que lista el patrón del admin a reusar (`Campo.tsx`, `confirmar.ts`,
+`avisos.ts`, `recursos.ts`, la lista `secciones` de `Admin.astro`); `Categorias.tsx` es el ejemplo
+completo de listado con alta, edición y borrado. Para la API, [fase-2.md](./fase-2.md).
 
 ## Decisiones para el usuario
 
@@ -57,6 +56,24 @@ CNAME "DNS only" en Cloudflare, `ADMIN_ORIGIN` y `RESET_PASSWORD_URL` en Railway
    segundo campo, con foco) y después una válida; el aviso de éxito enlaza al login y la contraseña
    nueva funciona. Volver a abrir el mismo enlace y enviar: muestra "El enlace venció o ya se usó".
 7. Teclado: con Tab se recorren los campos y botones con el foco visible.
+
+### Fase 5
+
+Después del push a `main` (y con la fase 4 desplegada), logueado en `admin.*/admin`:
+
+1. La barra muestra "Categorías" y "Tipos de medida"; el de la página actual queda marcado.
+2. En `/admin/categorias`, crear "Prueba F5": aparece en la lista y un toast dice "Categoría creada.".
+3. Crear "PRUEBA f5": el error "Ya existe una categoría con ese nombre." queda debajo del campo, con
+   borde rojo y el foco en el campo; lo tipeado se conserva.
+4. "Editar" en "Prueba F5": la fila pasa a formulario con el foco en el nombre. Escape cancela y el
+   foco vuelve a "Editar". Renombrar a "Prueba F5 bis" con Enter: toast "Categoría renombrada.".
+5. "Borrar": el diálogo pregunta "¿Borrar la categoría «Prueba F5 bis»?" con el foco en "Cancelar";
+   Escape cancela. Otra vez "Borrar" → "Borrar": desaparece, toast "Categoría borrada.", foco en el título.
+6. En `/admin/tipos-de-medida`, repetir 2 a 5 con un tipo: el alta trae `cm`; con la unidad vacía,
+   la fila dice "sin unidad: texto libre"; editar vaciando la unidad la quita.
+7. Con Tab se recorren nav, campos y botones con el foco visible.
+8. Opcional: con la red cortada (DevTools, Offline), "Cerrar sesión" muestra el error en un toast
+   rojo con "Cerrar", sin `alert`.
 
 ## Pendientes abiertos
 

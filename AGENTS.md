@@ -25,3 +25,5 @@ el avance, en [`fases/`](./docs/frontend-por-fases/fases/README.md).
 - **TypeScript queda en 6**: `astro check` no acepta la 7.
 - **`pnpm peers check` marca `typescript` para `openapi-typescript`** (pide `^5`): genera bien con
   la 6 y el chequeo de `pnpm lint` lo cubre; no bajes TypeScript por eso.
+- **Al probar la API con curl desde Git Bash**, un nombre con tildes en `-d` llega mal codificado
+  al backend: usá nombres sin tildes o mandá el cuerpo desde un archivo UTF-8 (`-d @cuerpo.json`).
