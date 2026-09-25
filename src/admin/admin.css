@@ -676,3 +676,240 @@ textarea[aria-invalid='true'] {
   font-weight: 600;
   color: var(--cacao);
 }
+
+/* ---------- Galería (F7-D5, F7-D6) y publicar (F7-D9) ---------- */
+
+.visualmente-oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.lista__foto {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--crema-2);
+  border: 1px solid var(--arena);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--texto-tenue);
+}
+.lista__foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.publicar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.publicar__motivo {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  max-width: 260px;
+  font-size: 12px;
+  color: var(--texto-suave);
+}
+
+.galeria-seccion {
+  display: grid;
+  gap: 12px;
+  padding: 18px 20px;
+  background: var(--papel);
+  border: 1px solid var(--arena);
+  border-radius: 12px;
+}
+
+.galeria__cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.galeria__titulo {
+  margin: 0;
+  font-family: 'Playfair Display', serif;
+  font-weight: 500;
+  font-size: 19px;
+  color: var(--cacao);
+}
+
+.galeria {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.foto {
+  border: 1px solid var(--arena);
+  border-radius: 8px;
+  background: var(--papel);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.foto__marco {
+  position: relative;
+  aspect-ratio: 1;
+  background: var(--crema-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--texto-tenue);
+}
+.foto__marco img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.foto__badge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  max-width: calc(100% - 12px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: rgba(59, 42, 26, 0.82);
+  color: var(--crema);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.foto__controles {
+  display: grid;
+  gap: 8px;
+  padding: 8px;
+  justify-items: start;
+}
+
+.foto__etapa {
+  display: grid;
+  gap: 4px;
+  justify-self: stretch;
+  font-size: 12px;
+  color: var(--texto-suave);
+}
+.foto__etapa--error {
+  color: var(--terracota);
+  justify-items: start;
+}
+
+.foto__fila {
+  display: flex;
+  gap: 4px;
+}
+
+.btn--icono {
+  appearance: none;
+  border: 1px solid var(--arena);
+  background: var(--papel);
+  color: var(--madera-oscura);
+  border-radius: 6px;
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+.btn--icono:hover:not(:disabled) {
+  background: var(--crema-2);
+  border-color: var(--dorado);
+}
+.btn--icono:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.foto__diseno {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--texto-suave);
+}
+
+.foto__nombre {
+  justify-self: stretch;
+}
+.foto__nombre input[type='text'] {
+  padding: 5px 7px;
+  font-size: 12px;
+}
+
+/* Barras de etapa: `<progress>` sin `value` es indeterminado y se anima (F7-D5). */
+progress {
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border: none;
+  border-radius: 999px;
+  background: var(--arena);
+  color: var(--madera);
+  overflow: hidden;
+}
+progress::-webkit-progress-bar {
+  background: var(--arena);
+  border-radius: 999px;
+}
+progress::-webkit-progress-value {
+  background: var(--madera);
+  border-radius: 999px;
+  transition: width var(--t-rapida) var(--ease);
+}
+progress::-moz-progress-bar {
+  background: var(--madera);
+  border-radius: 999px;
+}
+progress:indeterminate {
+  background: linear-gradient(90deg, var(--arena) 0%, var(--madera) 40%, var(--arena) 80%) 0 0 / 200% 100%;
+  animation: barra-indeterminada 1.2s linear infinite;
+}
+progress:indeterminate::-webkit-progress-bar {
+  background: transparent;
+}
+progress:indeterminate::-moz-progress-bar {
+  background: transparent;
+}
+
+@keyframes barra-indeterminada {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  progress:indeterminate {
+    animation: none;
+    background: var(--arena);
+  }
+}

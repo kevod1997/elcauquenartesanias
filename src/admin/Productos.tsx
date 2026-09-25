@@ -3,6 +3,8 @@ import { apiAdmin, type components, pedir } from '../api'
 import { formatearPrecio } from '../catalogo/presentacion'
 import { avisar } from './avisos'
 import { confirmar } from './confirmar'
+import { esValida, type Imagen } from './galeria'
+import { IconoFoto } from './iconos'
 import { mensajeDeError } from './mensajes'
 import type { Producto } from './productos'
 import { exigirSesion, redirigirSiNoAutenticado } from './sesion'
@@ -64,6 +66,7 @@ export default function Productos() {
       <ul className="lista">
         {productos.map((producto) => (
           <li className="lista__fila" key={producto.id}>
+            <Miniatura imagen={producto.galeria[0]} />
             <span className="lista__nombre">
               {producto.nombre}
               <span className="lista__detalle">{nombreCategoria(producto.categoriaId)}</span>
@@ -113,5 +116,14 @@ export default function Productos() {
       )}
       {lista}
     </section>
+  )
+}
+
+/** Imagen principal de 48 px si es válida; si no, el ícono de foto (F7-D10). El nombre ya está en la fila. */
+function Miniatura({ imagen }: { imagen: Imagen | undefined }) {
+  return (
+    <span className="lista__foto">
+      {imagen?.url160 && esValida(imagen) ? <img src={imagen.url160} width={48} height={48} alt="" /> : <IconoFoto />}
+    </span>
   )
 }

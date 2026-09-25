@@ -23,6 +23,9 @@ cada fase (decisiones FN-Dk y registro), en `fases/fase-N.md`, y el estado, en
   `reset-password:<token>` (`docker exec elcauquen-backend-postgres-1 psql -U postgres -d elcauquen`).
 - **El backend local sube al bucket R2 de producción**: usá solo imágenes de `public/assets/` y
   borrá por la API las imágenes de prueba al terminar.
+- **Una isla y su módulo de reglas se llaman igual salvo mayúsculas** (`Galeria.tsx` y `galeria.ts`):
+  importá la isla con extensión (`./Galeria.tsx`); sin ella, en Windows resuelve al `.ts` y
+  `astro check` falla con `ts(1149)`.
 - **TypeScript queda en 6**: `astro check` no acepta la 7.
 - **`pnpm peers check` marca `typescript` para `openapi-typescript`** (pide `^5`): genera bien con
   la 6 y el chequeo de `pnpm lint` lo cubre; no bajes TypeScript por eso.

@@ -2,6 +2,9 @@ import { type FormEvent, type KeyboardEvent, type RefObject, useCallback, useEff
 import { apiAdmin, type components, ErrorApi, pedir } from '../api'
 import { avisar } from './avisos'
 import Campo, { CampoSelect, CampoTexto } from './Campo'
+import { confirmar } from './confirmar'
+import Galeria from './Galeria.tsx'
+import { type Imagen, motivoParaNoPublicar } from './galeria'
 import { mensajeDeError } from './mensajes'
 import {
   cambiosPara,
@@ -29,7 +32,8 @@ import { exigirSesion, redirigirSiNoAutenticado } from './sesion'
 
 // `/admin/productos/editar` (F6-D1, F6-D3): sin `?id=` es el alta; con `?id=` edita ese producto, que se
 // busca en `GET /admin/productos` (no hay `GET /admin/productos/{id}`). Tras crear, la URL pasa a `?id=` y
-// el formulario sigue abierto en modo edición. La fase 7 suma acá la galería, publicar y volver a borrador.
+// el formulario sigue abierto en modo edición. Con un producto cargado, suma la galería (fuera del `<form>`)
+// y "Publicar" / "Volver a borrador" en la cabecera (F7-D1, F7-D9).
 
 type Categoria = components['schemas']['Categoria']
 
@@ -49,6 +53,7 @@ export default function EditarProducto() {
   const [errorMedidas, setErrorMedidas] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [enviando, setEnviando] = useState(false)
+  const [cambiandoEstado, setCambiandoEstado] = useState<'publicando' | 'volviendo' | null>(null)
   const nombreRef = useRef<HTMLInputElement>(null)
   const precioRef = useRef<HTMLInputElement>(null)
   const categoriaRef = useRef<HTMLSelectElement>(null)
@@ -108,8 +113,8 @@ export default function EditarProducto() {
   const cambiar = <K extends keyof Formulario>(campo: K, valor: Formulario[K]) =>
     setFormulario((actual) => ({ ...actual, [campo]: valor }))
 
-  const enviar = async (evento: FormEvent<HTMLFormElement>) => {
-    evento.preventDefault()
+  /** Valida y guarda el formulario. Devuelve si quedó guardado (o no había cambios). */
+  const guardar = async (): Promise<boolean> => {
     setError(null)
     setErrorMedidas(null)
     const leido = leerFormulario(formulario)
@@ -117,15 +122,16 @@ export default function EditarProducto() {
       setErrores(leido.errores)
       const { nombre, precio } = leido.errores
       ;(nombre ? nombreRef : precio ? precioRef : descripcionRef).current?.focus()
-      return
+      return false
     }
     setErrores({})
     const cambios = producto && cambiosPara(leido.cuerpo, producto)
     if (cambios && Object.keys(cambios).length === 0) {
       avisar('No hay cambios para guardar.')
-      return
+      return true
     }
     setEnviando(true)
+    let listo = false
     try {
       const guardado = producto
         ? await pedir(
@@ -136,11 +142,87 @@ export default function EditarProducto() {
       setProducto(guardado)
       setFormulario(formularioDe(guardado))
       avisar(producto ? 'Producto guardado.' : 'Producto creado.')
+      listo = true
     } catch (e) {
-      if (redirigirSiNoAutenticado(e)) return
+      if (redirigirSiNoAutenticado(e)) return false
       await manejarError(e)
     }
     setEnviando(false)
+    return listo
+  }
+
+  const enviar = (evento: FormEvent<HTMLFormElement>) => {
+    evento.preventDefault()
+    void guardar()
+  }
+
+  /** Relee la galería y el estado del producto; el resto del formulario queda como está (F7-D1). */
+  const recargar = useCallback(async () => {
+    if (id === null) return
+    try {
+      const { productos } = await pedir(apiAdmin.GET('/admin/productos'))
+      const actual = productos.find((p) => p.id === id)
+      if (!actual) {
+        setNoEncontrado(true)
+        return
+      }
+      setProducto((p) => p && { ...p, galeria: actual.galeria, estado: actual.estado })
+    } catch (e) {
+      if (!redirigirSiNoAutenticado(e)) avisar(mensajeDeError(e), 'error')
+    }
+  }, [id])
+
+  const cambiarGaleria = useCallback(
+    (cambio: (galeria: Imagen[]) => Imagen[]) => setProducto((p) => p && { ...p, galeria: cambio(p.galeria) }),
+    [],
+  )
+
+  // Publicar en pasos separados (F7-D9): si hay cambios sin guardar, primero se guardan.
+  const publicar = async () => {
+    if (!producto) return
+    setCambiandoEstado('publicando')
+    try {
+      if (sinGuardar && !(await guardar())) return
+      const publicado = await pedir(
+        apiAdmin.POST('/admin/productos/{id}/publicar', { params: { path: { id: producto.id } } }),
+      )
+      setProducto((p) => p && { ...p, estado: publicado.estado, galeria: publicado.galeria })
+      avisar('Producto publicado. Aparece en el catálogo en hasta un minuto.')
+    } catch (e) {
+      if (redirigirSiNoAutenticado(e)) return
+      const codigo = codigoDe(e)
+      if (codigo === 'PRODUCTO_NO_ENCONTRADO') setNoEncontrado(true)
+      else {
+        if (codigo === 'SIN_IMAGEN_PRINCIPAL') await recargar()
+        avisar(mensajeDeError(e), 'error')
+      }
+    } finally {
+      setCambiandoEstado(null)
+    }
+  }
+
+  const volverABorrador = async () => {
+    if (!producto) return
+    const confirmado = await confirmar({
+      titulo: `¿Volver a borrador «${producto.nombre}»?`,
+      detalle: 'Deja de verse en el catálogo.',
+      accion: 'Volver a borrador',
+    })
+    if (!confirmado) return
+    setCambiandoEstado('volviendo')
+    try {
+      const borrador = await pedir(
+        apiAdmin.POST('/admin/productos/{id}/volver-a-borrador', { params: { path: { id: producto.id } } }),
+      )
+      setProducto((p) => p && { ...p, estado: borrador.estado })
+      avisar('Producto en borrador.')
+    } catch (e) {
+      if (redirigirSiNoAutenticado(e)) return
+      if (codigoDe(e) === 'PRODUCTO_NO_ENCONTRADO') setNoEncontrado(true)
+      else avisar(mensajeDeError(e), 'error')
+    } finally {
+      setCambiandoEstado(null)
+    }
   }
 
   const manejarError = async (e: unknown) => {
@@ -202,6 +284,16 @@ export default function EditarProducto() {
           <span className={`estado estado--${producto.estado}`}>
             {producto.estado === 'publicado' ? 'Publicado' : 'Borrador'}
           </span>
+        )}
+        {producto && !cargando && (
+          <EstadoProducto
+            estado={producto.estado}
+            galeria={producto.galeria}
+            cambiando={cambiandoEstado}
+            bloqueado={enviando}
+            alPublicar={publicar}
+            alVolverABorrador={volverABorrador}
+          />
         )}
       </div>
       {cargando ? (
@@ -284,12 +376,69 @@ export default function EditarProducto() {
           </button>
         </form>
       )}
+      {!cargando &&
+        (producto ? (
+          <Galeria
+            productoId={producto.id}
+            estado={producto.estado}
+            galeria={producto.galeria}
+            alCambiar={cambiarGaleria}
+            recargar={recargar}
+          />
+        ) : (
+          !error && <p className="lista__vacia">Creá el producto para agregar imágenes.</p>
+        ))}
       {cargando && error && (
         <p className="aviso aviso--error" role="alert">
           {error}
         </p>
       )}
     </section>
+  )
+}
+
+interface PropsEstado {
+  estado: Producto['estado']
+  galeria: Imagen[]
+  cambiando: 'publicando' | 'volviendo' | null
+  /** El formulario se está guardando. */
+  bloqueado: boolean
+  alPublicar: () => void
+  alVolverABorrador: () => void
+}
+
+/** "Publicar" en borrador, con el motivo si no se puede; "Volver a borrador" en publicado (F7-D9). */
+function EstadoProducto({ estado, galeria, cambiando, bloqueado, alPublicar, alVolverABorrador }: PropsEstado) {
+  if (estado === 'publicado')
+    return (
+      <button
+        type="button"
+        className="btn btn--secundario"
+        onClick={alVolverABorrador}
+        disabled={cambiando !== null || bloqueado}
+      >
+        {cambiando === 'volviendo' ? 'Volviendo…' : 'Volver a borrador'}
+      </button>
+    )
+  const motivo = motivoParaNoPublicar(galeria)
+  return (
+    <div className="publicar">
+      <button
+        type="button"
+        className="btn btn--primario"
+        onClick={alPublicar}
+        disabled={motivo !== null || cambiando !== null || bloqueado}
+        aria-describedby={motivo ? 'publicarMotivo' : undefined}
+      >
+        {cambiando === 'publicando' ? 'Publicando…' : 'Publicar'}
+      </button>
+      {motivo && (
+        <p className="publicar__motivo" id="publicarMotivo">
+          {motivo.texto}
+          {motivo.esperando && <progress aria-label="Procesamiento de la imagen principal" />}
+        </p>
+      )}
+    </div>
   )
 }
 

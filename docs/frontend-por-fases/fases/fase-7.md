@@ -220,3 +220,96 @@ borrador" (F7-D9); la miniatura del listado (F7-D10); `galeria.ts` con tests y `
 (F7-D11).
 
 **Cerrar cuando:** una imagen real se sube desde el browser, se procesa, se publica y se ve en `/catalogo-nuevo` (D4); el `PUT` a R2 pasa el CORS con el origen del admin.
+
+## Implementado
+
+- `src/admin/Galeria.tsx`: la isla de la galería (F7-D1 a F7-D8), con `Tarjeta` y `Etapa` (texto y
+  `<progress>`). Cola de subidas, `XMLHttpRequest` a R2, consulta de etapa y región `role="status"`.
+- `src/admin/galeria.ts` (reglas puras de F7-D11 más `imagenPendiente`, `conImagenNueva`, `mover` y
+  `TIPOS_ACEPTADOS`) con `galeria.test.ts` (25 tests); `src/admin/preprocesar.ts` (canvas, F7-D2).
+- `EditarProducto.tsx`: `guardar()` separado del `submit` (lo reusa "Publicar"), `recargar`,
+  `cambiarGaleria`, `EstadoProducto` ("Publicar" con su motivo / "Volver a borrador") y la galería
+  debajo del `<form>`, o "Creá el producto para agregar imágenes." en el alta.
+- `Productos.tsx`: `Miniatura` de 48 px primera en cada fila (F7-D10).
+- `src/admin/iconos.tsx`: íconos del prototipo (foto, flechas, estrella).
+- `admin.css`: `.visualmente-oculto`, `.lista__foto`, `.publicar*`, `.galeria*`, `.foto*`,
+  `.btn--icono` y las barras `progress` (`:indeterminate` animado, quieto con `prefers-reduced-motion`).
+
+## Decisiones técnicas
+
+| Decisión | Motivo |
+| --- | --- |
+| `EditarProducto` importa `./Galeria.tsx` con extensión | En Windows, `./Galeria` sin extensión resuelve a `galeria.ts` (mismo nombre salvo mayúsculas) y `astro check` falla con `ts(1149)`. |
+| Lo local de cada subida (blob, vista previa, `uploadUrl`, `Subida`) vive en un estado `Record` por `imagenId` con copia en `useRef` | Los flujos asíncronos (cola, reintento, `XMLHttpRequest`) leen el valor vigente sin esperar un render. |
+| Subidas y reintentos de subida pasan por una sola cola de promesas | Cumple "uno por vez" también si se eligen más archivos o se reintenta a mitad de una secuencia. |
+| El cupo descuenta los archivos elegidos que todavía no pidieron `upload-url` (`reservados`) | Elegir otra tanda durante una subida no pasa del máximo de 6. |
+| `recargar` actualiza solo `galeria` y `estado` del producto cargado | El formulario y su comparación para el `PATCH` (F6-D3) no cambian por una recarga de la galería. |
+| La consulta de etapa es un único efecto, reiniciado cuando cambia la lista de imágenes en proceso o `document.hidden`; espera el pedido en vuelo antes de seguir | Una sola consulta a la vez (F7-D4) aunque el efecto se reinicie a mitad de un pedido. |
+| `confirmando` se muestra como "Subiendo… 100 %" y una `pendiente_subida` con archivo local sin subida activa, como "Subiendo…" indeterminado | F7-D5 no fija el texto de esos dos estados de transición. |
+| Las tarjetas con subida fallida o sin terminar muestran solo sus acciones ("Reintentar"/"Quitar"), sin orden ni diseño | Es lo que pide F7-D3 para esas tarjetas; ordenar una imagen sin archivo no aporta. |
+| Los errores de preparación se acumulan en el aviso de la galería; los de "Publicar" y "Volver a borrador", en el toast de error | F7-D2 y F7-D9 no fijan el lugar; el aviso de la galería ya junta los errores de subida. |
+| Guardar el "Nombre del diseño" no bloquea los botones de la galería | F7-D6 bloquea orden, diseño y quitar; el nombre no cambia posiciones. |
+
+## Validaciones ejecutadas
+
+- `pnpm lint`, `pnpm typecheck` (0 errores; hints ya existentes), `pnpm test` (78, 25 nuevos de
+  `galeria.ts`) y `pnpm build` pasan.
+- Contra el backend local (owner, `Origin: http://localhost:4321`), con un script Node de `fetch` fuera
+  del repo y `public/assets/asado-placa.webp` y `bowls-placa.webp`:
+  - `upload-url` → `201`; preflight `OPTIONS` a R2 → `204` con `Access-Control-Allow-Origin:
+    http://localhost:4321`; `PUT` → `200` con el mismo header; `confirmar` → `pendiente_procesamiento`;
+    consulta cada 2 s → `procesada` en ~4 s, con `url160`;
+  - `publicar` → `200 publicado`, y el producto aparece en `GET /api/productos`;
+  - `PATCH esDiseno` en la posición 1 → `200`; `PUT` de orden con el diseño primero → `422`
+    `DISENO_EN_PRINCIPAL`; `PATCH esDiseno` en la posición 0 → `422` `DISENO_EN_PRINCIPAL`;
+  - `DELETE` de la única válida del publicado → `409` `ULTIMA_IMAGEN_VALIDA`; `volver-a-borrador` →
+    `200 borrador`;
+  - con 6 imágenes, el séptimo `upload-url` → `422` `GALERIA_COMPLETA`;
+  - las 6 imágenes y el producto se borraron por la API; `GET /admin/productos` quedó vacío.
+- `astro dev`: `/admin/productos/editar` y `/admin/productos` responden `200` con `noindex` y la isla;
+  Vite sirve `Galeria.tsx` y `galeria.ts` como módulos distintos.
+
+## Desvíos
+
+- Con cupo para una sola imagen, el toast dice "Entraba 1 imagen más: se agregó la primera." en vez
+  del plural de F7-D3.
+- La galería vacía muestra "Todavía no hay imágenes." (F7-D1 no fija el texto).
+- F7-D12 pedía curl; se usó `fetch` de Node con los mismos pedidos para manejar la cookie y el `PUT`
+  binario en un solo script.
+- La isla no se probó en un navegador (preprocesamiento, `XMLHttpRequest`, barras, foco, lector de
+  pantalla): ver las verificaciones del usuario.
+
+## Verificaciones del usuario
+
+Primero en local (`pnpm dev` con el backend local, AGENTS.md) y después del push a `main` en
+`admin.*/admin`, logueado. Solo imágenes de `public/assets/` en local (suben al bucket de producción);
+en `admin.*`, una foto real.
+
+1. `/admin/productos/editar` (alta) muestra "Creá el producto para agregar imágenes."; crear el producto
+   "Prueba F7": aparece "Galería (0/6)", "Todavía no hay imágenes." y "Publicar" deshabilitado con
+   "Para publicar, agregá una imagen que no sea un diseño.".
+2. "Agregar imágenes" con dos archivos: cada tarjeta pasa por "Preparando…", "Subiendo… N %" (barra que
+   avanza), "Pendiente de procesamiento" / "Procesando…" (barra animada) y termina con la imagen. La
+   primera dice "Principal". En DevTools → Network, el `PUT` a `…r2.cloudflarestorage.com` da `200`, sin
+   error de CORS. Mientras "Publicar" espera, muestra "Se puede publicar cuando la imagen principal
+   termine de procesarse." con barra.
+3. Intentar cerrar la pestaña durante una subida: el navegador avisa.
+4. Marcar "Es un diseño" en la principal: toast "La imagen principal no puede ser un diseño. Hacé
+   principal otra imagen primero." y la casilla queda desmarcada. Marcarlo en la segunda: aparece
+   "Nombre del diseño"; escribir "Aves" + Enter: toast "Nombre del diseño guardado." y la marca
+   "Diseño: Aves".
+5. "Mover antes" en el diseño: toast "La imagen principal no puede ser un diseño.", sin cambios. Con
+   Tab, recorrer los botones de la tarjeta: foco visible y `aria-label` "Mover antes la imagen 2".
+6. Elegir 6 archivos con 2 ya cargados: toast "Entraban 4 imágenes más: se agregaron las primeras 4.";
+   con 6, "Agregar imágenes" queda deshabilitado con "La galería está completa (6 de 6).".
+7. "Publicar" con un cambio sin guardar en el precio: guarda, publica, toast "Producto publicado.
+   Aparece en el catálogo en hasta un minuto."; la píldora dice "Publicado". En hasta un minuto, el
+   producto se ve en `/catalogo-nuevo` con su imagen (criterio de cierre).
+8. En el publicado, "Quitar" en la única imagen válida: el aviso dice "Es la última imagen válida de un
+   producto publicado: volvé a borrador para quitarla." sin diálogo.
+9. "Volver a borrador": confirma "¿Volver a borrador «Prueba F7»?"; toast "Producto en borrador.".
+10. "Quitar" otra imagen: diálogo "¿Quitar esta imagen?"; al confirmar, toast "Imagen quitada.".
+11. `/admin/productos`: la fila de "Prueba F7" muestra la miniatura de 48 px.
+12. En `admin.*` (Safari de macOS o iPhone), subir una foto HEIC: se sube como JPEG y se procesa. En
+    Chrome de escritorio, un `.heic` da "No se pudo leer «archivo». Elegí una imagen JPG, PNG o WebP.".
+13. Borrar "Prueba F7" desde el listado (borra su galería).

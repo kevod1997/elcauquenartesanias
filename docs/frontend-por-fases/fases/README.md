@@ -13,7 +13,7 @@ decisiones técnicas y las validaciones ejecutadas.
 | 4. Login y sesión | 🔎 Implementada (2026-09-25) | [fase-4.md](./fase-4.md) |
 | 5. Categorías y tipos de medida | 🔎 Implementada (2026-09-25) | [fase-5.md](./fase-5.md) |
 | 6. Productos con medidas | 🔎 Implementada (2026-09-25) | [fase-6.md](./fase-6.md) |
-| 7. Galería e imágenes | ⏳ Pendiente | |
+| 7. Galería e imágenes | 🔎 Implementada (2026-09-25) | [fase-7.md](./fase-7.md) |
 | 8. Orden | ⏳ Pendiente | |
 | 9. Integrantes | ⏳ Pendiente | |
 | 10. Limpieza y cierre | ⏳ Pendiente | |
@@ -21,10 +21,10 @@ decisiones técnicas y las validaciones ejecutadas.
 "🔎 Implementada" es una fase con el código commiteado a la que le quedan verificaciones del
 usuario; cuenta como dependencia cumplida.
 
-**Siguiente:** implementar la fase 7 con el prompt 6.2 de [prompts.md](../prompts.md): su definición
-([fase-7.md](./fase-7.md), F7-D1 a F7-D12) ya está cerrada. Leé [fase-6.md](./fase-6.md) (formulario y
-listado donde se suma la galería) y, para la API, [fase-2.md](./fase-2.md). La fase 8 (orden) sigue sin
-preparar (prompt 6.1) y también depende solo de la 6.
+**Siguiente:** preparar la fase 8 (orden) con el prompt 6.1 de [prompts.md](../prompts.md). Leé
+[fase-6.md](./fase-6.md) (el listado de `/admin/productos`, donde se suma reordenar) y
+[fase-7.md](./fase-7.md) (miniatura del listado y cómo `galeria.ts` separa reglas puras con tests). La
+fase 9 (integrantes) también está sin preparar y depende solo de la 4.
 
 ## Decisiones para el usuario
 
@@ -40,6 +40,8 @@ borra esa sección y su línea de acá, y la fase pasa a "✅ Cerrada".
 - [Fase 4](./fase-4.md#verificaciones-del-usuario)
 - [Fase 5](./fase-5.md#verificaciones-del-usuario)
 - [Fase 6](./fase-6.md#verificaciones-del-usuario)
+- [Fase 7](./fase-7.md#verificaciones-del-usuario): incluye el criterio de cierre (subida desde el
+  navegador con CORS en `admin.*` y el producto en `/catalogo-nuevo`).
 
 ## Pendientes abiertos
 
