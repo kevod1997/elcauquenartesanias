@@ -180,30 +180,16 @@ anuncia el botón con su nombre y su estado (presionado o no).
   - `/admin/ingresar` con el backend detenido (así muestra el formulario sin cerrar la sesión): el botón
     "Mostrar contraseña" alterna con clic, Espacio y Enter.
   - El producto y la categoría de prueba se borraron por la API (`204`).
+- En producción, tras el deploy (2026-09-25):
+  - el usuario, con curl: `/no-existe` en la raíz → `404`; en `admin.*`, `/no-existe` → `307` a
+    `/admin/no-existe` y `/` → `307` a `/admin/productos`;
+  - el agente, con curl: `admin.*/admin/no-existe` → `404`; `admin.*/admin` → `302` a
+    `/admin/productos`; `/admin` en la raíz → `307` a `admin.*/admin/productos`; la 404 de la raíz
+    trae "No encontramos esta página";
+  - el usuario confirmó el resto de las verificaciones (login sin `volver`, botón de la contraseña).
 
 ## Desvíos
 
 - `PaginaError.astro` no estaba en F11-D3; es un componente del layout para no repetir el hero.
 - `Ingresar` se probó con el backend detenido, no con la sesión cerrada: el agente no escribe
   contraseñas.
-- Quedan para el usuario, tras el deploy: la 404 en producción, los redirects de `admin.*`, el login
-  real sin `volver` y el lector de pantalla (ver abajo).
-
-## Verificaciones del usuario
-
-Tras el push y el deploy:
-
-1. En una terminal:
-   `curl -sI https://elcauquenartesanias.com.ar/no-existe` → `HTTP/2 404`;
-   `curl -sI https://admin.elcauquenartesanias.com.ar/no-existe` → `307` a `/admin/no-existe`, y ese
-   → `404`; `curl -sI https://admin.elcauquenartesanias.com.ar/` → `307` a `/admin/productos`;
-   `curl -sI https://admin.elcauquenartesanias.com.ar/admin` → `302` a `/admin/productos` (el redirect
-   de Astro); `curl -sI https://elcauquenartesanias.com.ar/admin` → `307` a
-   `https://admin.elcauquenartesanias.com.ar/admin/productos`. Los `307` son los `"permanent": false`
-   de `vercel.json`. En el navegador,
-   `https://elcauquenartesanias.com.ar/no-existe` muestra "No encontramos esta página".
-2. En `admin.*`, "Cerrar sesión" e iniciar sesión desde `/admin/ingresar` (sin `volver`): termina en
-   `/admin/productos`. En el login, el ojo muestra y oculta la contraseña.
-3. Con lector de pantalla (NVDA o Narrador) en `/admin/ingresar`: Tab hasta el botón anuncia "Mostrar
-   contraseña, botón de alternancia, no presionado"; Espacio → "presionado". Lo mismo en
-   `/admin/restablecer?token=x` con "Mostrar contraseña nueva" y "Mostrar contraseña repetida".
