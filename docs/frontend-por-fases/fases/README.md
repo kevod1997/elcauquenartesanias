@@ -14,17 +14,17 @@ decisiones técnicas y las validaciones ejecutadas.
 | 5. Categorías y tipos de medida | ✅ Cerrada (2026-09-25) | [fase-5.md](./fase-5.md) |
 | 6. Productos con medidas | ✅ Cerrada (2026-09-25) | [fase-6.md](./fase-6.md) |
 | 7. Galería e imágenes | ✅ Cerrada (2026-09-25) | [fase-7.md](./fase-7.md) |
-| 8. Orden | ⏳ Pendiente | |
+| 8. Orden | 🔎 Implementada | [fase-8.md](./fase-8.md) |
 | 9. Integrantes | ⏳ Pendiente | |
 | 10. Limpieza y cierre | ⏳ Pendiente | |
 
 "🔎 Implementada" es una fase con el código commiteado a la que le quedan verificaciones del
 usuario; cuenta como dependencia cumplida.
 
-**Siguiente:** implementar la fase 8 (orden, ya preparada: F8-D1 a F8-D7) con el prompt 6.2 de
-[prompts.md](../prompts.md). Leé [fase-8.md](./fase-8.md), `src/admin/Productos.tsx` (el listado
-donde se suma reordenar) y `src/admin/galeria.ts` (`mover`, y cómo separa reglas puras con tests). La
-fase 9 (integrantes) está sin preparar y depende solo de la 4.
+**Siguiente:** preparar la fase 9 (integrantes, depende solo de la 4) con el prompt 6.1 de
+[prompts.md](../prompts.md). Leé [fase-9.md](./fase-9.md), el pendiente de "Fase 9" más abajo,
+`src/admin/Categorias.tsx` (el patrón de listado de F5-D2 a F5-D6) y `src/admin/Admin.astro` (la
+barra con `data-rol`). La fase 10 espera el cierre de la 8 y la 9.
 
 ## Decisiones para el usuario
 
@@ -37,7 +37,8 @@ Pruebas que el agente no puede ejecutar (visuales, en producción o tras un push
 están en la sección "Verificaciones del usuario" de cada `fase-N.md`. Al confirmarlas todas, se
 borra esa sección y su línea de acá, y la fase pasa a "✅ Cerrada".
 
-Ninguna.
+- **Fase 8:** subir y bajar con teclado, guardar y verlo en `/catalogo-nuevo`, y el conflicto con dos
+  pestañas, en `admin.*` tras el push ([pasos](./fase-8.md#verificaciones-del-usuario)).
 
 ## Pendientes abiertos
 

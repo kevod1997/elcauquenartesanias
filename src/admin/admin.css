@@ -913,3 +913,32 @@ progress:indeterminate::-moz-progress-bar {
     background: var(--arena);
   }
 }
+
+/* ---------- Orden global (F8-D1, F8-D2) ---------- */
+
+.orden__acciones {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.orden__pendiente {
+  font-size: 13px;
+  color: var(--texto-suave);
+}
+
+.lista__orden {
+  flex: none;
+  min-width: 2ch;
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 22px;
+  color: var(--madera);
+  text-align: center;
+}
+
+.lista__acciones {
+  align-items: center;
+}

@@ -104,3 +104,63 @@ resto de los errores van al aviso de la lista con `mensajeDeError` y conservan e
 `src/admin/orden.ts` con tests (F8-D6).
 
 **Cerrar cuando:** reordenar se refleja en `/catalogo-nuevo` (D4) y un conflicto simulado con dos pestañas se resuelve sin error.
+
+## Implementado
+
+- `src/admin/Productos.tsx`: el listado pasa a `<ol>` con la posición (`.lista__orden`), "Subir" y
+  "Bajar" por fila, "Guardar orden" con "Hay cambios en el orden sin guardar." en la cabecera, el
+  conflicto de F8-D4, el aviso de `beforeunload` y la región `role="status"` del anuncio.
+- `src/admin/orden.ts` (`hayCambios`, `rebasar`) con `orden.test.ts` (6 tests).
+- `src/admin/iconos.tsx`: `IconoArriba` e `IconoAbajo` del prototipo.
+- `admin.css`: `.orden__acciones`, `.orden__pendiente` y `.lista__orden`.
+
+## Decisiones técnicas
+
+| Decisión | Motivo |
+| --- | --- |
+| `rebasar(sinGuardar, anterior, nuevo)` recibe también el orden cargado antes de la recarga; sin cambios del usuario devuelve el de la API | Rebasar un orden sin cambios tras borrar, con otro integrante que reordenó, mostraría como "cambios sin guardar" el orden viejo. |
+| El orden cargado, su versión y el orden sin guardar son un solo estado (`Orden`), con copia en `useRef` que `cargar` lee después del `await` | La recarga rebasa el orden vigente al llegar la respuesta, aunque el usuario haya movido filas mientras tanto. |
+| El foco vuelve con un efecto sobre `[data-mover][data-id]` después del render | Es cuando la fila ya está en su lugar nuevo; los atributos siguen como `enfocarEditar` de `recursos.ts`. |
+| La posición es `.lista__orden`, no `.fila__orden` | La fila del admin usa las clases `lista__*` de F5-D2; el estilo es el del prototipo, a 22 px para la fila más baja. |
+| El texto de cambios va antes de "Guardar orden" y lo describe con `aria-describedby` | Así se lee junto al botón que lo resuelve. |
+
+## Validaciones ejecutadas
+
+- `pnpm lint`, `pnpm typecheck` (0 errores; hints ya existentes), `pnpm test` (84, 6 nuevos de
+  `orden.ts`) y `pnpm build` pasan.
+- Contra el backend local (owner, `Origin: http://localhost:4321`), con un script Node de `fetch` fuera
+  del repo, sobre un producto ya existente más dos creados ("Prueba orden A" y "B"):
+  - crear subió `ordenVersion` de 7 a 8 y a 9, con los nuevos al final;
+  - `PUT` del orden invertido con la versión 9 → `200` con la versión 10 y el orden enviado;
+  - el mismo `PUT` con la versión 9 → `409` `ORDEN_DESACTUALIZADO`;
+  - con la versión actual, sin un id → `400` `ORDEN_INVALIDO` ("El orden tiene que incluir todos los
+    productos, sin otros ids."); con un id repetido → `400` `SOLICITUD_INVALIDA`;
+  - cada producto con `public/assets/asado-placa-640.webp` (procesada) y publicado: `publicar` no
+    cambió `ordenVersion`; `GET /api/productos` los listó B, A y, tras intercambiarlos con el `PUT`, A, B;
+  - borrar cada uno subió `ordenVersion` (11 → 12 → 13); el orden final quedó igual al inicial.
+- `astro dev`: `/admin/productos` responde `200` con `noindex` y la isla `Productos.tsx`.
+
+## Desvíos
+
+- F8-D7 pedía curl; se usó `fetch` de Node con los mismos pedidos, como en la fase 7.
+- La isla no se probó en un navegador: iniciar sesión exige escribir la contraseña, y eso queda para el
+  usuario. El foco, el anuncio, el aviso de conflicto y `beforeunload` quedan en las verificaciones del
+  usuario; las reglas del rebase, en los tests de `orden.ts`.
+
+## Verificaciones del usuario
+
+En `https://admin.elcauquenartesanias.com.ar/admin/productos`, tras el deploy, con al menos tres
+productos (dos publicados):
+
+1. Con Tab hasta "Bajar «X»" del primero y Enter: la fila baja a "02", el foco sigue en "Bajar «X»" de
+   la misma fila y aparece "Hay cambios en el orden sin guardar.". Llevarla con Enter hasta el final:
+   el foco pasa a "Subir «X»". Con lector de pantalla, se anuncia "«X», posición N de M.".
+2. Con cambios, cerrar la pestaña o tocar "Editar": el navegador pide confirmar la salida. Cancelar.
+3. Dejar primero un producto publicado que no lo estaba, "Guardar orden": toast "Orden guardado. El
+   catálogo se actualiza en hasta un minuto." y el botón se deshabilita. Al minuto, recargar
+   `/catalogo-nuevo`: el producto aparece primero.
+4. Abrir el listado en dos pestañas. En la A, mover un producto y guardar. En la B, mover otro distinto
+   y guardar: aparece el aviso "Otro integrante cambió los productos mientras ordenabas…", la lista
+   de la B conserva su orden y "Guardar orden" sigue habilitado. Guardar en la B: toast de guardado,
+   sin error. Recargar la A: muestra el orden de la B.
+5. Dejar el orden del catálogo como lo querés y guardarlo.

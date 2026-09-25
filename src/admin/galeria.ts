@@ -65,7 +65,7 @@ export const esValida = (imagen: Imagen | undefined): boolean =>
 
 // ---------- Orden (F7-D6) ----------
 
-/** La galería con la imagen `i` movida `paso` lugares (−1 antes, +1 después). */
+/** La lista con el elemento `i` movido `paso` lugares (−1 antes, +1 después); también la usa el orden global (F8-D2). */
 export function mover<T>(lista: T[], i: number, paso: number): T[] {
   const j = i + paso
   if (i < 0 || j < 0 || i >= lista.length || j >= lista.length) return lista

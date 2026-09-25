@@ -36,6 +36,8 @@ const Trazo = ({ d }: { d: string }) => (
 
 export const IconoIzquierda = () => <Trazo d="M8.5 2.5L4 7l4.5 4.5" />
 export const IconoDerecha = () => <Trazo d="M5.5 2.5L10 7l-4.5 4.5" />
+export const IconoArriba = () => <Trazo d="M2.5 8.5L7 4l4.5 4.5" />
+export const IconoAbajo = () => <Trazo d="M2.5 5.5L7 10l4.5-4.5" />
 
 export const IconoEstrella = () => (
   <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
