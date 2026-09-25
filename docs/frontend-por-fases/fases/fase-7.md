@@ -58,7 +58,7 @@ Motivo:
 - HEIC: en iOS, todos los navegadores convierten a JPEG al elegir el archivo, sea cual sea el
   `accept`. Safari de macOS convierte al primer tipo del `accept` si `image/heic` no está
   ([zenn.dev, Safari 17.6](https://zenn.dev/kou_pg_0131/articles/safari-input-file-heic), fuente
-  secundaria; se comprueba en las verificaciones del usuario). Chrome de escritorio no decodifica
+  secundaria; el usuario lo comprobó con una foto HEIC en `admin.*`). Chrome de escritorio no decodifica
   HEIC: cae en el error de lectura.
 - La calidad 0,85 es una elección de esta fase: con 2560 px deja el archivo muy por debajo de 10 MiB.
 
@@ -268,6 +268,18 @@ borrador" (F7-D9); la miniatura del listado (F7-D10); `galeria.ts` con tests y `
   - las 6 imágenes y el producto se borraron por la API; `GET /admin/productos` quedó vacío.
 - `astro dev`: `/admin/productos/editar` y `/admin/productos` responden `200` con `noindex` y la isla;
   Vite sirve `Galeria.tsx` y `galeria.ts` como módulos distintos.
+- En `admin.*` (2026-09-25), con producción y un producto "Prueba F7" con las medidas de las
+  Cazuelas de `main.js`:
+  - se subieron `cazuelas-placa.webp` y `bowls-placa.webp` de `public/assets/`; la primera pasó a
+    "procesada" ("Principal"), y `confirmar` y los derivados en `img.*` dieron `200`;
+  - "Publicar" dejó el producto "Publicado" y en el minuto apareció en `/catalogo-nuevo` con su
+    precio, sus medidas ("Diámetro 13 cm", "Alto 4 cm") y su imagen; el usuario confirmó que se ve
+    bien en el celular;
+  - el listado mostró la miniatura de 48 px del producto;
+  - un `.heic` de prueba (bytes que Chrome no decodifica) dio "No se pudo leer «prueba.heic». Elegí
+    una imagen JPG, PNG o WebP." y la galería siguió en 2/6; el usuario subió una foto HEIC desde
+    un dispositivo de Apple y confirmó que se procesa;
+  - "Prueba F7" se borró desde el listado, y la lista volvió a "Todavía no hay productos.".
 
 ## Desvíos
 
@@ -276,40 +288,11 @@ borrador" (F7-D9); la miniatura del listado (F7-D10); `galeria.ts` con tests y `
 - La galería vacía muestra "Todavía no hay imágenes." (F7-D1 no fija el texto).
 - F7-D12 pedía curl; se usó `fetch` de Node con los mismos pedidos para manejar la cookie y el `PUT`
   binario en un solo script.
-- La isla no se probó en un navegador (preprocesamiento, `XMLHttpRequest`, barras, foco, lector de
-  pantalla): ver las verificaciones del usuario.
-
-## Verificaciones del usuario
-
-Primero en local (`pnpm dev` con el backend local, AGENTS.md) y después del push a `main` en
-`admin.*/admin`, logueado. Solo imágenes de `public/assets/` en local (suben al bucket de producción);
-en `admin.*`, una foto real.
-
-1. `/admin/productos/editar` (alta) muestra "Creá el producto para agregar imágenes."; crear el producto
-   "Prueba F7": aparece "Galería (0/6)", "Todavía no hay imágenes." y "Publicar" deshabilitado con
-   "Para publicar, agregá una imagen que no sea un diseño.".
-2. "Agregar imágenes" con dos archivos: cada tarjeta pasa por "Preparando…", "Subiendo… N %" (barra que
-   avanza), "Pendiente de procesamiento" / "Procesando…" (barra animada) y termina con la imagen. La
-   primera dice "Principal". En DevTools → Network, el `PUT` a `…r2.cloudflarestorage.com` da `200`, sin
-   error de CORS. Mientras "Publicar" espera, muestra "Se puede publicar cuando la imagen principal
-   termine de procesarse." con barra.
-3. Intentar cerrar la pestaña durante una subida: el navegador avisa.
-4. Marcar "Es un diseño" en la principal: toast "La imagen principal no puede ser un diseño. Hacé
-   principal otra imagen primero." y la casilla queda desmarcada. Marcarlo en la segunda: aparece
-   "Nombre del diseño"; escribir "Aves" + Enter: toast "Nombre del diseño guardado." y la marca
-   "Diseño: Aves".
-5. "Mover antes" en el diseño: toast "La imagen principal no puede ser un diseño.", sin cambios. Con
-   Tab, recorrer los botones de la tarjeta: foco visible y `aria-label` "Mover antes la imagen 2".
-6. Elegir 6 archivos con 2 ya cargados: toast "Entraban 4 imágenes más: se agregaron las primeras 4.";
-   con 6, "Agregar imágenes" queda deshabilitado con "La galería está completa (6 de 6).".
-7. "Publicar" con un cambio sin guardar en el precio: guarda, publica, toast "Producto publicado.
-   Aparece en el catálogo en hasta un minuto."; la píldora dice "Publicado". En hasta un minuto, el
-   producto se ve en `/catalogo-nuevo` con su imagen (criterio de cierre).
-8. En el publicado, "Quitar" en la única imagen válida: el aviso dice "Es la última imagen válida de un
-   producto publicado: volvé a borrador para quitarla." sin diálogo.
-9. "Volver a borrador": confirma "¿Volver a borrador «Prueba F7»?"; toast "Producto en borrador.".
-10. "Quitar" otra imagen: diálogo "¿Quitar esta imagen?"; al confirmar, toast "Imagen quitada.".
-11. `/admin/productos`: la fila de "Prueba F7" muestra la miniatura de 48 px.
-12. En `admin.*` (Safari de macOS o iPhone), subir una foto HEIC: se sube como JPEG y se procesa. En
-    Chrome de escritorio, un `.heic` da "No se pudo leer «archivo». Elegí una imagen JPG, PNG o WebP.".
-13. Borrar "Prueba F7" desde el listado (borra su galería).
+- El `PUT` a R2 no se pudo ver en Network: la extensión de Chrome que corrió la prueba no lo registra.
+  Que pasa el CORS con el origen de `admin.*` se dedujo de que la subida terminó: `confirmar` responde
+  `200` solo si el objeto llegó a R2.
+- No se probaron en un navegador las barras de progreso, el aviso al cerrar durante una subida, "Es
+  un diseño" y "Mover antes", el cupo de 6 imágenes, "Quitar" (incluida la última imagen válida de un
+  publicado), "Volver a borrador", el foco de las tarjetas ni el lector de pantalla. Las reglas de
+  servidor de esos casos están en las validaciones contra la API, y las de la isla, en los tests de
+  `galeria.ts`.

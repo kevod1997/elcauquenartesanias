@@ -197,37 +197,23 @@ y las medidas (F6-D4, F6-D5); el alta rápida de categoría y tipo (F6-D6); "Pro
   - todo lo creado se borró; productos, tipos y categorías quedaron vacíos.
 - `astro dev`: `/admin/productos` y `/admin/productos/editar` responden `200` con `noindex`, su isla y
   `aria-current` en "Productos"; `/admin/categorias` sigue marcando solo "Categorías".
+- En `admin.*` (2026-09-25), el usuario confirmó el aviso al cerrar la pestaña con cambios sin
+  guardar, y el resto se corrió en el navegador contra producción (pasos 1 a 10 y 12):
+  - nombre vacío (error con foco), precio `1.500` (formato), `0` (mayor a 0) y `19,99`;
+  - "Nueva categoría" con foco en "Nombre", Escape que devuelve el foco al botón, alta con Enter (toast
+    "Categoría creada.", queda elegida, el formulario no se envía) y nombre repetido;
+  - "Nuevo tipo de medida" (unidad `cm` precargada, queda elegido con foco en "Valor"), `abc` →
+    "Escribí un número, ej. 13 o 13,5.", `13,5` agrega el chip sin enviar, y al elegir el tipo de
+    nuevo precarga `13,5` con "Actualizar";
+  - "Crear producto" (toast, `?id=…`, "Borrador"), "Guardar cambios" sin cambios ("No hay cambios para
+    guardar."), guardar el precio y verlo con coma tras recargar (`25,50`);
+  - con el tipo y la categoría borrados desde otra pestaña, guardar deja el chip "13,5 (sin tipo)" y
+    el select en "Sin categoría";
+  - listado con `$25,50` y "Borrador", diálogo "¿Borrar el producto «…»?" con el aviso de medidas y
+    galería, `?id=no-existe` ("No existe ese producto.") y todo lo creado borrado.
+  - No se verificó a ojo el recorrido con Tab (paso 11).
 
 ## Desvíos
 
-- Las islas no se probaron en el navegador (errores en su campo, foco, alta rápida, medidas, aviso de
-  salida): ver las verificaciones del usuario.
 - Si la sesión vence con cambios sin guardar, la redirección al login dispara también el aviso de
   `beforeunload`; se dejó así porque avisa que se pierden los cambios.
-
-## Verificaciones del usuario
-
-Después del push a `main` (con las fases 4 y 5 desplegadas), logueado en `admin.*/admin`:
-
-1. La barra muestra "Productos" primero; queda marcado en `/admin/productos` y en `/admin/productos/editar`.
-2. `/admin/productos` vacío dice "Todavía no hay productos."; "Nuevo producto" abre el formulario.
-3. "Crear producto" vacío: "Escribí un nombre." en el nombre con foco. Con nombre, probar precios `1.500`
-   (error de formato), `0` ("mayor a 0") y `19,99`.
-4. "Nueva categoría" abre el grupo con foco en "Nombre"; Escape lo cierra y devuelve el foco al botón.
-   Crear "Prueba F6" con Enter: toast "Categoría creada.", queda elegida y el producto no se envía.
-   Repetir el nombre: "Ya existe una categoría con ese nombre." en su campo.
-5. "Nuevo tipo de medida": crear "Alto F6" (unidad `cm`); queda elegido con el foco en "Valor". Escribir
-   `abc` + Enter: "Escribí un número, ej. 13 o 13,5."; `13,5` + Enter agrega el chip "Alto F6: 13,5 cm"
-   sin enviar el formulario. Elegir de nuevo "Alto F6": precarga `13,5` y el botón dice "Actualizar".
-6. "Crear producto": toast "Producto creado.", la URL pasa a `?id=…`, el título es el nombre y el estado
-   "Borrador". "Guardar cambios" sin tocar nada: toast "No hay cambios para guardar.".
-7. Cambiar el precio y tratar de cerrar la pestaña: el navegador avisa. Guardar: toast "Producto
-   guardado." y ya no avisa. Recargar: el precio se muestra con coma (`19,99`).
-8. En otra pestaña, borrar "Alto F6" en tipos de medida; volver y quitar/agregar algo para guardar con esa
-   medida: si el tipo ya no está, el chip dice "13,5 (sin tipo)". Idem categoría: borrar "Prueba F6" y
-   guardar con ella elegida → el error va al select, que pasa a "Sin categoría".
-9. En el listado, la fila muestra nombre, categoría, precio `$19,99` y "Borrador"; "Borrar" pregunta
-   "¿Borrar el producto «…»?" con el detalle de medidas y galería; al confirmar, toast "Producto borrado.".
-10. `/admin/productos/editar?id=no-existe` muestra "No existe ese producto." y "Volver a productos".
-11. Con Tab se recorren todos los campos, chips y botones con el foco visible.
-12. Borrar lo creado para la prueba (producto, categoría y tipo).

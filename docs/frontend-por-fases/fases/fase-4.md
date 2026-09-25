@@ -179,6 +179,9 @@ local del backend ya tiene `ADMIN_ORIGIN=http://localhost:4321` y
   - CORS: `access-control-allow-origin: http://localhost:4321` con credenciales.
 - `astro dev`: `/admin`, `/admin/ingresar` y `/admin/restablecer?token=x` responden 200 con
   `noindex` y la isla.
+- En `admin.*`, el usuario probó y confirmó (2026-09-25): los redirects de `vercel.json`, el guard,
+  el login (y el error con contraseña mala), la sesión y "Cerrar sesión", el reset por mail y el
+  recorrido con Tab.
 
 ## Desvíos
 
@@ -187,28 +190,5 @@ local del backend ya tiene `ADMIN_ORIGIN=http://localhost:4321` y
   preparación, así que la prueba usó etiquetas nuevas.
 - En una corrida, el primer `reset-password` falló con `SIN_CONEXION` (fetch de Node); repetido dio
   la respuesta esperada. No se reprodujo.
-- Lo visual y lo que pide producción no se probó en el navegador: ver las verificaciones del usuario.
 - El build de Astro no incluye los redirects de `vercel.json` en `.vercel/output/config.json` local
-  (tampoco sus `headers`). Que Vercel los aplique en el deploy queda por verificar; si no, pasarlos a
-  `redirects` de `astro.config.ts` o a `vercel.ts`.
-
-## Verificaciones del usuario
-
-Después del push a `main` y del paso "Hacer (usuario)" de la fase 4 (dominio `admin.*` en Vercel,
-CNAME "DNS only" en Cloudflare, `ADMIN_ORIGIN` y `RESET_PASSWORD_URL` en Railway):
-
-1. Redirects (F4-D1): `https://admin.elcauquenartesanias.com.ar/` lleva a `/admin`;
-   `/restablecer?token=abc` lleva a `/admin/restablecer?token=abc`;
-   `https://elcauquenartesanias.com.ar/admin/ingresar` lleva a `admin.*/admin/ingresar`; `/` y
-   `/catalogo-nuevo` del dominio principal siguen igual. Si ninguno redirige, Vercel no tomó los
-   `redirects` de `vercel.json` (ver "Desvíos", más arriba).
-2. Guard: en una ventana privada, `admin.*/admin` redirige a `/admin/ingresar?volver=%2Fadmin`.
-3. Login: con las credenciales del owner real, entra y vuelve a `/admin` con su nombre en la barra.
-   Una contraseña mala muestra "El email o la contraseña no son correctos." sobre el botón.
-4. Con sesión, abrir `/admin/ingresar` lleva directo a `/admin`.
-5. "Cerrar sesión" lleva a `/admin/ingresar`, y `/admin` vuelve a pedir login.
-6. Reset: en `/admin/restablecer`, pedir el enlace con el email del owner; llega el mail, el enlace
-   abre `admin.*/admin/restablecer?token=…`. Probar dos contraseñas distintas (error debajo del
-   segundo campo, con foco) y después una válida; el aviso de éxito enlaza al login y la contraseña
-   nueva funciona. Volver a abrir el mismo enlace y enviar: muestra "El enlace venció o ya se usó".
-7. Teclado: con Tab se recorren los campos y botones con el foco visible.
+  (tampoco sus `headers`), pero Vercel los aplica en el deploy (confirmado en `admin.*`).

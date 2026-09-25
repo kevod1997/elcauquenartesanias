@@ -160,28 +160,13 @@ del layout, que reemplaza el `alert` de "Cerrar sesión" (F5-D5); el `<nav>` de 
   - borrado de todo lo creado → `204`; los dos listados quedaron vacíos.
 - `astro dev`: `/admin/categorias` y `/admin/tipos-de-medida` responden `200` con `noindex`, la isla
   y `aria-current` en el enlace propio.
+- En `admin.*` (2026-09-25), el usuario dio la fase por verificada con lo que se probó en las fases 6
+  y 7: alta y borrado de tipos de medida y de una categoría, con su diálogo (foco en "Cancelar",
+  aviso de que los productos quedan sin categoría) y su toast "Categoría borrada.", más el error
+  "Ya existe una categoría con ese nombre." (probado desde el formulario de producto). Renombrar, la
+  unidad vacía, Escape y la red cortada no se probaron en producción.
 
 ## Desvíos
 
-- La isla no se probó en el navegador (error en el campo, foco, diálogo, toast, teclado): ver las
-  verificaciones del usuario.
 - Un nombre con tilde mandado por curl desde Git Bash llegó mal codificado ("Di�metro"): es la
   codificación del argumento de la shell de Windows, no del front ni de la API.
-
-## Verificaciones del usuario
-
-Después del push a `main` (y con la fase 4 desplegada), logueado en `admin.*/admin`:
-
-1. La barra muestra "Categorías" y "Tipos de medida"; el de la página actual queda marcado.
-2. En `/admin/categorias`, crear "Prueba F5": aparece en la lista y un toast dice "Categoría creada.".
-3. Crear "PRUEBA f5": el error "Ya existe una categoría con ese nombre." queda debajo del campo, con
-   borde rojo y el foco en el campo; lo tipeado se conserva.
-4. "Editar" en "Prueba F5": la fila pasa a formulario con el foco en el nombre. Escape cancela y el
-   foco vuelve a "Editar". Renombrar a "Prueba F5 bis" con Enter: toast "Categoría renombrada.".
-5. "Borrar": el diálogo pregunta "¿Borrar la categoría «Prueba F5 bis»?" con el foco en "Cancelar";
-   Escape cancela. Otra vez "Borrar" → "Borrar": desaparece, toast "Categoría borrada.", foco en el título.
-6. En `/admin/tipos-de-medida`, repetir 2 a 5 con un tipo: el alta trae `cm`; con la unidad vacía,
-   la fila dice "sin unidad: texto libre"; editar vaciando la unidad la quita.
-7. Con Tab se recorren nav, campos y botones con el foco visible.
-8. Opcional: con la red cortada (DevTools, Offline), "Cerrar sesión" muestra el error en un toast
-   rojo con "Cerrar", sin `alert`.
