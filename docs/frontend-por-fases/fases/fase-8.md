@@ -158,10 +158,4 @@ resto de los errores van al aviso de la lista con `mensajeDeError` y conservan e
 - F8-D7 pedía curl; se usó `fetch` de Node con los mismos pedidos, como en la fase 7.
 - Las verificaciones de F8-D7 en `admin.*` las ejecutó el agente con la sesión del usuario, en lugar
   del usuario. El anuncio se leyó en el texto de la región `role="status"`, sin lector de pantalla.
-  El aviso de `beforeunload` no se probó: el diálogo del navegador bloquea la extensión.
-
-## Verificaciones del usuario
-
-En `https://admin.elcauquenartesanias.com.ar/admin/productos`, con al menos dos productos: mover uno
-con "Bajar" y, sin guardar, cerrar la pestaña o tocar "Editar". El navegador pide confirmar la salida.
-Cancelar, tocar "Guardar orden" y repetir: esta vez sale sin preguntar.
+  El aviso de `beforeunload` lo probó el usuario en `admin.*` (2026-09-25): funciona.
