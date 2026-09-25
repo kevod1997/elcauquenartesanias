@@ -14,6 +14,9 @@ cada fase (decisiones FN-Dk y registro), en `fases/fase-N.md`, y el estado, en
   falla con `EPERM ... symlink`.
 - **`astro dev` lee `PUBLIC_API_URL` del `.env` local**; para apuntar a otra API (el fixture o
   producción), pasala en la línea de comando, que tiene prioridad.
+- **Astro admite un solo `astro dev` por proyecto**, aun en otro puerto: si el usuario ya tiene uno
+  (`Another astro dev server is already running`), usá ese, que recarga tus cambios, o
+  `pnpm build`; `--force` cierra el suyo.
 - **Al validar el admin en local**, el backend corre en `http://localhost:3001` (`pnpm dev` en
   `../elcauquen-backend`; el 3000 lo ocupa otro proyecto) con `ADMIN_ORIGIN=http://localhost:4321`.
   El owner y un editor activo de prueba están en `.env.test.local` (`OWNER_TEST_*`, `EDITOR_TEST_*`);

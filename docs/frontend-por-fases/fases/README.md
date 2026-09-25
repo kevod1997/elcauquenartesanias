@@ -16,13 +16,14 @@ decisiones técnicas y las validaciones ejecutadas.
 | 7. Galería e imágenes | ✅ Cerrada (2026-09-25) | [fase-7.md](./fase-7.md) |
 | 8. Orden | ✅ Cerrada (2026-09-25) | [fase-8.md](./fase-8.md) |
 | 9. Integrantes | ✅ Cerrada (2026-09-25) | [fase-9.md](./fase-9.md) |
-| 10. Limpieza y cierre | ⏳ Pendiente | |
+| 10. Limpieza y cierre | 🔎 Implementada (2026-09-25) | [fase-10.md](./fase-10.md) |
 
 "🔎 Implementada" es una fase con el código commiteado a la que le quedan verificaciones del
 usuario; cuenta como dependencia cumplida.
 
-**Siguiente:** implementar la fase 10 (limpieza y cierre) según [fase-10.md](./fase-10.md); sus
-dependencias (3, 7, 8 y 9) están cerradas.
+**Siguiente:** que el usuario confirme las verificaciones de la fase 10 (cargar el catálogo en
+producción antes del push); con eso se cierra el plan. Después, cualquier trabajo sale de "Mejoras
+opcionales": leé este archivo, el [PRD](../PRD.md) y el `fase-N.md` de la fase que toque la mejora.
 
 ## Decisiones para el usuario
 
@@ -35,7 +36,8 @@ Pruebas que el agente no puede ejecutar (visuales, en producción o tras un push
 están en la sección "Verificaciones del usuario" de cada `fase-N.md`. Al confirmarlas todas, se
 borra esa sección y su línea de acá, y la fase pasa a "✅ Cerrada".
 
-Ninguna.
+- Fase 10: cargar el catálogo en producción, push, y ver el catálogo nuevo en la raíz y en `www`
+  ([pasos](./fase-10.md#verificaciones-del-usuario)).
 
 ## Pendientes abiertos
 
@@ -50,10 +52,6 @@ Agrupados por la fase que los resuelve. Al resolver uno, se borra de acá.
   recién creado, que ya tiene `activo: true`; conviene "define su contraseña" (F9-D4).
 - Reactivar un editor desactivado y saber si un editor ya definió su contraseña, para mostrarlo en
   `/admin/integrantes` (requiere cambio en el backend; hoy F9-D3 muestra solo activo o desactivado).
-- Corregir los textos del sitio actual que `/catalogo-nuevo` copia tal cual: "Piezas unicas"
-  (sin tilde) en el hero y la `description`, y "hechas a mano en Hechas a mano" en la `description`.
-- Mostrar "Diámetro" en lugar de "Ø" en las medidas del sitio actual (`public/main.js`) y del fixture
-  (`scripts/api-fixture/productos.ts`); en el admin el tipo se llama "Diámetro".
 - En el formulario de producto, tras "Nueva categoría" con un nombre repetido, el grupo queda abierto
   con "Ya existe una categoría con ese nombre." aun después de crear el producto; y el error de precio
   ("El precio tiene que ser mayor a 0.") sigue visible después de corregir el valor, hasta enviar.

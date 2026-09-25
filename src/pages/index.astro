@@ -1,5 +1,5 @@
 ---
-// Catálogo público (fase 3). SSR con ISR (F3-D2): el adapter cachea esta ruta y la regenera cada 60 s.
+// Catálogo público (fases 3 y 10). SSR con ISR (F3-D2): el adapter cachea esta ruta y la regenera cada 60 s.
 // Un error de la API se propaga (F3-D3): Vercel conserva la versión cacheada en lugar de una página vacía.
 import { apiPublica, pedir } from '../api'
 import '../catalogo/catalogo.css'
@@ -21,11 +21,10 @@ const { productos } = await pedir(apiPublica.GET('/api/productos'))
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="robots" content="noindex" />
     <title>El Cauquén Artesanías</title>
     <meta
       name="description"
-      content="Piezas  unicas en madera hechas a mano en Hechas a mano: cazuelas, bowls, ensaladeras, mates de caldén, morteros y más."
+      content="Piezas únicas en madera hechas a mano: cazuelas, bowls, ensaladeras, mates de caldén, morteros y más."
     />
     <link rel="icon" href="/assets/logo-160.webp" />
     <link rel="preload" href="/assets/fonts/playfair-latin-var.woff2" as="font" type="font/woff2" crossorigin />
@@ -65,7 +64,7 @@ const { productos } = await pedir(apiPublica.GET('/api/productos'))
           alt="El Cauquén Artesanías"
           fetchpriority="high"
         />
-        <p class="hero__eyebrow">Piezas unicas en madera · Hechas a mano</p>
+        <p class="hero__eyebrow">Piezas únicas en madera · Hechas a mano</p>
         <h1 class="hero__title">El Cauquén<br /><span>Artesanías</span></h1>
       </header>
 

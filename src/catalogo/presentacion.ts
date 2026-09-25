@@ -9,12 +9,12 @@ type Precio = components['schemas']['Precio']
 const miles = new Intl.NumberFormat('es-AR')
 const conCentavos = new Intl.NumberFormat('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
-/** `$5.000`, o `$5.000,50` si hay centavos. `style: 'currency'` daría `$ 5.000`, distinto del sitio actual. */
+/** `$5.000`, o `$5.000,50` si hay centavos. `style: 'currency'` daría `$ 5.000`, distinto del sitio viejo. */
 export function formatearPrecio({ amount }: Precio): string {
   return `$${(amount % 100 === 0 ? miles : conCentavos).format(amount / 100)}`
 }
 
-/** `Ø 13 cm`: tipo, valor y unidad, omitiendo los `null`. */
+/** `Diámetro 13 cm`: tipo, valor y unidad, omitiendo los `null`. */
 export function textoMedida({ tipo, valor, unidad }: MedidaPublica): string {
   return [tipo, valor, unidad].filter((parte) => parte !== null && parte !== '').join(' ')
 }
@@ -63,8 +63,8 @@ const PRODUCTOS_POR_HILERA = 4
 
 /**
  * Hileras del carrusel mobile, con los índices en el orden de la API. Un producto con diseños va solo en su
- * hilera, después de la hilera que se está llenando; el resto va de a cuatro. Con el catálogo actual da las
- * hileras fijas de `public/main.js`: [0-3], [4, 5, 7, 8], [6] y [9, 10]. En desktop las hileras no cuentan:
+ * hilera, después de la hilera que se está llenando; el resto va de a cuatro. Con el catálogo del fixture da las
+ * hileras fijas del sitio viejo: [0-3], [4, 5, 7, 8], [6] y [9, 10]. En desktop las hileras no cuentan:
  * la grilla ordena por índice.
  */
 export function hileras(productos: ProductoPublico[]): number[][] {

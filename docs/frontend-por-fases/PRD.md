@@ -11,7 +11,7 @@ Este PRD integra, del repo del backend:
 - [`docs/contrato-api-borrador.md`](../../../elcauquen-backend/docs/contrato-api-borrador.md): reglas y flujos (sesión, ingesta de imágenes, galería, publicación, diferencias con el prototipo).
 - [`CONTEXT.md`](../../../elcauquen-backend/CONTEXT.md): glosario del dominio. La UI y el código usan esos términos.
 - [`docs/api-por-fases/fases/README.md`](../../../elcauquen-backend/docs/api-por-fases/fases/README.md) y su [`PRD.md`](../../../elcauquen-backend/docs/api-por-fases/PRD.md): reglas de negocio ya implementadas.
-- Prototipo visual actual: [handoff](../elcauquen-admin-prototype-handoff-2026-09-22.md) y `admin/admin.js`. Es un prototipo, no el producto final: el contrato manda.
+- Prototipo visual del admin: el handoff (`docs/elcauquen-admin-prototype-handoff-2026-09-22.md`) y `admin/`, retirados en la fase 10; siguen en el historial de git (`git show c0bc407:admin/admin.js`). Era un prototipo, no el producto final: el contrato manda.
 
 Si hay diferencias, prevalece el backend para reglas y formas HTTP.
 
@@ -73,7 +73,7 @@ en Astro. Motivo:
   ([directivas](https://docs.astro.build/en/reference/directives-reference/)). Así se cumple el
   rendimiento de §3.
 - El admin es estado de cliente (formularios con errores, etapas con consulta, orden con `409`). El
-  prototipo en DOM nativo ya ocupa 1150 líneas en `admin/admin.js`.
+  prototipo en DOM nativo ya ocupaba 1150 líneas en `admin/admin.js`.
 - Next.js no le suma nada al admin: el front nunca ve la cookie de sesión (ver D2), así que todo
   sería `"use client"`, y el sitio público cargaría React en cada página.
 - El Context de React no cruza islas ([estado entre islas](https://docs.astro.build/en/recipes/sharing-state-islands/)).
@@ -128,7 +128,8 @@ actual mientras no exista `src/pages/index.astro`. Las etapas de la migración:
 - **Fases 1 a 9:** el admin crece en `/admin` y, desde la fase 4, también en el dominio `admin.*`
   del mismo proyecto. El catálogo nuevo se arma en `/catalogo-nuevo`, con `noindex`.
 - **Fase 10:** el catálogo nuevo pasa a `/` y se borra el sitio viejo de `public/`. Es un commit,
-  sin mover dominios.
+  sin mover dominios. Hecho: el catálogo es `src/pages/index.astro` y `/catalogo-nuevo` ya no
+  existe.
 
 Motivo:
 
@@ -144,8 +145,8 @@ Cuidados:
 - Vercel no detecta Astro en un proyecto que ya existe. `vercel.json` fija `"framework": "astro"`,
   que reemplaza al preset del panel
   ([`framework`](https://vercel.com/docs/project-configuration/vercel-json)).
-- Los `.jpeg`/`.jpg` originales quedan fuera de `public/`: todo lo que está en `public/` se publica,
-  y hoy `.vercelignore` los excluye del deploy.
+- Todo lo que está en `public/` se publica. Los `.jpeg`/`.jpg` originales del sitio viejo quedaron
+  fuera de `public/` hasta la fase 10, que los borró del repo.
 
 **D5. Render del catálogo público: SSR con ISR en Vercel (`@astrojs/vercel`, `isr`).** Solo las
 páginas del catálogo usan `export const prerender = false`; el admin queda estático. Motivo:

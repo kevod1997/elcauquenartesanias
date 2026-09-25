@@ -1,4 +1,4 @@
-// El catálogo de public/main.js en forma `ProductoPublico` (F3-D6). Lo sirve servidor.mjs.
+// El catálogo del sitio viejo (retirado en la fase 10) en forma `ProductoPublico` (F3-D6). Lo sirve servidor.mjs.
 import type { components } from '../../src/api/schema'
 
 type ProductoPublico = components['schemas']['ProductoPublico']
@@ -48,7 +48,7 @@ export const productos = (origen: string): ProductoPublico[] => {
       'Cazuelas artesanales',
       5000,
       'Madera maciza de guayubira con terminación de alta calidad. Ideales para aceitunas, frutos secos, salsas y condimentos.',
-      [medida('Ø', '13', 'cm'), medida('Alto', '4', 'cm')],
+      [medida('Diámetro', '13', 'cm'), medida('Alto', '4', 'cm')],
       ['cazuelas-placa'],
     ),
     producto(
@@ -56,7 +56,7 @@ export const productos = (origen: string): ProductoPublico[] => {
       'Cuencos o bowls',
       7000,
       'Torneados a mano, pequeños y versátiles. Vetas y tonos irrepetibles en cada pieza.',
-      [medida('Ø', '12', 'cm'), medida('Alto', '7', 'cm')],
+      [medida('Diámetro', '12', 'cm'), medida('Alto', '7', 'cm')],
       ['cuencos-placa'],
     ),
     producto(
@@ -64,7 +64,7 @@ export const productos = (origen: string): ProductoPublico[] => {
       'Bowls de guayubira',
       12000,
       'Acabado natural que realza las vetas. Para ensaladas, frutas, picadas, panes y postres.',
-      [medida('Ø', '23', 'cm'), medida('Alto', '4', 'cm')],
+      [medida('Diámetro', '23', 'cm'), medida('Alto', '4', 'cm')],
       ['bowls-placa'],
     ),
     producto(
@@ -72,7 +72,7 @@ export const productos = (origen: string): ProductoPublico[] => {
       'Ensaladeras',
       13000,
       'Belleza natural y diseño atemporal para la mesa. Acabado suave, ideales para uso diario.',
-      [medida('Ø', '22,5', 'cm'), medida('Alto', '4', 'cm')],
+      [medida('Diámetro', '22,5', 'cm'), medida('Alto', '4', 'cm')],
       ['ensaladeras-placa'],
     ),
     producto(
@@ -80,7 +80,7 @@ export const productos = (origen: string): ProductoPublico[] => {
       'Platos cóncavos',
       8000,
       'Hechos para compartir: quesos, fiambres, aceitunas y snacks. Resistentes y fáciles de mantener.',
-      [medida('Ø', '19', 'cm'), medida('Alto', '4 y 3,5', 'cm')],
+      [medida('Diámetro', '19', 'cm'), medida('Alto', '4 y 3,5', 'cm')],
       ['concavos-placa'],
     ),
     producto(
@@ -88,7 +88,7 @@ export const productos = (origen: string): ProductoPublico[] => {
       'Plato para asado',
       9000,
       'Con borde interior que evita derrames y realza la presentación. Para asados, picadas y parrilladas.',
-      [medida('Ø', '23', 'cm'), medida('Alto', '2', 'cm')],
+      [medida('Diámetro', '23', 'cm'), medida('Alto', '2', 'cm')],
       ['asado-placa'],
     ),
     producto(
@@ -96,7 +96,7 @@ export const productos = (origen: string): ProductoPublico[] => {
       'Mate de caldén',
       15000,
       'Madera de caldén, reconocida por su dureza y belleza natural, con fleje de alpaca grabado. Cuatro Diseños para elegir.',
-      [medida('Ø interior', '5', 'cm'), medida('Prof.', '6', 'cm')],
+      [medida('Diámetro interior', '5', 'cm'), medida('Prof.', '6', 'cm')],
       ['mate-placa'],
       [
         ['mate-floral', 'Fleje floral'],
@@ -110,7 +110,7 @@ export const productos = (origen: string): ProductoPublico[] => {
       'Mortero de palo santo',
       14000,
       'Tallado a mano en palo santo, apreciado por su dureza y su aroma. Para especias, semillas y hierbas.',
-      [medida('Ø exterior', '10,5', 'cm'), medida('Alto', '12', 'cm')],
+      [medida('Diámetro exterior', '10,5', 'cm'), medida('Alto', '12', 'cm')],
       ['mortero-placa'],
     ),
     producto(
@@ -126,7 +126,7 @@ export const productos = (origen: string): ProductoPublico[] => {
       'Porta sahumerios',
       4000,
       'Torneado en madera maciza, con orificio central para sostener el sahumerio de manera práctica y segura. Ideal para acompañar momentos de relajación o como objeto decorativo.',
-      [medida('Ø', '18', 'cm')],
+      [medida('Diámetro', '18', 'cm')],
       ['porta-sahumerio-placa', 'porta-sahumerio'],
     ),
     producto(

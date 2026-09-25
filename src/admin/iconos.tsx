@@ -1,4 +1,4 @@
-// Íconos SVG del prototipo (`admin/admin.js`), decorativos: el botón que los lleva tiene su `aria-label`.
+// Íconos SVG del prototipo del admin (retirado en la fase 10), decorativos: el botón que los lleva tiene su `aria-label`.
 
 export const IconoFoto = () => (
   <svg
