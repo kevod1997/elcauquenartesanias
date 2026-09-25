@@ -18,14 +18,14 @@ decisiones técnicas y las validaciones ejecutadas.
 | 9. Integrantes | ✅ Cerrada (2026-09-25) | [fase-9.md](./fase-9.md) |
 | 10. Limpieza y cierre | ✅ Cerrada (2026-09-25) | [fase-10.md](./fase-10.md) |
 | 11. Mejoras opcionales del front | ⏳ Pendiente | |
+| 12. Admin mobile y orden con arrastre | ⏳ Pendiente | |
 
 "🔎 Implementada" es una fase con el código commiteado a la que le quedan verificaciones del
 usuario; cuenta como dependencia cumplida.
 
-**Siguiente:** preparar la fase 11 (mejoras opcionales del front) con el prompt 6.1 de
-[prompts.md](../prompts.md) y después implementarla con 6.2; leé [fase-11.md](./fase-11.md), el
-[PRD](../PRD.md) y, para cada mejora, el registro de la fase que la originó (3 para el catálogo, 6
-para el formulario de producto). Depende de la 10, cerrada.
+**Siguiente:** implementar la fase 11 (mejoras opcionales del front) con el prompt 6.2 de
+[prompts.md](../prompts.md), según F11-D1 a F11-D6 de [fase-11.md](./fase-11.md). Depende de la 10,
+cerrada. Después, la fase 12 (depende de la 11).
 
 ## Decisiones para el usuario
 
@@ -44,10 +44,10 @@ Ninguna.
 
 Agrupados por la fase que los resuelve. Al resolver uno, se borra de acá.
 
-### Fase 11
+### Fase 12
 
-- Páginas 404 y 500 propias, y los dos mensajes del formulario de producto que no se limpian
-  ([fase-11.md](./fase-11.md)).
+- Admin mobile (checklist, navbar con pestañas abajo, listas como tarjetas) y el orden del catálogo
+  en una grilla que se arrastra, con texto explicativo ([fase-12.md](./fase-12.md)).
 
 ### Mejoras opcionales (sin fase)
 
