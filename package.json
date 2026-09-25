@@ -10,7 +10,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "typecheck": "astro check",
-    "lint": "biome check"
+    "lint": "biome check && node scripts/check-vercelignore.mjs"
   },
   "dependencies": {
     "@astrojs/react": "7.0.0",

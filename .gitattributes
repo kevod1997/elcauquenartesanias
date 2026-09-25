@@ -1,0 +1,7 @@
+# Mismos bytes en la copia local y en el repo, sin importar core.autocrlf
+* text=auto eol=lf
+
+*.webp binary
+*.jpeg binary
+*.jpg binary
+*.woff2 binary

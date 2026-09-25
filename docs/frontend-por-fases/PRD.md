@@ -199,8 +199,8 @@ páginas del catálogo usan `export const prerender = false`; el admin queda est
 
 - `pnpm typecheck`, `pnpm lint` y `pnpm build` pasan.
 - `pnpm preview` sirve en `/` el sitio actual sin diferencias visibles.
-- El `AGENTS.md` indica comandos, estructura, las decisiones D1–D5 que afectan al código y las
-  reglas de §3.
+- El `AGENTS.md` apunta al PRD y registra solo instrucciones que no se deducen del código ni del
+  PRD.
 - Después del push, el deploy de producción en Vercel sirve el sitio actual en la raíz.
 
 ### Fase 2 — Capa de API tipada

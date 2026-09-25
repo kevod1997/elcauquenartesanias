@@ -38,9 +38,15 @@
 - **Assets en 404 tras el primer deploy (`71658f3`):** `.vercelignore` tenía `assets/` sin ancla, que con la sintaxis de gitignore excluye también `public/assets/`; el sitio salió sin fotos, logo ni fuentes. Se anclaron todas las rutas con `/` (`/assets/`). Comprobado con `git check-ignore --no-index`: con el patrón viejo `public/assets/logo.webp` queda excluido; con el nuevo, incluido, y `assets/logo.jpg` sigue excluido. Tras el deploy de `e933ab1`, los 58 archivos de `public/assets/` responden 200 en producción. Los headers de `/assets/*` también se aplican a los 404, así que un navegador que abrió el sitio entre los dos deploys guarda el 404 un día: se resuelve con recarga forzada o en incógnito.
 - **Headers de `vercel.json` con el adapter:** se aplican sobre la salida de la Build Output API. Verificado en producción tras `71658f3`: `/assets/fonts/inter-latin-var.woff2` devuelve `max-age=31536000, immutable` y `/assets/logo.webp`, `max-age=86400, stale-while-revalidate=2592000` (en 404, antes del arreglo de `.vercelignore`).
 
+## Revisión de la sesión (prompt 6.3)
+
+- **`scripts/check-vercelignore.mjs`, dentro de `pnpm lint`:** falla si `.vercelignore` excluye algo de `public/`, `src/` o la configuración del build. `astro build` y `astro preview` no leen `.vercelignore`, y por eso el 404 de los assets pasó las validaciones locales. Probado en rojo agregando `assets/` (lista los 58 archivos de `public/assets/`) y en verde con el archivo actual.
+- **`.gitattributes` con `eol=lf`:** con `core.autocrlf=true`, la copia local en CRLF generaba marcas `M` sin cambios y diferencias falsas al comparar el build contra `HEAD`.
+- **`AGENTS.md` reducido a lo no deducible** (pnpm con build scripts, pnpm 10 en Vercel, TypeScript 6). El resto duplicaba el PRD (§2, §3, D1–D5 y los prompts de §6) o `package.json`. El criterio de cierre de la fase en el PRD pasó a pedir solo eso.
+
 ## Pendientes del usuario
 
 Cierran la fase; ver la lista ordenada en [README](./README.md).
 
-1. Borrar los docs sin versionar (o decidir conservar `docs/handoff-backend.md`).
-2. Push a `main` del arreglo de `.vercelignore`. El agente verifica después que `/assets/*` responda 200 en producción y el usuario confirma que se ven las fotos, el logo y las fuentes.
+1. Borrar `docs/research/hono-better-auth-postgres.md`, la única copia del backend que sigue sin versionar.
+2. Confirmar, en incógnito o tras una recarga forzada, que se ven las fotos, el logo, las fuentes y el favicon. El agente ya verificó que los 58 archivos de `public/assets/` responden 200 en producción después de `e933ab1`.
