@@ -1,5 +1,5 @@
-﻿# Corre las fases del PRD sin supervisión (§6.4): por fase, 6.1 y después 6.2, cada uno en una
-# sesión `claude -p` nueva con el bloque de 6.4 agregado. Los prompts se leen del PRD.
+﻿# Corre las fases del PRD sin supervisión (6.4 de prompts.md): por fase, 6.1 y después 6.2, cada uno
+# en una sesión `claude -p` nueva con el bloque de 6.4 agregado. Los prompts se leen de prompts.md.
 # Uso: powershell -File scripts/loop-fases.ps1 [-Desde 4] [-Hasta 9]
 param([int]$Desde = 4, [int]$Hasta = 9)
 $ErrorActionPreference = 'Stop'
@@ -10,18 +10,24 @@ $OutputEncoding = New-Object System.Text.UTF8Encoding $false
 
 $raiz = Split-Path $PSScriptRoot -Parent
 Set-Location $raiz
-$prd = 'docs/frontend-por-fases/PRD.md'
+$prompts = 'docs/frontend-por-fases/prompts.md'
 $readme = 'docs/frontend-por-fases/fases/README.md'
 $logs = Join-Path $raiz 'logs/loop'
 # El modelo sale de la configuración de Claude Code; el esfuerzo se fija por prompt.
-$esfuerzo = @{ '6.1' = 'medium'; '6.2' = 'low' }
+$esfuerzo = @{ '6.1' = 'medium'; '6.2' = 'medium' }
 
 function Get-Bloque([string]$seccion) {
-  $texto = Get-Content $prd -Raw -Encoding UTF8
-  $patron = '(?s)### ' + [regex]::Escape($seccion) + ' .*?```text\r?\n(.*?)```'
+  $texto = Get-Content $prompts -Raw -Encoding UTF8
+  $patron = '(?s)## ' + [regex]::Escape($seccion) + ' .*?```text\r?\n(.*?)```'
   $m = [regex]::Match($texto, $patron)
-  if (-not $m.Success) { throw "No encontré el bloque de $seccion en $prd." }
+  if (-not $m.Success) { throw "No encontré el bloque de $seccion en $prompts." }
   $m.Groups[1].Value
+}
+
+# Una fase preparada ya tiene su primera decisión (FN-D1) en fases/fase-N.md.
+function Test-Preparada([int]$n) {
+  $definicion = "docs/frontend-por-fases/fases/fase-$n.md"
+  (Test-Path $definicion) -and (Select-String -Path $definicion -Pattern "F$n-D1\." -Quiet)
 }
 
 function Get-Estado([int]$n) {
@@ -55,12 +61,19 @@ try {
     if ((Get-Estado $n) -match 'Implementada|Cerrada') { Write-Host "Fase $n ya implementada: la salteo."; continue }
 
     foreach ($p in '6.1', '6.2') {
+      if ($p -eq '6.1' -and (Test-Preparada $n)) { Write-Host "Fase $n ya preparada: salteo 6.1."; continue }
       Write-Host "Fase $n, prompt $p..."
-      $prompt = ((Get-Bloque $p) + "`n" + $modoLoop) -replace '\bN\b', "$n"
+      # `N` suelto y el de `FN-D1` (sin límite de palabra entre F y N) pasan a ser la fase.
+      $prompt = ((Get-Bloque $p) + "`n" + $modoLoop) -replace '\b(F?)N\b', ('${1}' + $n)
       $log = Join-Path $logs "fase-$n-$p.json"
       $prompt | claude -p --permission-mode auto --effort $esfuerzo[$p] --output-format json | Out-File $log -Encoding utf8
       $resultado = Get-Content $log -Raw -Encoding UTF8 | ConvertFrom-Json
-      if ($LASTEXITCODE -ne 0 -or $resultado.is_error) { throw "Falló el prompt $p de la fase ${n}: revisá $log." }
+      if ($LASTEXITCODE -ne 0 -or $resultado.is_error) {
+        if ($resultado.result -match 'limit') {
+          throw "Límite de uso en la fase $n, prompt ${p}: $($resultado.result) Relanzá el loop después; retoma desde acá."
+        }
+        throw "Falló el prompt $p de la fase ${n}: revisá $log."
+      }
       if (-not (Test-ArbolLimpio)) { throw "La fase $n dejó cambios sin commitear tras ${p}: revisá $log." }
     }
 

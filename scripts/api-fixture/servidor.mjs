@@ -1,4 +1,4 @@
-// API local con el catálogo actual (F3-D6 del PRD del front), para probar /catalogo-nuevo sin el backend.
+// API local con el catálogo actual (F3-D6, docs/frontend-por-fases/fases/fase-3.md), para probar /catalogo-nuevo sin el backend.
 //   pnpm api:fixture            GET /api/productos con los productos de productos.ts
 //   pnpm api:fixture --vacio    { productos: [] }
 //   pnpm api:fixture --error    500 con la forma de error del contrato

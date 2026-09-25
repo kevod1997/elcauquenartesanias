@@ -1,7 +1,10 @@
 # Fase 2 — Capa de API tipada
 
-**Estado:** cerrada el 2026-09-25 (ningún criterio depende de un deploy).
-**Definición:** [PRD, fase 2](../PRD.md#fase-2--capa-de-api-tipada). Sin decisiones abiertas; aplica D3.
+## Definición
+
+**Construir:** copiar `openapi.json`, generar tipos con `openapi-typescript`, crear el cliente `fetch` con `credentials: 'include'` y el manejo de errores del contrato; script `pnpm gen:api`; variable de entorno de la URL de la API.
+
+**Cerrar cuando:** `GET /api/categorias` funciona contra producción con tipos generados, el cliente tiene tests de la traducción de errores y `pnpm gen:api` es reproducible.
 
 ## Implementado
 

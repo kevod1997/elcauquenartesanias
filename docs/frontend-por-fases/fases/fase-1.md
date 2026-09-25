@@ -1,8 +1,25 @@
 # Fase 1 — Decisiones y esquema
 
-**Estado:** cerrada el 2026-09-25; el usuario confirmó el sitio en producción.
-**Fecha:** 2026-09-24.
-**Definición:** [PRD, fase 1](../PRD.md#fase-1--decisiones-y-esquema). Las decisiones D1–D5 ya estaban cerradas; este registro cubre la implementación.
+## Definición
+
+**Construir:**
+
+- Borrar `docs/contrato-api-borrador.md` del front, que es una copia vieja.
+- Resolver el working tree: commitear o descartar los cambios sin versionar.
+- Crear el proyecto Astro en la raíz con pnpm, TypeScript estricto, `@astrojs/react` y
+  `@astrojs/vercel`, con scripts de `typecheck`, `lint` y `build`, y `"framework": "astro"` en
+  `vercel.json`.
+- Mover el sitio actual a `public/` (D4), con las rutas de `.vercelignore`, `.gitignore` y los
+  headers de `vercel.json` ajustadas.
+- Crear el `AGENTS.md` del front con `/writing-for-agents`.
+
+**Cerrar cuando:**
+
+- `pnpm typecheck`, `pnpm lint` y `pnpm build` pasan.
+- `pnpm preview` sirve en `/` el sitio actual sin diferencias visibles.
+- El `AGENTS.md` apunta al PRD y registra solo instrucciones que no se deducen del código ni del
+  PRD.
+- Después del push, el deploy de producción en Vercel sirve el sitio actual en la raíz.
 
 ## Implementado
 
@@ -20,7 +37,7 @@
 | TypeScript 6.0.3, no 7 | `@astrojs/check` 0.9.10 declara `typescript: ^5 \|\| ^6` como peer. |
 | Biome como linter, con la base del backend (`lineWidth` 120, comillas simples, sin `;`) y las reglas recomendadas | Mismo estilo en los dos repos. El backend usa `preset: none`; acá se dejan las recomendadas porque no hay código previo que las incumpla. |
 | Sin páginas en `src/pages/` | `/` tiene que seguir siendo el sitio viejo (D4); cualquier página ahora sería un placeholder publicado. El build avisa `Missing pages directory` hasta la fase 3 o 4. |
-| Adapter de Vercel sin `isr` | La `expiration` se fija en la fase 3 (D5); el comportamiento de la caché ISR del adapter está en [F3-D2](../PRD.md#fase-3--sitio-público). Sin páginas `prerender = false`, la salida es estática. |
+| Adapter de Vercel sin `isr` | La `expiration` se fija en la fase 3 (D5); el comportamiento de la caché ISR del adapter está en [F3-D2](./fase-3.md#definición). Sin páginas `prerender = false`, la salida es estática. |
 | Orden de los headers de `/assets/*`: la regla de fuentes va última | En producción, `/assets/fonts/*` recibía `max-age=86400` porque la regla genérica, declarada después, pisaba a la de fuentes (Vercel aplica la última que coincide). |
 | `minimumReleaseAgeExclude: astro@7.3.5` en `pnpm-workspace.yaml` | pnpm 12 lo agregó solo al instalar: 7.3.5 tiene menos días que la política de antigüedad mínima. Se puede quitar cuando la versión envejezca. |
 | Lockfile compatible con pnpm 10 | Vercel instala con pnpm 9 o 10 para `lockfileVersion: 9.0` ([package managers](https://vercel.com/docs/package-managers)); pnpm 12 no está soportado. Se probó `pnpm@10 install --frozen-lockfile` y el build. |

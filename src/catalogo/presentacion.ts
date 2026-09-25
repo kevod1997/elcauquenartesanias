@@ -1,4 +1,4 @@
-// Mapeo de `ProductoPublico` a lo que muestra el catálogo público (F3-D4 del PRD del front).
+// Mapeo de `ProductoPublico` a lo que muestra el catálogo público (F3-D4, docs/frontend-por-fases/fases/fase-3.md).
 import type { components } from '../api'
 
 export type ProductoPublico = components['schemas']['ProductoPublico']

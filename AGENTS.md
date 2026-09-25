@@ -2,7 +2,8 @@
 
 Sitio público y admin en Astro que consume la API de `../elcauquen-backend`. El plan, las
 decisiones D1–D5 y las reglas estables (§3) están en el [PRD](./docs/frontend-por-fases/PRD.md);
-el avance, en [`fases/`](./docs/frontend-por-fases/fases/README.md).
+cada fase (decisiones FN-Dk y registro), en `fases/fase-N.md`, y el estado, en
+[`fases/README.md`](./docs/frontend-por-fases/fases/README.md).
 
 - **Al agregar una dependencia con build scripts**, pnpm la bloquea con `ERR_PNPM_IGNORED_BUILDS`;
   usá `pnpm approve-builds <paquete>` (sin argumento es interactivo).

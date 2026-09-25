@@ -6,7 +6,7 @@
 * **Cliente API:** `openapi-fetch` con tipos de `openapi-typescript` generados desde `openapi.json`
 * **Despliegue:** Vercel (catálogo público con ISR)
 
-Motivos: decisiones D1–D5 de la fase 1 en `docs/frontend-por-fases/PRD.md`.
+Motivos: decisiones D1–D5 (§4) en `docs/frontend-por-fases/PRD.md`.
 
 ## Backend (`elcauquen-backend`)
 * **Framework:** Hono (TypeScript)
