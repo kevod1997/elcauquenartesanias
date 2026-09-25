@@ -9,7 +9,7 @@ tomadas (y su porqué) y las validaciones ejecutadas.
 | 1. Decisiones y esquema | ✅ Cerrada (2026-09-25) | [fase-1.md](./fase-1.md) |
 | 2. Capa de API tipada | ✅ Cerrada (2026-09-25) | [fase-2.md](./fase-2.md) |
 | 3. Sitio público | ✅ Cerrada (2026-09-25) | [fase-3.md](./fase-3.md) |
-| 4. Login y sesión | ⏳ Pendiente | |
+| 4. Login y sesión | ⏳ Pendiente (preparada el 2026-09-25) | [fase-4.md](./fase-4.md) |
 | 5. Categorías y tipos de medida | ⏳ Pendiente | |
 | 6. Productos con medidas | ⏳ Pendiente | |
 | 7. Galería e imágenes | ⏳ Pendiente | |
@@ -20,8 +20,9 @@ tomadas (y su porqué) y las validaciones ejecutadas.
 "🔎 Implementada" es una fase con el código commiteado a la que le quedan verificaciones del
 usuario; cuenta como dependencia cumplida.
 
-**Siguiente:** fase 4 (login y sesión), que deja abierto el tipado de `/api/auth/*` (D3). Para usar la API, leé los
-tipos y las decisiones de [fase-2.md](./fase-2.md). Las fases 4 a 9 pueden correr sin supervisión
+**Siguiente:** implementar la fase 4 (login y sesión) con las decisiones F4-D1 a F4-D6 del PRD,
+ya cerradas; el tipado de `/api/auth/*` (D3) es F4-D2. Para usar la API, leé los tipos y las
+decisiones de [fase-2.md](./fase-2.md). Las fases 4 a 9 pueden correr sin supervisión
 con el loop de [§6.4 del PRD](../PRD.md#64-loop-sin-supervisión).
 
 ## Decisiones para el usuario
@@ -42,6 +43,11 @@ Agrupados por la fase que los resuelve. Al resolver uno, se borra de acá.
 ### Fase 7
 
 - Probar la subida de imágenes desde el browser: primer uso real del CORS de R2 con `ADMIN_ORIGIN`.
+
+### Fase 9
+
+- Mostrar "Integrantes" en la barra solo al `owner`, con el `rol` que el layout toma de
+  `GET /admin/sesion` (F4-D3). El editor activa su cuenta en `/admin/restablecer?token=…` (F4-D4).
 
 ### Mejoras opcionales (sin fase)
 
