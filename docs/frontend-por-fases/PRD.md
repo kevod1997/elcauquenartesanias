@@ -52,7 +52,7 @@ No se incluyen carrito, pago, stock, registro público ni cambios en el backend.
 ### Calidad mínima transversal
 
 - Typecheck, lint y build pasan antes de cerrar cada fase.
-- Probar el cliente HTTP y la lógica de estado (subida de imágenes, orden con `409`) con tests; no probar solo que un componente renderiza.
+- Tests mínimos, solo donde un error no se ve a simple vista: la traducción de errores del cliente HTTP y la lógica de estado (subida de imágenes, orden con `409`). Los componentes y la UI se verifican con el build y la prueba manual.
 - Las variables de entorno se documentan en un ejemplo sin valores reales. Ningún secreto en el repo ni en el chat.
 - Accesibilidad básica: formularios con etiquetas, foco visible y navegación por teclado en el admin.
 - El sitio público conserva su rendimiento: imágenes con el tamaño adecuado (`url160`, `url640`, `url1600`) y dimensiones reservadas cuando sea posible.
@@ -304,33 +304,35 @@ Prepará la fase N de docs/frontend-por-fases/PRD.md, sin implementar código.
 ### 6.2 Implementación
 
 ```text
-Implementá la fase N de docs/frontend-por-fases/PRD.md.
+Implementá la fase N de docs/frontend-por-fases/PRD.md de punta a punta en esta sesión.
 
 1. Arranque: leé docs/frontend-por-fases/fases/README.md, §1–3 del PRD, la definición
    de N y solo las partes del contrato del backend que esa fase usa
    (../elcauquen-backend/docs/openapi.json y la sección pertinente de
    ../elcauquen-backend/docs/contrato-api-borrador.md). Verificá las dependencias de N según
    la tabla del PRD; si alguna está abierta, retomá esa fase como alcance de la sesión.
-2. Decisiones: podés elegir los detalles técnicos compatibles con el PRD y el contrato.
-   Consultame si las fuentes no resuelven una decisión de producto, hay requisitos
-   incompatibles o proponés cambiar una regla acordada o el contrato del backend.
-   Agrupá las consultas con tu recomendación e impacto; avanzá en lo independiente.
-   Registrá las mejoras opcionales sin bloquear la fase.
+2. Decisiones: resolvé vos los detalles técnicos compatibles con el PRD y el contrato.
+   Consultame solo cuando la única salida cambie una regla de producto, el contrato del
+   backend o el alcance de la fase, o cuando dos requisitos sean incompatibles; mientras
+   esperás, seguí con lo que no depende de esa respuesta. Las mejoras opcionales van a
+   "Mejoras opcionales (sin fase)" de fases/README.md.
 3. Implementación: usá los tipos generados; no escribas a mano formas que estén en
    openapi.json. Verificá las APIs de terceros que incorpores en Context7 o
-   documentación oficial para la versión utilizada. Escribí tests para la lógica de
-   cliente y de estado. Typecheck al completar cada cambio coherente de tipos.
-4. Validación: cada punto de "Cerrar cuando" debe tener evidencia ejecutada (test,
-   comando o prueba manual descrita contra producción) y typecheck, lint y build deben
-   pasar. Si falta verificar algún criterio, registrá el bloqueo y mantené la fase abierta.
-   Los pasos que solo puede hacer el usuario se listan explícitamente al cerrar.
+   documentación oficial para la versión utilizada. Los tests se limitan a lo que pide §3.
+4. Validación: cada punto de "Cerrar cuando" queda verificado con evidencia que ejecutaste
+   (test, comando o prueba contra producción) o asignado a mí con los pasos exactos para
+   verificarlo. Typecheck, lint y build pasan. Lo que dependa de un push, un deploy o un
+   paso de "Hacer (usuario)" pendiente queda asignado a mí, y la fase sigue abierta hasta
+   que lo confirme.
 5. Documentación: con /writing-for-agents, creá o actualizá el registro de la fase en
-   docs/frontend-por-fases/fases/fase-N.md con lo implementado, las validaciones
-   ejecutadas y los desvíos respecto de lo acordado. Actualizá fases/README.md con
-   estado, enlaces, pendientes y el siguiente trabajo con qué leer. Actualizá el PRD
-   si cambiaron reglas y AGENTS.md si surgieron instrucciones no deducibles del código.
-6. Con validación y documentación completas, creá un commit local con solo los
-   cambios de la fase trabajada.
+   docs/frontend-por-fases/fases/fase-N.md con lo implementado, las decisiones técnicas
+   que tomaste y su motivo, las validaciones ejecutadas y los desvíos respecto de lo
+   acordado. Actualizá fases/README.md con estado, enlaces, pendientes y el siguiente
+   trabajo con qué leer. Actualizá el PRD si cambiaron reglas y AGENTS.md si surgieron
+   instrucciones no deducibles del código.
+6. Creá un commit local con solo los cambios de la fase trabajada, aunque queden
+   criterios asignados a mí. Terminá con la lista de lo que tengo que hacer a mano, en
+   el orden en que conviene hacerlo.
 ```
 
 ### 6.3 Revisión
