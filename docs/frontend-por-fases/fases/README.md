@@ -10,7 +10,7 @@ tomadas (y su porqué) y las validaciones ejecutadas.
 | 2. Capa de API tipada | ✅ Cerrada (2026-09-25) | [fase-2.md](./fase-2.md) |
 | 3. Sitio público | ✅ Cerrada (2026-09-25) | [fase-3.md](./fase-3.md) |
 | 4. Login y sesión | 🔎 Implementada (2026-09-25) | [fase-4.md](./fase-4.md) |
-| 5. Categorías y tipos de medida | ⏳ Pendiente | |
+| 5. Categorías y tipos de medida | ⏳ Pendiente (preparada 2026-09-25) | [fase-5.md](./fase-5.md) |
 | 6. Productos con medidas | ⏳ Pendiente | |
 | 7. Galería e imágenes | ⏳ Pendiente | |
 | 8. Orden | ⏳ Pendiente | |
@@ -20,9 +20,11 @@ tomadas (y su porqué) y las validaciones ejecutadas.
 "🔎 Implementada" es una fase con el código commiteado a la que le quedan verificaciones del
 usuario; cuenta como dependencia cumplida.
 
-**Siguiente:** preparar la fase 5 (categorías y tipos de medida) con el prompt 6.1 del PRD. Leé la
-fase 5 del PRD y [fase-4.md](./fase-4.md) (layout, `sesion.ts` con `exigirSesion` y
-`redirigirSiNoAutenticado`, `mensajes.ts`); para la API, [fase-2.md](./fase-2.md).
+**Siguiente:** implementar la fase 5 con el prompt 6.2 del PRD. Leé la fase 5 del PRD (F5-D1 a
+F5-D7, que fijan el patrón de listado, formularios, confirmación y avisos del admin) y
+[fase-4.md](./fase-4.md) (layout, `sesion.ts` con `exigirSesion` y `redirigirSiNoAutenticado`,
+`mensajes.ts`, `Restablecer.tsx` como base de formulario); para la API, [fase-2.md](./fase-2.md).
+Los estilos a portar están en `admin/admin.css` del prototipo.
 
 ## Decisiones para el usuario
 
@@ -60,6 +62,11 @@ CNAME "DNS only" en Cloudflare, `ADMIN_ORIGIN` y `RESET_PASSWORD_URL` en Railway
 
 Agrupados por la fase que los resuelve. Al resolver uno, se borra de acá.
 
+### Fase 6
+
+- Crear una categoría o un tipo de medida desde el formulario de producto, como el prototipo, y
+  enlazar a `/admin/categorias` y `/admin/tipos-de-medida` (F5-D1). Reusar el patrón F5-D2 a F5-D5.
+
 ### Fase 7
 
 - Probar la subida de imágenes desde el browser: primer uso real del CORS de R2 con `ADMIN_ORIGIN`.
@@ -68,10 +75,6 @@ Agrupados por la fase que los resuelve. Al resolver uno, se borra de acá.
 
 - Mostrar "Integrantes" en la barra solo al `owner`, con el `rol` que el layout deja en
   `data-rol` de `#barra` (F4-D3). El editor activa su cuenta en `/admin/restablecer?token=…` (F4-D4).
-
-### Fase 5
-
-- Reemplazar el `alert` de "Cerrar sesión" fallido por el patrón de avisos que fije la fase.
 
 ### Mejoras opcionales (sin fase)
 
