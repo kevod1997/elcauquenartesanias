@@ -3,7 +3,7 @@ import { crearAuth } from './auth'
 import { crearCliente } from './cliente'
 
 export { type CodigoError, type CodigoErrorAuth, type CodigoErrorCliente, ErrorApi, pedir } from './cliente'
-export type { components } from './schema'
+export type { components, paths } from './schema'
 
 /** Catálogo público (`/api/*`): sin cookies. */
 export const apiPublica = crearCliente({ baseUrl: PUBLIC_API_URL, credentials: 'omit' })

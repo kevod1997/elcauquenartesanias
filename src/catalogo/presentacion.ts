@@ -4,12 +4,13 @@ import type { components } from '../api'
 export type ProductoPublico = components['schemas']['ProductoPublico']
 type MedidaPublica = components['schemas']['MedidaPublica']
 type ImagenPublica = components['schemas']['ImagenPublica']
+type Precio = components['schemas']['Precio']
 
 const miles = new Intl.NumberFormat('es-AR')
 const conCentavos = new Intl.NumberFormat('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
 /** `$5.000`, o `$5.000,50` si hay centavos. `style: 'currency'` daría `$ 5.000`, distinto del sitio actual. */
-export function formatearPrecio({ amount }: ProductoPublico['precio']): string {
+export function formatearPrecio({ amount }: Precio): string {
   return `$${(amount % 100 === 0 ? miles : conCentavos).format(amount / 100)}`
 }
 

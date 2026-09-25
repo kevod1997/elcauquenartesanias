@@ -10,12 +10,15 @@ interface Props {
 
 const { titulo, protegida = true } = Astro.props
 
-// Secciones de la barra (F5-D1); la fase 6 suma "Productos" y la 9, "Integrantes".
+// Secciones de la barra (F5-D1, F6-D1); la fase 9 suma "Integrantes".
 const secciones = [
+  { href: '/admin/productos', texto: 'Productos' },
   { href: '/admin/categorias', texto: 'Categorías' },
   { href: '/admin/tipos-de-medida', texto: 'Tipos de medida' },
 ]
 const actual = Astro.url.pathname.replace(/\/$/, '')
+// Por prefijo: "Productos" queda marcado también en `/admin/productos/editar`.
+const esActual = (href: string) => actual === href || actual.startsWith(`${href}/`)
 ---
 
 <!doctype html>
@@ -39,7 +42,7 @@ const actual = Astro.url.pathname.replace(/\/$/, '')
           <nav class="panel__nav" aria-label="Secciones">
             {
               secciones.map(({ href, texto }) => (
-                <a href={href} aria-current={href === actual ? 'page' : undefined}>
+                <a href={href} aria-current={esActual(href) ? 'page' : undefined}>
                   {texto}
                 </a>
               ))

@@ -1,0 +1,8 @@
+---
+import Admin from '../../admin/Admin.astro'
+import Productos from '../../admin/Productos.tsx'
+---
+
+<Admin titulo="Productos">
+  <Productos client:only="react" />
+</Admin>
