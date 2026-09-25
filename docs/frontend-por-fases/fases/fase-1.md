@@ -20,7 +20,7 @@
 | TypeScript 6.0.3, no 7 | `@astrojs/check` 0.9.10 declara `typescript: ^5 \|\| ^6` como peer. |
 | Biome como linter, con la base del backend (`lineWidth` 120, comillas simples, sin `;`) y las reglas recomendadas | Mismo estilo en los dos repos. El backend usa `preset: none`; acá se dejan las recomendadas porque no hay código previo que las incumpla. |
 | Sin páginas en `src/pages/` | `/` tiene que seguir siendo el sitio viejo (D4); cualquier página ahora sería un placeholder publicado. El build avisa `Missing pages directory` hasta la fase 3 o 4. |
-| Adapter de Vercel sin `isr` | La `expiration` se fija en la fase 3 (D5). Sin páginas `prerender = false`, la salida es estática. |
+| Adapter de Vercel sin `isr` | La `expiration` se fija en la fase 3 (D5); el comportamiento de la caché ISR del adapter está en [F3-D2](../PRD.md#fase-3--sitio-público). Sin páginas `prerender = false`, la salida es estática. |
 | Orden de los headers de `/assets/*`: la regla de fuentes va última | En producción, `/assets/fonts/*` recibía `max-age=86400` porque la regla genérica, declarada después, pisaba a la de fuentes (Vercel aplica la última que coincide). |
 | `minimumReleaseAgeExclude: astro@7.3.5` en `pnpm-workspace.yaml` | pnpm 12 lo agregó solo al instalar: 7.3.5 tiene menos días que la política de antigüedad mínima. Se puede quitar cuando la versión envejezca. |
 | Lockfile compatible con pnpm 10 | Vercel instala con pnpm 9 o 10 para `lockfileVersion: 9.0` ([package managers](https://vercel.com/docs/package-managers)); pnpm 12 no está soportado. Se probó `pnpm@10 install --frozen-lockfile` y el build. |

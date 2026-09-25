@@ -18,7 +18,7 @@ tomadas (y su porqué) y las validaciones ejecutadas.
 | 10. Limpieza y cierre | ⏳ Pendiente | |
 
 **Siguiente:** fase 3 (sitio público) o fase 4 (login y sesión), en cualquier orden. La 3 ya está
-preparada (D3.1 a D3.7 en el PRD) y va directo al prompt 6.2; la 4 deja abierto el tipado de
+preparada (F3-D1 a F3-D7 en el PRD) y va directo al prompt 6.2; la 4 deja abierto el tipado de
 `/api/auth/*` (D3). Para usar la API, leé los tipos y las decisiones de [fase-2.md](./fase-2.md).
 
 ## Pendientes abiertos
@@ -33,4 +33,4 @@ Agrupados por la fase que los resuelve. Al resolver uno, se borra de acá.
 
 - Ancho y alto de cada derivado en la galería pública (requiere cambio en el backend).
 - Página por producto con `GET /api/productos/:id` y filtro por categoría con `GET /api/categorias`
-  en el catálogo público: fuera de la fase 3 por decisión del usuario (D3.1).
+  en el catálogo público: fuera de la fase 3 por decisión del usuario (F3-D1).
