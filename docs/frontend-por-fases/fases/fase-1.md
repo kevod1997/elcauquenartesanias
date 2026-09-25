@@ -1,6 +1,6 @@
 # Fase 1 — Decisiones y esquema
 
-**Estado:** abierta hasta que el usuario confirme el deploy de producción (ver [Pendientes](#pendientes-del-usuario)).
+**Estado:** cerrada el 2026-09-25; el usuario confirmó el sitio en producción.
 **Fecha:** 2026-09-24.
 **Definición:** [PRD, fase 1](../PRD.md#fase-1--decisiones-y-esquema). Las decisiones D1–D5 ya estaban cerradas; este registro cubre la implementación.
 
@@ -44,9 +44,6 @@
 - **`.gitattributes` con `eol=lf`:** con `core.autocrlf=true`, la copia local en CRLF generaba marcas `M` sin cambios y diferencias falsas al comparar el build contra `HEAD`.
 - **`AGENTS.md` reducido a lo no deducible** (pnpm con build scripts, pnpm 10 en Vercel, TypeScript 6). El resto duplicaba el PRD (§2, §3, D1–D5 y los prompts de §6) o `package.json`. El criterio de cierre de la fase en el PRD pasó a pedir solo eso.
 
-## Pendientes del usuario
+## Cierre
 
-Cierran la fase; ver la lista ordenada en [README](./README.md).
-
-1. Borrar `docs/research/hono-better-auth-postgres.md`, la única copia del backend que sigue sin versionar.
-2. Confirmar, en incógnito o tras una recarga forzada, que se ven las fotos, el logo, las fuentes y el favicon. El agente ya verificó que los 58 archivos de `public/assets/` responden 200 en producción después de `e933ab1`.
+El usuario borró los docs duplicados y confirmó que producción muestra fotos, logo, fuentes y favicon.

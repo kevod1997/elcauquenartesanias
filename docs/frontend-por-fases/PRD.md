@@ -328,8 +328,9 @@ Implementá la fase N de docs/frontend-por-fases/PRD.md de punta a punta en esta
    docs/frontend-por-fases/fases/fase-N.md con lo implementado, las decisiones técnicas
    que tomaste y su motivo, las validaciones ejecutadas y los desvíos respecto de lo
    acordado. Actualizá fases/README.md con estado, enlaces, pendientes y el siguiente
-   trabajo con qué leer. Actualizá el PRD si cambiaron reglas y AGENTS.md si surgieron
-   instrucciones no deducibles del código.
+   trabajo con qué leer. Actualizá el PRD si cambiaron reglas. En AGENTS.md agregá solo
+   gotchas que no se deducen del código, de package.json ni del PRD; lo que ya dicen el PRD
+   o estos prompts se referencia, no se copia.
 6. Creá un commit local con solo los cambios de la fase trabajada, aunque queden
    criterios asignados a mí. Terminá con la lista de lo que tengo que hacer a mano, en
    el orden en que conviene hacerlo.
