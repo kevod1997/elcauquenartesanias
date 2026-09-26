@@ -7,7 +7,7 @@ import Hilera from '../catalogo/Hilera.astro'
 import IconoInstagram from '../catalogo/IconoInstagram.astro'
 import IconoWhatsapp from '../catalogo/IconoWhatsapp.astro'
 import Pagina from '../catalogo/Pagina.astro'
-import { hileras, imagenesVisor } from '../catalogo/presentacion'
+import { hileras, imagenesVisor, tieneDisenos } from '../catalogo/presentacion'
 import Tarjeta from '../catalogo/Tarjeta.astro'
 import Visor from '../catalogo/Visor.astro'
 
@@ -70,7 +70,7 @@ const { productos } = await pedir(apiPublica.GET('/api/productos'))
       {
         productos.length > 0 ? (
           <div class="grid">
-            {hileras(productos).map((indices) => (
+            {hileras(productos, tieneDisenos).map((indices) => (
               <Hilera cantidad={indices.length}>
                 {indices.map((i) => productos[i] && <Tarjeta producto={productos[i]} indice={i} />)}
               </Hilera>

@@ -1,18 +1,19 @@
-import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react'
+import { type KeyboardEvent, type ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 import { apiAdmin, type components, ErrorApi, pedir } from '../api'
 import { formatearPrecio } from '../catalogo/presentacion'
 import { avisar } from './avisos'
 import { confirmar } from './confirmar'
 import { esValida, type Imagen, mover } from './galeria'
-import { IconoAbajo, IconoArriba, IconoFoto } from './iconos'
+import { IconoFoto } from './iconos'
 import { mensajeDeError } from './mensajes'
-import { hayCambios, rebasar } from './orden'
+import OrdenCatalogo from './OrdenCatalogo'
+import { estaPublicado, hayCambios, posiciones, rebasar, textoPosicion } from './orden'
 import type { Producto } from './productos'
 import { exigirSesion, redirigirSiNoAutenticado } from './sesion'
 
-// `/admin/productos` (F6-D1, F6-D2): el listado en el orden global de la API, con "Nuevo producto" arriba
-// y "Editar" como enlace al formulario. Suma el orden sin guardar con "Subir", "Bajar" y "Guardar orden"
-// (F8-D1 a F8-D5): toda recarga lo rebasa sobre la lista nueva, así no se pierde ante un `409`.
+// `/admin/productos` (F6-D1, F6-D2, F12-D6): dos pestañas. "Lista" muestra el orden guardado con "Nuevo
+// producto", "Editar" y "Borrar"; "Orden del catálogo" arma el orden sin guardar con "Guardar orden" (F8-D1 a
+// F8-D5): toda recarga lo rebasa sobre la lista nueva, así no se pierde ante un `409`.
 
 type Categoria = components['schemas']['Categoria']
 
@@ -22,6 +23,12 @@ interface Orden {
   version: number
   sinGuardar: string[]
 }
+
+type Vista = 'lista' | 'orden'
+const VISTAS: Vista[] = ['lista', 'orden']
+
+/** La pestaña de la URL: `?vista=orden`, o la "Lista" con cualquier otro valor (F12-D6). */
+const vistaDeUrl = (): Vista => (new URLSearchParams(location.search).get('vista') === 'orden' ? 'orden' : 'lista')
 
 const codigoDe = (e: unknown) => (e instanceof ErrorApi ? e.codigo : null)
 
@@ -33,6 +40,7 @@ export default function Productos() {
   const [guardando, setGuardando] = useState(false)
   const [anuncio, setAnuncio] = useState('')
   const [foco, setFoco] = useState<{ id: string; paso: -1 | 1 } | null>(null)
+  const [vista, setVista] = useState<Vista>(vistaDeUrl)
   const titulo = useRef<HTMLHeadingElement>(null)
   // La recarga rebasa el orden de ese momento, no el de cuando empezó el pedido.
   const ordenRef = useRef(orden)
@@ -78,7 +86,7 @@ export default function Productos() {
     return () => removeEventListener('beforeunload', avisarSalida)
   }, [cambios])
 
-  // React mueve la fila con `insertBefore` y el botón pierde el foco: se lo devuelve (F8-D2).
+  // React mueve la tarjeta con `insertBefore` y el botón pierde el foco: se lo devuelve (F8-D2, F12-D8).
   useEffect(() => {
     if (!foco) return
     const boton = (paso: -1 | 1) =>
@@ -89,15 +97,25 @@ export default function Productos() {
   }, [foco])
 
   const porId = new Map((productos ?? []).map((p) => [p.id, p]))
+  const enOrden = (ids: string[]) => ids.flatMap((id) => porId.get(id) ?? [])
 
-  const moverFila = (i: number, paso: -1 | 1) => {
+  /** "Antes" y "Después": mueven un lugar y anuncian la posición en el catálogo (F12-D8). */
+  const moverTarjeta = (i: number, paso: -1 | 1) => {
     if (!orden) return
     const sinGuardar = mover(orden.sinGuardar, i, paso)
     const id = sinGuardar[i + paso]
-    if (id === undefined) return
+    const producto = id === undefined ? undefined : porId.get(id)
+    if (id === undefined || !producto) return
     setOrden({ ...orden, sinGuardar })
-    setAnuncio(`«${porId.get(id)?.nombre ?? ''}», posición ${i + paso + 1} de ${sinGuardar.length}.`)
+    const lista = enOrden(sinGuardar)
+    const total = lista.filter(estaPublicado).length
+    setAnuncio(textoPosicion(producto.nombre, posiciones(lista, estaPublicado)[i + paso] ?? null, total))
     setFoco({ id, paso })
+  }
+
+  /** Soltar una tarjeta arrastrada: mueve en el orden sin guardar, sin guardar (F12-D8). */
+  const soltar = (desde: number, hasta: number) => {
+    setOrden((actual) => actual && { ...actual, sinGuardar: mover(actual.sinGuardar, desde, hasta - desde) })
   }
 
   const guardar = async () => {
@@ -148,21 +166,43 @@ export default function Productos() {
     titulo.current?.focus()
   }
 
+  // Pestañas con activación automática y `tabindex` rotativo (patrón Tabs de la APG, F12-D6).
+  const elegirVista = (nueva: Vista) => {
+    setVista(nueva)
+    const url = new URL(location.href)
+    if (nueva === 'orden') url.searchParams.set('vista', 'orden')
+    else url.searchParams.delete('vista')
+    history.replaceState(history.state, '', url)
+  }
+
+  const teclaPestana = (evento: KeyboardEvent<HTMLButtonElement>) => {
+    const i = VISTAS.indexOf(vista)
+    const destino = {
+      ArrowLeft: VISTAS[(i - 1 + VISTAS.length) % VISTAS.length],
+      ArrowRight: VISTAS[(i + 1) % VISTAS.length],
+      Home: VISTAS[0],
+      End: VISTAS[VISTAS.length - 1],
+    }[evento.key]
+    if (!destino) return
+    evento.preventDefault()
+    elegirVista(destino)
+    document.getElementById(`pestana-${destino}`)?.focus()
+  }
+
   const nombreCategoria = (id: string | null) => categorias.find((c) => c.id === id)?.nombre ?? 'Sin categoría'
 
-  const filas = (orden?.sinGuardar ?? []).flatMap((id) => porId.get(id) ?? [])
+  const guardados = enOrden(orden?.cargado ?? [])
+  const sinGuardar = enOrden(orden?.sinGuardar ?? [])
 
   let lista: ReactNode
-  if (productos === null) lista = !errorLista && <p className="cargando">Cargando…</p>
-  else if (filas.length === 0) lista = <p className="lista__vacia">Todavía no hay productos.</p>
-  else
+  let grilla: ReactNode
+  if (productos === null) lista = grilla = !errorLista && <p className="cargando">Cargando…</p>
+  else if (guardados.length === 0) lista = grilla = <p className="lista__vacia">Todavía no hay productos.</p>
+  else {
     lista = (
       <ol className="lista">
-        {filas.map((producto, i) => (
+        {guardados.map((producto) => (
           <li className="lista__fila" key={producto.id}>
-            <span className="lista__orden" aria-hidden="true">
-              {String(i + 1).padStart(2, '0')}
-            </span>
             <Miniatura imagen={producto.galeria[0]} />
             <span className="lista__nombre">
               {producto.nombre}
@@ -175,28 +215,6 @@ export default function Productos() {
               </span>
             </span>
             <span className="lista__acciones">
-              <button
-                type="button"
-                className="btn--icono"
-                aria-label={`Subir «${producto.nombre}»`}
-                data-mover="-1"
-                data-id={producto.id}
-                onClick={() => moverFila(i, -1)}
-                disabled={guardando || i === 0}
-              >
-                <IconoArriba />
-              </button>
-              <button
-                type="button"
-                className="btn--icono"
-                aria-label={`Bajar «${producto.nombre}»`}
-                data-mover="1"
-                data-id={producto.id}
-                onClick={() => moverFila(i, 1)}
-                disabled={guardando || i === filas.length - 1}
-              >
-                <IconoAbajo />
-              </button>
               <a
                 className="btn btn--secundario btn--chico"
                 href={`/admin/productos/editar?id=${encodeURIComponent(producto.id)}`}
@@ -218,13 +236,82 @@ export default function Productos() {
         ))}
       </ol>
     )
+    grilla = <OrdenCatalogo productos={sinGuardar} guardando={guardando} onMover={moverTarjeta} onSoltar={soltar} />
+  }
+
+  const pestana = (v: Vista, texto: ReactNode) => (
+    <button
+      type="button"
+      role="tab"
+      className="pestanas__pestana"
+      id={`pestana-${v}`}
+      aria-selected={vista === v}
+      aria-controls={`panel-${v}`}
+      tabIndex={vista === v ? 0 : -1}
+      onClick={() => elegirVista(v)}
+      onKeyDown={teclaPestana}
+    >
+      {texto}
+    </button>
+  )
 
   return (
     <section className="seccion" aria-labelledby="tituloProductos">
-      <div className="seccion__cabecera">
-        <h1 className="seccion__titulo" id="tituloProductos" ref={titulo} tabIndex={-1}>
-          Productos
-        </h1>
+      <h1 className="seccion__titulo" id="tituloProductos" ref={titulo} tabIndex={-1}>
+        Productos
+      </h1>
+      <div className="pestanas" role="tablist" aria-label="Vistas de los productos">
+        {pestana('lista', 'Lista')}
+        {pestana(
+          'orden',
+          <>
+            Orden del catálogo
+            {cambios && (
+              <>
+                <span className="pestanas__punto" aria-hidden="true" />
+                <span className="visualmente-oculto"> (sin guardar)</span>
+              </>
+            )}
+          </>,
+        )}
+      </div>
+      {errorLista && (
+        <p className="aviso aviso--error" role="alert">
+          {errorLista}
+        </p>
+      )}
+      <div
+        className="pestanas__panel"
+        role="tabpanel"
+        id="panel-lista"
+        aria-labelledby="pestana-lista"
+        hidden={vista !== 'lista'}
+      >
+        <div className="seccion__cabecera">
+          <a className="btn btn--primario" href="/admin/productos/editar">
+            Nuevo producto
+          </a>
+        </div>
+        {lista}
+      </div>
+      <div
+        className="pestanas__panel"
+        role="tabpanel"
+        id="panel-orden"
+        aria-labelledby="pestana-orden"
+        hidden={vista !== 'orden'}
+      >
+        <div className="orden__explicacion">
+          <p>
+            El catálogo público muestra los productos publicados en este orden, de izquierda a derecha y de arriba
+            abajo. En el teléfono se ven por hileras de hasta cuatro que se deslizan de costado, y un producto con
+            diseños va solo en la suya.
+          </p>
+          <p>
+            Los borradores no se ven hasta publicarlos. Los cambios se ven en el catálogo en hasta un minuto después de
+            guardar.
+          </p>
+        </div>
         <div className="orden__acciones">
           {cambios && (
             <span className="orden__pendiente" id="ordenPendiente">
@@ -233,24 +320,16 @@ export default function Productos() {
           )}
           <button
             type="button"
-            className="btn btn--secundario"
+            className="btn btn--primario"
             onClick={guardar}
             disabled={!cambios || guardando}
             aria-describedby={cambios ? 'ordenPendiente' : undefined}
           >
             {guardando ? 'Guardando…' : 'Guardar orden'}
           </button>
-          <a className="btn btn--primario" href="/admin/productos/editar">
-            Nuevo producto
-          </a>
         </div>
+        {grilla}
       </div>
-      {errorLista && (
-        <p className="aviso aviso--error" role="alert">
-          {errorLista}
-        </p>
-      )}
-      {lista}
       <p className="visualmente-oculto" role="status">
         {anuncio}
       </p>

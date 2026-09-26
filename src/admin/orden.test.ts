@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { hayCambios, rebasar } from './orden'
+import { hayCambios, posiciones, rebasar } from './orden'
+
+describe('posiciones', () => {
+  it('numera los que se ven desde 1 y deja en null a los borradores', () => {
+    const publicados = new Set(['a', 'c', 'd'])
+    expect(posiciones(['x', 'a', 'b', 'c', 'd', 'y'], (id) => publicados.has(id))).toEqual([null, 1, null, 2, 3, null])
+  })
+})
 
 describe('rebasar', () => {
   const anterior = ['a', 'b', 'c', 'd']

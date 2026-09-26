@@ -29,6 +29,14 @@ cada fase (decisiones FN-Dk y registro), en `fases/fase-N.md`, y el estado, en
   (`beforeunload`) y el lector de pantalla. Crear datos de prueba en producción requiere que el
   usuario lo autorice en el chat de esa sesión (sin eso, el modo automático lo bloquea); borralos al
   terminar.
+- **Para ver el admin a ancho de teléfono desde la extensión**, la ventana no se achica: reemplazá el
+  documento por iframes del mismo origen con ese ancho y menos alto que la ventana (~600px, o la barra
+  de abajo queda fuera de la captura), y medí dentro de `contentDocument`.
+- **Para probar el arrastre del orden desde la extensión**, la pestaña está oculta: no corre
+  `requestAnimationFrame` y los timers se espacian. Tras cargar, reemplazá `requestAnimationFrame` por
+  una espera con `MessageChannel` y tomá una captura (libera el frame que dnd-kit dejó pendiente);
+  después mandá `PointerEvent` a la manija con `setPointerCapture` neutralizado, o teclas reales. El
+  clon de la animación de soltar sigue en el DOM hasta la próxima captura.
 - **Al detener en Windows un `pnpm dev` o `pnpm api:fixture` lanzado en segundo plano**, el proceso
   hijo sigue escuchando en su puerto: buscá el PID con `netstat -ano | grep :<puerto>` y cerralo con
   `taskkill //PID <pid> //T //F`.

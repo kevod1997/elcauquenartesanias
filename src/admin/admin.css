@@ -60,12 +60,31 @@
   display: none !important;
 }
 
+/* Base mobile (F12-D3). Sin `overscroll-behavior`: el admin es un documento y recargar ya avisa si hay cambios. */
+html {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 body {
   margin: 0;
   background: var(--crema);
   color: var(--tinta);
   font-family: Inter, sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+
+a,
+button,
+[role='tab'] {
+  touch-action: manipulation;
+}
+
+button,
+[role='tab'] {
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 :where(button, a, input, select, textarea, [tabindex]):focus-visible {
@@ -97,7 +116,8 @@ a {
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-  padding: 18px clamp(16px, 4vw, 40px);
+  padding: calc(18px + env(safe-area-inset-top, 0px)) calc(clamp(16px, 4vw, 40px) + env(safe-area-inset-right, 0px))
+    18px calc(clamp(16px, 4vw, 40px) + env(safe-area-inset-left, 0px));
   background: linear-gradient(180deg, var(--madera-oscura) 0%, var(--cacao) 100%);
   color: var(--crema);
 }
@@ -131,8 +151,17 @@ a {
   color: var(--arena);
 }
 
+/* `main` ocupa todo el ancho sin padding a los costados: la grilla del orden mide `100cqi` como la del
+   catálogo público mide el `body` (F12-D7). En el `body`, `container-type` corta la propagación de su fondo al
+   lienzo, y una página corta queda sin fondo abajo. */
 .panel__contenido {
-  padding: clamp(20px, 4vw, 40px) clamp(16px, 4vw, 40px);
+  container-type: inline-size;
+  padding: clamp(20px, 4vw, 40px) 0 calc(clamp(20px, 4vw, 40px) + env(safe-area-inset-bottom, 0px));
+}
+
+.panel__marco {
+  padding: 0 calc(clamp(16px, 4vw, 40px) + env(safe-area-inset-right, 0px)) 0
+    calc(clamp(16px, 4vw, 40px) + env(safe-area-inset-left, 0px));
 }
 
 /* ---------- Navegación de la barra (F5-D1) ---------- */
@@ -149,9 +178,6 @@ a {
   text-decoration: none;
   padding: 4px 0;
   border-bottom: 2px solid transparent;
-}
-.panel__nav a:hover {
-  color: var(--crema);
 }
 .panel__nav a[aria-current='page'] {
   color: var(--crema);
@@ -178,7 +204,8 @@ a {
     background-color var(--t-rapida) var(--ease),
     border-color var(--t-rapida) var(--ease),
     color var(--t-rapida) var(--ease),
-    opacity var(--t-rapida) var(--ease);
+    opacity var(--t-rapida) var(--ease),
+    transform 100ms var(--ease);
 }
 
 .btn:disabled {
@@ -190,17 +217,11 @@ a {
   background: var(--dorado);
   color: var(--cacao);
 }
-.btn--primario:hover:not(:disabled) {
-  background: #c7ae8c;
-}
 
 .btn--secundario {
   background: transparent;
   border-color: var(--madera);
   color: var(--madera);
-}
-.btn--secundario:hover:not(:disabled) {
-  background: var(--crema-2);
 }
 
 .btn--fantasma {
@@ -208,25 +229,16 @@ a {
   border-color: rgba(247, 242, 235, 0.35);
   color: var(--crema);
 }
-.btn--fantasma:hover:not(:disabled) {
-  background: rgba(247, 242, 235, 0.1);
-}
 
 .btn--peligro {
   background: transparent;
   border-color: var(--terracota);
   color: var(--terracota);
 }
-.btn--peligro:hover:not(:disabled) {
-  background: var(--terracota-suave);
-}
 
 .btn--peligro-solido {
   background: var(--terracota);
   color: var(--papel);
-}
-.btn--peligro-solido:hover:not(:disabled) {
-  background: #732e22;
 }
 
 .btn--chico {
@@ -283,7 +295,7 @@ input[aria-invalid='true'] {
 
 .acceso {
   max-width: 380px;
-  margin: clamp(24px, 8vh, 80px) auto 0;
+  margin: clamp(24px, 8svh, 80px) auto 0;
   padding: 28px clamp(20px, 5vw, 32px);
   display: grid;
   gap: 18px;
@@ -459,7 +471,8 @@ input[aria-invalid='true'] {
 .toast {
   position: fixed;
   left: 50%;
-  bottom: 24px;
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  max-width: calc(100vw - 32px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
   display: flex;
   align-items: center;
   gap: 14px;
@@ -646,7 +659,6 @@ textarea[aria-invalid='true'] {
   color: var(--texto-tenue);
   cursor: pointer;
 }
-.campo__revelar:hover,
 .campo__revelar[aria-pressed='true'] {
   color: var(--madera-oscura);
 }
@@ -901,10 +913,9 @@ textarea[aria-invalid='true'] {
   justify-content: center;
   cursor: pointer;
   padding: 0;
-}
-.btn--icono:hover:not(:disabled) {
-  background: var(--crema-2);
-  border-color: var(--dorado);
+  transition:
+    background-color var(--t-rapida) var(--ease),
+    transform 100ms var(--ease);
 }
 .btn--icono:disabled {
   opacity: 0.35;
@@ -1005,4 +1016,432 @@ progress:indeterminate::-moz-progress-bar {
 
 .lista__acciones {
   align-items: center;
+}
+
+/* ---------- Pestañas de Productos (F12-D6) ---------- */
+
+.pestanas {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--arena);
+}
+
+.pestanas__pestana {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  margin-bottom: -1px;
+  padding: 10px 14px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--texto-suave);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    color var(--t-rapida) var(--ease),
+    background-color var(--t-rapida) var(--ease),
+    border-color var(--t-rapida) var(--ease);
+}
+.pestanas__pestana[aria-selected='true'] {
+  color: var(--cacao);
+  border-bottom-color: var(--madera);
+}
+
+/* Con orden sin guardar, el nombre suma "(sin guardar)" para el lector y este punto para la vista. */
+.pestanas__punto {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--ambar);
+}
+
+.pestanas__panel {
+  display: grid;
+  gap: 18px;
+}
+
+/* ---------- Orden del catálogo (F12-D6, F12-D7) ---------- */
+
+.orden__explicacion {
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--texto-suave);
+}
+.orden__explicacion p {
+  margin: 0;
+}
+
+/* Desktop: la regla de `.grid` del catálogo público al mismo ancho, `min(1140px, 100cqi - 40px)`, centrada
+   aunque la sección sea más angosta: a un mismo ancho de ventana, las mismas columnas. */
+.orden__grilla {
+  --ancho-catalogo: min(1140px, 100cqi - 40px);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(290px, 100%), 1fr));
+  gap: clamp(20px, 4vw, 32px);
+  width: var(--ancho-catalogo);
+  margin: 0 calc((100% - var(--ancho-catalogo)) / 2);
+  padding: 0;
+  list-style: none;
+}
+
+.orden__hilera {
+  display: none;
+}
+
+.orden__tarjeta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--papel);
+  border: 1px solid var(--arena);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.orden__tarjeta.is-arrastrada {
+  border-color: var(--dorado);
+  box-shadow: 0 16px 34px -12px rgba(59, 42, 26, 0.45);
+}
+
+.orden__foto {
+  position: relative;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--crema-2);
+  color: var(--texto-tenue);
+}
+.orden__foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* `touch-action: none`: el navegador no desplaza la página mientras sostienen la manija (F12-D5). */
+.orden__manija {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid rgba(247, 242, 235, 0.45);
+  border-radius: 10px;
+  background: rgba(59, 42, 26, 0.78);
+  color: var(--crema);
+  cursor: grab;
+  touch-action: none;
+  -webkit-touch-callout: none;
+  transition: background-color var(--t-rapida) var(--ease);
+}
+.orden__manija:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+.orden__manija:active:not(:disabled),
+.is-arrastrada .orden__manija {
+  cursor: grabbing;
+  background: var(--cacao);
+}
+
+.orden__cuerpo {
+  display: grid;
+  gap: 2px;
+  padding: 10px 12px 4px;
+}
+
+.orden__numero {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 1.1;
+  color: var(--madera);
+}
+
+.orden__borrador {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 24px;
+  color: var(--ambar);
+}
+
+.orden__nombre {
+  font-size: 15px;
+  color: var(--tinta);
+  overflow-wrap: anywhere;
+}
+
+.orden__tarjeta--borrador .orden__foto,
+.orden__tarjeta--borrador .orden__nombre {
+  opacity: 0.55;
+}
+
+.orden__mover {
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
+  padding: 8px 12px 12px;
+}
+.orden__mover .btn {
+  flex: 1;
+  min-width: 0;
+  padding-inline: 6px;
+}
+
+/* ---------- Feedback de toque (F12-D3) ---------- */
+
+.btn:active:not(:disabled),
+.btn--icono:active:not(:disabled) {
+  transform: scale(0.97);
+}
+.btn--primario:active:not(:disabled) {
+  background: #c7ae8c;
+}
+.btn--secundario:active:not(:disabled),
+.btn--icono:active:not(:disabled) {
+  background: var(--crema-2);
+}
+.btn--fantasma:active:not(:disabled) {
+  background: rgba(247, 242, 235, 0.14);
+}
+.btn--peligro:active:not(:disabled) {
+  background: var(--terracota-suave);
+}
+.btn--peligro-solido:active:not(:disabled) {
+  background: #732e22;
+}
+.pestanas__pestana:active {
+  color: var(--cacao);
+  background: var(--crema-2);
+}
+.panel__nav a:active {
+  color: var(--crema);
+}
+.panel__nav a {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Todo `:hover` va acá: en touch, el primer toque lo deja pegado (F12-D3). */
+@media (hover: hover) and (pointer: fine) {
+  .panel__nav a:hover {
+    color: var(--crema);
+  }
+  .btn--primario:hover:not(:disabled) {
+    background: #c7ae8c;
+  }
+  .btn--secundario:hover:not(:disabled) {
+    background: var(--crema-2);
+  }
+  .btn--fantasma:hover:not(:disabled) {
+    background: rgba(247, 242, 235, 0.1);
+  }
+  .btn--peligro:hover:not(:disabled) {
+    background: var(--terracota-suave);
+  }
+  .btn--peligro-solido:hover:not(:disabled) {
+    background: #732e22;
+  }
+  .btn--icono:hover:not(:disabled) {
+    background: var(--crema-2);
+    border-color: var(--dorado);
+  }
+  .campo__revelar:hover {
+    color: var(--madera-oscura);
+  }
+  .pestanas__pestana:hover {
+    color: var(--cacao);
+  }
+  .orden__manija:hover:not(:disabled) {
+    background: var(--cacao);
+  }
+}
+
+/* iOS acerca la página al enfocar un campo de menos de 16px; en desktop quedan como están (F12-D3). */
+@media (pointer: coarse) {
+  input[type='text'],
+  input[type='email'],
+  input[type='password'],
+  .foto__nombre input[type='text'],
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+/* ---------- Navegación en desktop (F12-D4) ---------- */
+
+.panel__icono {
+  display: none;
+}
+
+/* ---------- Mobile (F12-D3, F12-D4, F12-D7, F12-D9) ---------- */
+
+@media (max-width: 560px) {
+  :root {
+    --alto-barra: 58px;
+  }
+
+  /* La cabecera queda fina: la marca, el integrante y "Cerrar sesión". */
+  .panel__bar {
+    padding-top: calc(10px + env(safe-area-inset-top, 0px));
+    padding-bottom: 10px;
+    gap: 8px;
+  }
+  .panel__marca {
+    font-size: 17px;
+  }
+  .panel__acciones {
+    gap: 8px;
+  }
+  .panel__integrante {
+    font-size: 13px;
+  }
+
+  /* La misma `<nav>` pasa a la barra fija de abajo, con las pestañas en partes iguales. */
+  .panel__nav {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 30;
+    gap: 0;
+    margin: 0;
+    padding: 0 env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+    background: var(--cacao);
+    border-top: 1px solid rgba(247, 242, 235, 0.12);
+    box-shadow: 0 -6px 18px -10px rgba(0, 0, 0, 0.5);
+  }
+  .panel__nav a {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: var(--alto-barra);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 6px 2px;
+    border-bottom: none;
+    color: rgba(228, 213, 193, 0.62);
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  /* La actual, en dorado y con una marca arriba: las demás quedan más tenues para que se distinga. */
+  .panel__nav a[aria-current='page'] {
+    color: var(--dorado);
+    box-shadow: inset 0 2px 0 var(--dorado);
+  }
+  .panel__icono {
+    display: block;
+  }
+
+  /* Con la barra de abajo, el contenido y el toast le dejan lugar. */
+  .panel__bar ~ .panel__contenido {
+    padding-bottom: calc(var(--alto-barra) + 24px + env(safe-area-inset-bottom, 0px));
+  }
+  .panel__bar ~ .toast {
+    bottom: calc(var(--alto-barra) + 12px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .seccion__titulo {
+    font-size: 24px;
+  }
+
+  /* Listas como tarjetas apiladas, con las acciones en su línea y de 44px de alto (F12-D9). */
+  .lista {
+    display: grid;
+    gap: 10px;
+    background: none;
+    border: none;
+    border-radius: 0;
+  }
+  .lista__fila {
+    justify-content: flex-start;
+    background: var(--papel);
+    border: 1px solid var(--arena);
+    border-radius: 12px;
+  }
+  .lista__nombre {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .lista__fila.lista__fila--edicion {
+    background: var(--crema-2);
+  }
+  .lista .lista__acciones {
+    flex-basis: 100%;
+  }
+  .lista .lista__acciones > * {
+    flex: 1;
+  }
+  .lista .btn--chico,
+  .lista .btn--icono {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .lista .btn--icono {
+    min-width: 44px;
+  }
+
+  .pestanas__pestana {
+    flex: 1;
+    justify-content: center;
+    padding-inline: 8px;
+  }
+
+  /* Orden del catálogo: dos columnas y un separador antes de cada hilera (F12-D7). */
+  .orden__grilla {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    width: auto;
+    margin: 0;
+  }
+  .orden__hilera {
+    display: block;
+    grid-column: 1 / -1;
+    margin-top: 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--arena);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--texto-tenue);
+  }
+  .orden__hilera:first-child {
+    margin-top: 0;
+  }
+  .orden__cuerpo {
+    padding: 8px 10px 2px;
+  }
+  .orden__numero {
+    font-size: 19px;
+  }
+  .orden__nombre {
+    font-size: 14px;
+  }
+  .orden__mover {
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px 10px 10px;
+  }
+  .orden__mover .btn {
+    min-height: 44px;
+  }
 }

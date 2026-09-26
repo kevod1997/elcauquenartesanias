@@ -61,29 +61,44 @@ export function imagenesVisor({ nombre, galeria }: ProductoPublico): ImagenVisor
 
 const PRODUCTOS_POR_HILERA = 4
 
+/** Si un producto del catálogo público tiene diseños: va solo en su hilera. */
+export const tieneDisenos = (producto: ProductoPublico): boolean => producto.galeria.some((imagen) => imagen.esDiseno)
+
 /**
- * Hileras del carrusel mobile, con los índices en el orden de la API. Un producto con diseños va solo en su
- * hilera, después de la hilera que se está llenando; el resto va de a cuatro. Con el catálogo del fixture da las
- * hileras fijas del sitio viejo: [0-3], [4, 5, 7, 8], [6] y [9, 10]. En desktop las hileras no cuentan:
- * la grilla ordena por índice.
+ * Hileras del carrusel mobile, con los índices en el orden global (F12-D1, F12-D2): cortes de ese orden de a
+ * cuatro productos que se ven, y un producto con diseños cierra la hilera que se está llenando y ocupa la suya.
+ * Uno que no se ve (un borrador, en el admin) queda en la hilera que se está llenando sin contar para las cuatro
+ * ni cerrarla; si la hilera solo tiene de esos, sigue con el producto que viene. El catálogo público pasa
+ * `tieneDisenos` y ningún `seVe`. En desktop las hileras no cuentan: la grilla ordena por índice.
  */
-export function hileras(productos: ProductoPublico[]): number[][] {
+export function hileras<T>(
+  productos: readonly T[],
+  conDisenos: (producto: T) => boolean,
+  seVe: (producto: T) => boolean = () => true,
+): number[][] {
   const resultado: number[][] = []
   let actual: number[] = []
-  let solos: number[][] = []
+  let visibles = 0
+  const cerrar = () => {
+    resultado.push(actual)
+    actual = []
+    visibles = 0
+  }
   productos.forEach((producto, i) => {
-    if (producto.galeria.some((imagen) => imagen.esDiseno)) {
-      solos.push([i])
+    if (!seVe(producto)) {
+      actual.push(i)
+      return
+    }
+    if (conDisenos(producto)) {
+      if (visibles > 0) cerrar()
+      actual.push(i)
+      cerrar()
       return
     }
     actual.push(i)
-    if (actual.length === PRODUCTOS_POR_HILERA) {
-      resultado.push(actual, ...solos)
-      actual = []
-      solos = []
-    }
+    visibles++
+    if (visibles === PRODUCTOS_POR_HILERA) cerrar()
   })
   if (actual.length) resultado.push(actual)
-  resultado.push(...solos)
   return resultado
 }

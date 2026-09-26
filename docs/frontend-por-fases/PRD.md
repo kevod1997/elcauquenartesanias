@@ -48,6 +48,9 @@ No se incluyen carrito, pago, stock, registro público ni cambios en el backend.
 - **Patrón del admin** (listado, formularios y errores, confirmación, avisos, estado): F5-D2 a
   F5-D6 en la [fase 5](./fases/fase-5.md#definición). Las fases 6 a 9 lo reusan y registran solo
   sus desvíos.
+- **Admin en el teléfono** (corte en 560px, `:hover` solo con mouse, campos de 16px, safe areas, barra
+  de secciones abajo y listas como tarjetas con acciones de 44px): F12-D3, F12-D4 y F12-D9 en la
+  [fase 12](./fases/fase-12.md#definición). Toda pantalla nueva del admin los sigue.
 - La posición 0 de la galería es la imagen principal y no puede ser un diseño; la UI lo comunica antes de que la API lo rechace.
 - Un producto publicado no puede quedar inválido: la UI deshabilita o explica las acciones que la API rechazaría con `422`.
 

@@ -92,7 +92,7 @@ viejo sigue en `/`.
 
 | Decisión | Motivo |
 | --- | --- |
-| Hileras mobile: un producto con diseños va solo en su hilera, después de la que se está llenando; el resto va de a cuatro (`hileras()` en `presentacion.ts`). | `main.js` tenía las hileras fijas por índice. Con el catálogo actual, la regla da las mismas: `[0-3] [4,5,7,8] [6] [9,10]`. En desktop, `--orden-producto` mantiene el orden de la API. |
+| Hileras mobile: un producto con diseños va solo en su hilera, después de la que se está llenando; el resto va de a cuatro (`hileras()` en `presentacion.ts`). Reemplazada por F12-D1 ([fase 12](./fase-12.md)): el producto con diseños cierra la hilera en su posición. | `main.js` tenía las hileras fijas por índice. Con el catálogo actual, la regla da las mismas: `[0-3] [4,5,7,8] [6] [9,10]`. En desktop, `--orden-producto` mantiene el orden de la API. |
 | En el visor, la imagen previa es `url160` para los diseños y `url640` para el resto. | Así lo hacía `main.js`: el visor abre con la imagen que ya cargó la tarjeta. F3-D4 decía `url640` para todas; ver [Desvíos](#desvíos). |
 | Los datos del visor viajan en un `<script type="application/json">`, con `<` escapado. El script del visor queda en el bundle de Astro. | `define:vars` vuelve inline el script y le quita el tipado. |
 | Sin imagen principal, la tarjeta muestra el fondo en un `div` sin la lupa ni el visor. | F3-D4: la tarjeta no falla, y no hay nada que mostrar en el visor. |
