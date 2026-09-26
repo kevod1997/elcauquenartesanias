@@ -280,26 +280,7 @@ listas como tarjetas (F12-D9); los tests de F12-D10.
 ## Desvíos
 
 - `container-type` va en `main` y no en el `body` (F12-D7), por el fondo; el ancho medido es el mismo.
-- El dispositivo real, el lector de pantalla y la barra de Integrantes del owner quedan para el usuario;
-  la prueba local usó la sesión del editor.
-
-## Verificaciones del usuario
-
-Tras el push a `main` y el deploy, en `https://admin.elcauquenartesanias.com.ar`:
-
-1. **Teléfono real** (iPhone con notch si hay uno a mano): en Productos, Categorías y Tipos de medida,
-   la barra de abajo cambia de sección, no tapa el contenido al final de la página ni queda bajo el
-   indicador de inicio, y la cabecera no queda bajo el notch. Tocar un campo (el nombre de una
-   categoría nueva) no acerca la página. "Editar" y "Borrar" de cada tarjeta se tocan sin errores, y
-   un botón no queda marcado después de tocarlo.
-2. **Owner en el teléfono:** la barra muestra 4 pestañas, con Integrantes.
-3. **Orden con el dedo:** en Productos → "Orden del catálogo", mantener apretada la manija (⠿) de una
-   tarjeta y arrastrarla a otro lugar; la tarjeta se mueve y la página se desplaza sola cerca del borde.
-   Desplazar la página tocando la foto no arrastra. "Antes" y "Después" mueven la tarjeta. Con los
-   separadores "Hilera N" a la vista, abrir el catálogo público en el mismo teléfono: cada carrusel
-   tiene los productos de su hilera. No guardar, o volver al orden original antes de guardar.
-4. **Orden con el mouse en desktop:** arrastrar una tarjeta por la manija; se reordena mientras se
-   arrastra y al soltar queda "Hay cambios en el orden sin guardar.". Recargar y aceptar el diálogo
-   del navegador para descartar.
-5. **Lector de pantalla** (NVDA o VoiceOver): con el foco en una manija se anuncia "Mover «X»" y las
-   instrucciones; Espacio, una flecha y Espacio anuncian la posición en español.
+- El dispositivo real, el lector de pantalla y la barra de Integrantes del owner los verificó el
+  usuario; la prueba local usó la sesión del editor.
+- El usuario confirmó en producción (2026-09-25) las verificaciones en el teléfono real, con el
+  owner, el arrastre con el dedo y el mouse, las hileras contra el catálogo y el lector de pantalla.
