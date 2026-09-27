@@ -40,12 +40,6 @@ cada fase (decisiones FN-Dk y registro), en `fases/fase-N.md`, y el estado, en
 - **Al detener en Windows un `pnpm dev` o `pnpm api:fixture` lanzado en segundo plano**, el proceso
   hijo sigue escuchando en su puerto: buscá el PID con `netstat -ano | grep :<puerto>` y cerralo con
   `taskkill //PID <pid> //T //F`.
-- **Para ver `/admin/ingresar` con la sesión local iniciada**, detené el backend: sin respuesta de
-  `/admin/sesion` la página muestra el formulario, y la sesión del usuario queda intacta. En ese
-  formulario, Chrome autocompleta y su desplegable tapa el botón del ojo: Escape antes de hacer clic.
-- **La pestaña que maneja la extensión de Chrome queda oculta**, y ahí el `close` de un `<dialog>`
-  (la confirmación de `confirmar.ts`) no llega hasta que la pestaña se dibuja: tras confirmar, tomá
-  una captura antes de leer el toast o la lista.
 - **El backend local sube al bucket R2 de producción**: usá solo imágenes de `public/assets/` y
   borrá por la API las imágenes de prueba al terminar.
 - **Una isla y su módulo de reglas se llaman igual salvo mayúsculas** (`Galeria.tsx` y `galeria.ts`):
