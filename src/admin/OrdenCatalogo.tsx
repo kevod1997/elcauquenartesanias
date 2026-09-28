@@ -35,8 +35,6 @@ const TACHO = 'zona:tacho'
 const INSTRUCCIONES =
   'Para tomar un producto o una hilera, apretá Espacio o Enter. Con las flechas lo llevás a otro lugar; Espacio o Enter lo sueltan y Escape descarta el movimiento.'
 const DESCARTADO = 'Se descartó el movimiento: todo volvió a como estaba.'
-const MEZCLA =
-  'Mezcla productos con y sin diseños: en el catálogo las tarjetas sin diseños toman otra proporción y la hilera se ve despareja.'
 
 /** Cuánto puede saltar el scroll de una vez mientras se arrastra; más es un salto de dnd-kit y se deshace. */
 const SALTO = 150
@@ -329,11 +327,6 @@ function Hilera({ ids, indice, porId, aPublicar, activo, encima, guardando }: Pr
     disabled: guardando,
   })
   const numero = indice + 1
-  const conDisenos = ids.filter((x) => {
-    const producto = porId.get(x)
-    return producto !== undefined && tieneDisenoProcesado(producto)
-  }).length
-  const mezcla = conDisenos > 0 && conDisenos < ids.length
   const clases = [
     'orden__hilera',
     isDragSource && 'is-arrastrada',
@@ -347,7 +340,7 @@ function Hilera({ ids, indice, porId, aPublicar, activo, encima, guardando }: Pr
         ref={handleRef}
         data-orden-id={id}
         className="orden__numero"
-        aria-label={`Hilera ${numero}, con ${productos(ids.length)}${mezcla ? ', mezcla productos con y sin diseños' : ''}: arrastrala para moverla entera`}
+        aria-label={`Hilera ${numero}, con ${productos(ids.length)}: arrastrala para moverla entera`}
         aria-roledescription="arrastrable"
         disabled={guardando}
       >
@@ -377,7 +370,6 @@ function Hilera({ ids, indice, porId, aPublicar, activo, encima, guardando }: Pr
           <Vacio key={`${VACIO}${ids[0]}:${k}`} id={`${VACIO}${ids[0]}:${k}`} disabled={guardando} />
         ))}
       </ol>
-      {mezcla && <p className="orden__mezcla">{MEZCLA}</p>}
     </li>
   )
 }

@@ -34,6 +34,9 @@ const datos = JSON.stringify(Astro.props.galerias).replaceAll('<', '\\u003c')
     </div>
 
     <div class="visor__tiras" id="visorTiras"></div>
+
+    <!-- Solo mobile: el cuerpo de la tarjeta, que ahí muestra solo foto, nombre y precio. -->
+    <div class="visor__info" id="visorInfo"></div>
   </div>
 </dialog>
 
@@ -47,6 +50,7 @@ const datos = JSON.stringify(Astro.props.galerias).replaceAll('<', '\\u003c')
   const visorTitulo = porId('visorTitulo')
   const visorContador = porId('visorContador')
   const visorTiras = porId('visorTiras')
+  const visorInfo = porId('visorInfo')
   const capas = [porId<HTMLImageElement>('visorFotoA'), porId<HTMLImageElement>('visorFotoB')] as const
   const panel = visor.querySelector('.visor__panel') as HTMLElement
 
@@ -54,9 +58,12 @@ const datos = JSON.stringify(Astro.props.galerias).replaceAll('<', '\\u003c')
   let idx = 0
   let activa: 0 | 1 = 0
 
-  function abrir(galeria: ImagenVisor[], i: number) {
+  function abrir(galeria: ImagenVisor[], i: number, tarjeta: Element | null) {
     items = galeria
     idx = i
+    const cuerpo = tarjeta?.querySelector('.card__body')
+    visorInfo.replaceChildren(...(cuerpo ? [cuerpo.cloneNode(true)] : []))
+    panel.scrollTop = 0
     visor.classList.toggle('visor--unica', items.length <= 1)
     document.body.style.overflow = 'hidden'
     pintarTiras()
@@ -161,11 +168,19 @@ const datos = JSON.stringify(Astro.props.galerias).replaceAll('<', '\\u003c')
 
   /* ---------- Controles ---------- */
 
+  const tarjetaEntera = window.matchMedia('(max-width: 560px)')
+
   document.addEventListener('click', (e) => {
-    const disparador = (e.target as Element).closest<HTMLElement>('[data-visor-producto]')
-    if (!disparador) return
+    const objetivo = e.target as Element
+    /* En mobile se toca la tarjeta entera; el botón de la foto sigue siendo el que se enfoca con el teclado. */
+    const disparador =
+      objetivo.closest<HTMLElement>('[data-visor-producto]') ??
+      (tarjetaEntera.matches
+        ? objetivo.closest('.product-row .card')?.querySelector<HTMLElement>('.card__foto[data-visor-producto]')
+        : null)
+    if (!disparador || visor.contains(disparador)) return
     const galeria = galerias[Number(disparador.dataset.visorProducto)]
-    if (galeria?.length) abrir(galeria, Number(disparador.dataset.visorImagen))
+    if (galeria?.length) abrir(galeria, Number(disparador.dataset.visorImagen), disparador.closest('.card'))
   })
 
   visor.addEventListener('click', (e) => {

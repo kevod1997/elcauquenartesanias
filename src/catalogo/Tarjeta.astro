@@ -12,6 +12,9 @@ interface Props {
 const { producto, indice } = Astro.props
 const principal = producto.galeria[0]
 const listaDisenos = disenos(producto.galeria)
+// En mobile la tarjeta muestra solo foto, nombre y precio: el resto está en el visor, y el chip «más» lo anuncia.
+const textoMas =
+  listaDisenos.length === 0 ? 'Ver más' : `${listaDisenos.length} ${listaDisenos.length === 1 ? 'diseño' : 'diseños'}`
 ---
 
 <article class="card" style={`--orden-producto: ${indice}`}>
@@ -47,6 +50,11 @@ const listaDisenos = disenos(producto.galeria)
       <h3 class="card__nombre">{producto.nombre}</h3>
       <span class="card__precio">{formatearPrecio(producto.precio)}</span>
     </div>
+
+    <span class="card__mas" aria-hidden="true">
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M5 1v8M1 5h8"></path></svg>
+      {textoMas}
+    </span>
 
     {producto.descripcion !== null && <p class="card__desc">{producto.descripcion}</p>}
 

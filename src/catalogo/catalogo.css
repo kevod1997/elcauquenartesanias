@@ -336,6 +336,12 @@ a:hover {
   border-left: 1px solid rgba(183, 158, 127, 0.75);
 }
 
+/* Chip «más» de la tarjeta simplificada (solo mobile): anuncia el detalle o los diseños del visor
+   debajo de la foto, sin taparla. Toma la píldora de las medidas. */
+.card__mas {
+  display: none;
+}
+
 .card__body {
   padding: 20px 20px 22px;
   display: flex;
@@ -635,6 +641,7 @@ a:hover {
   }
 
   .product-row {
+    --ancho-tarjeta: min(64vw, 280px);
     position: relative;
     display: block;
     min-width: 0;
@@ -655,14 +662,48 @@ a:hover {
     display: none;
   }
 
+  /* Tarjeta simplificada: foto, nombre y precio. La descripción, las medidas, los diseños y el WhatsApp
+     pasan al visor, que se abre tocando la tarjeta entera. Entra una y media por pantalla. */
+  /* Mismo ancho en todas las hileras, aunque tengan un solo producto; min-width: 0 impide que el
+     contenido la ensanche. */
   .product-row .card {
     order: initial;
-    min-width: calc(100% - 38px);
+    flex: 0 0 var(--ancho-tarjeta);
+    min-width: 0;
     scroll-snap-align: start;
+    cursor: pointer;
   }
 
-  .product-row--single .card {
-    min-width: 100%;
+  .product-row .card :where(.card__desc, .medidas, .variantes, .btn-wa) {
+    display: none;
+  }
+
+  .product-row .card__body {
+    padding: 14px 14px 16px;
+  }
+
+  .product-row .card__nombre {
+    font-size: 18px;
+  }
+
+  /* Sin la lupa la foto queda limpia, y el velo que le daba piso sobra. */
+  .product-row .card__lupa,
+  .product-row .card__foto::after {
+    display: none;
+  }
+
+  .product-row .card__mas {
+    display: inline-flex;
+    align-self: flex-start;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 11px;
+    border-radius: 999px;
+    background: var(--crema-2);
+    color: var(--madera);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
   }
 
   .medidas {
@@ -679,7 +720,8 @@ a:hover {
 
   .product-row__arrow {
     position: absolute;
-    top: clamp(150px, 42vw, 182px);
+    /* A la altura del centro de la foto */
+    top: calc(var(--ancho-tarjeta) / 2 - 22px);
     z-index: 3;
     display: inline-flex;
     align-items: center;
@@ -992,6 +1034,61 @@ a:hover {
 .visor__tiras button[aria-current='true'] {
   border-color: var(--verde);
   opacity: 1;
+}
+
+/* El detalle del producto va en el visor solo en mobile: en desktop la tarjeta ya lo muestra. */
+.visor__info {
+  display: none;
+}
+
+@media (max-width: 560px) {
+  /* El panel se desplaza: la foto queda cuadrada y el detalle sigue debajo de la tira. */
+  .visor__panel {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .visor__panel > * {
+    flex-shrink: 0;
+  }
+
+  .visor__head {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #fbf7f1;
+  }
+
+  .visor__stage {
+    flex: none;
+    aspect-ratio: 1;
+  }
+
+  .visor__info {
+    display: block;
+  }
+
+  /* La tira ya muestra los diseños, y el título los nombra al elegirlos. */
+  .visor__info .variantes {
+    display: none;
+  }
+
+  .visor__info .card__body {
+    padding: 16px 16px 12px;
+  }
+
+  /* En el visor hay ancho: las medidas vuelven a partir línea en vez de desbordar. */
+  .visor__info .medidas {
+    flex-wrap: wrap;
+  }
+
+  /* El WhatsApp queda a mano mientras se lee el detalle. */
+  .visor__info .btn-wa {
+    position: sticky;
+    bottom: 12px;
+    margin-top: 4px;
+    box-shadow: 0 10px 24px -10px rgba(59, 42, 26, 0.6);
+  }
 }
 
 /* Una sola imagen: sin flechas, contador ni tira */

@@ -1500,14 +1500,6 @@ progress:indeterminate::-moz-progress-bar {
 /* ---------- Mobile (F12-D3, F12-D4, F12-D7, F12-D9) ---------- */
 
 @media (max-width: 560px) {
-/* Aviso de una hilera que mezcla productos con y sin diseños, debajo de sus lugares. */
-.orden__mezcla {
-  grid-column: 2;
-  margin: -2px 0 0;
-  font-size: 12px;
-  color: var(--terracota);
-}
-
   :root {
     --alto-barra: 58px;
   }
