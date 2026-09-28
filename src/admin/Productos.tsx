@@ -3,26 +3,34 @@ import { apiAdmin, type components, ErrorApi, pedir } from '../api'
 import { formatearPrecio } from '../catalogo/presentacion'
 import { avisar } from './avisos'
 import { confirmar } from './confirmar'
-import { esValida, type Imagen, mover } from './galeria'
+import { esValida, type Imagen } from './galeria'
 import { IconoFoto } from './iconos'
 import { mensajeDeError } from './mensajes'
 import OrdenCatalogo from './OrdenCatalogo'
-import { estaPublicado, hayCambios, posiciones, rebasar, textoPosicion } from './orden'
+import { type Armado, hayCambios, listaDeCortes, rebasar } from './orden'
 import type { Producto } from './productos'
 import { exigirSesion, redirigirSiNoAutenticado } from './sesion'
 
 // `/admin/productos` (F6-D1, F6-D2, F12-D6): dos pestañas. "Lista" muestra el orden guardado con "Nuevo
-// producto", "Editar" y "Borrar"; "Orden del catálogo" arma el orden sin guardar con "Guardar orden" (F8-D1 a
-// F8-D5): toda recarga lo rebasa sobre la lista nueva, así no se pierde ante un `409`.
+// producto", "Editar" y "Borrar"; "Orden del catálogo" arma el orden sin guardar, con sus cortes de hilera y
+// los borradores a publicar, y lo guarda con "Guardar orden" o "Guardar y publicar" (F8-D1 a F8-D5, F13-D4,
+// F13-D9): toda recarga lo rebasa sobre la lista nueva, así no se pierde ante un `409` (F13-D8).
 
 type Categoria = components['schemas']['Categoria']
 
 /** El orden cargado (`cargado`, `version`) y el que el usuario armó y todavía no guardó. */
 interface Orden {
-  cargado: string[]
+  cargado: Armado
   version: number
-  sinGuardar: string[]
+  sinGuardar: Armado
 }
+
+/** El orden guardado, con los cortes que trae cada producto (`iniciaHilera`) o el `PUT`. */
+const armadoGuardado = (orden: string[], cortes: Iterable<string>): Armado => ({
+  orden,
+  cortes: new Set(cortes),
+  aPublicar: new Set(),
+})
 
 type Vista = 'lista' | 'orden'
 const VISTAS: Vista[] = ['lista', 'orden']
@@ -39,7 +47,6 @@ export default function Productos() {
   const [errorLista, setErrorLista] = useState<string | null>(null)
   const [guardando, setGuardando] = useState(false)
   const [anuncio, setAnuncio] = useState('')
-  const [foco, setFoco] = useState<{ id: string; paso: -1 | 1 } | null>(null)
   const [vista, setVista] = useState<Vista>(vistaDeUrl)
   const titulo = useRef<HTMLHeadingElement>(null)
   // La recarga rebasa el orden de ese momento, no el de cuando empezó el pedido.
@@ -54,13 +61,19 @@ export default function Productos() {
         pedir(apiAdmin.GET('/admin/categorias')),
       ])
       const previo = ordenRef.current
+      const cargado = armadoGuardado(
+        orden,
+        productos.filter((p) => p.iniciaHilera).map((p) => p.id),
+      )
+      const publicados = new Set(productos.filter((p) => p.estado === 'publicado').map((p) => p.id))
       const nuevo: Orden = {
-        cargado: orden,
+        cargado,
         version: ordenVersion,
-        sinGuardar: previo ? rebasar(previo.sinGuardar, previo.cargado, orden) : orden,
+        sinGuardar: previo ? rebasar(previo.sinGuardar, previo.cargado, cargado, (id) => publicados.has(id)) : cargado,
       }
       setProductos(productos)
       setCategorias(categorias)
+      ordenRef.current = nuevo
       setOrden(nuevo)
       return nuevo
     } catch (e) {
@@ -86,48 +99,52 @@ export default function Productos() {
     return () => removeEventListener('beforeunload', avisarSalida)
   }, [cambios])
 
-  // React mueve la tarjeta con `insertBefore` y el botón pierde el foco: se lo devuelve (F8-D2, F12-D8).
-  useEffect(() => {
-    if (!foco) return
-    const boton = (paso: -1 | 1) =>
-      document.querySelector<HTMLButtonElement>(`[data-mover="${paso}"][data-id="${CSS.escape(foco.id)}"]`)
-    const mismo = boton(foco.paso)
-    ;(mismo && !mismo.disabled ? mismo : boton(foco.paso === -1 ? 1 : -1))?.focus()
-    setFoco(null)
-  }, [foco])
-
   const porId = new Map((productos ?? []).map((p) => [p.id, p]))
-  const enOrden = (ids: string[]) => ids.flatMap((id) => porId.get(id) ?? [])
+  const enOrden = (ids: readonly string[]) => ids.flatMap((id) => porId.get(id) ?? [])
 
-  /** "Antes" y "Después": mueven un lugar y anuncian la posición en el catálogo (F12-D8). */
-  const moverTarjeta = (i: number, paso: -1 | 1) => {
-    if (!orden) return
-    const sinGuardar = mover(orden.sinGuardar, i, paso)
-    const id = sinGuardar[i + paso]
-    const producto = id === undefined ? undefined : porId.get(id)
-    if (id === undefined || !producto) return
-    setOrden({ ...orden, sinGuardar })
-    const lista = enOrden(sinGuardar)
-    const total = lista.filter(estaPublicado).length
-    setAnuncio(textoPosicion(producto.nombre, posiciones(lista, estaPublicado)[i + paso] ?? null, total))
-    setFoco({ id, paso })
-  }
-
-  /** Soltar una tarjeta arrastrada: mueve en el orden sin guardar, sin guardar (F12-D8). */
-  const soltar = (desde: number, hasta: number) => {
-    setOrden((actual) => actual && { ...actual, sinGuardar: mover(actual.sinGuardar, desde, hasta - desde) })
-  }
+  const descartar = () => setOrden((actual) => actual && { ...actual, sinGuardar: actual.cargado })
 
   const guardar = async () => {
     if (!orden) return
+    const { sinGuardar, version } = orden
     setErrorLista(null)
     setGuardando(true)
     try {
       const guardado = await pedir(
-        apiAdmin.PUT('/admin/productos/orden', { body: { orden: orden.sinGuardar, ordenVersion: orden.version } }),
+        apiAdmin.PUT('/admin/productos/orden', {
+          body: { orden: [...sinGuardar.orden], cortes: listaDeCortes(sinGuardar), ordenVersion: version },
+        }),
       )
-      setOrden({ cargado: guardado.orden, version: guardado.ordenVersion, sinGuardar: guardado.orden })
-      avisar('Orden guardado. El catálogo se actualiza en hasta un minuto.')
+      const cargado = armadoGuardado(guardado.orden, guardado.cortes)
+      const nuevo = { cargado, version: guardado.ordenVersion, sinGuardar: cargado }
+      ordenRef.current = nuevo
+      setOrden(nuevo)
+      const aPublicar = sinGuardar.orden.filter((id) => sinGuardar.aPublicar.has(id))
+      if (aPublicar.length === 0) {
+        avisar('Orden guardado. El catálogo se actualiza en hasta un minuto.')
+        return
+      }
+      // F13-D9: de a uno; un error sigue con el resto, salvo el `401`, que redirige.
+      const fallas: string[] = []
+      for (const id of aPublicar) {
+        try {
+          await pedir(apiAdmin.POST('/admin/productos/{id}/publicar', { params: { path: { id } } }))
+        } catch (e) {
+          if (redirigirSiNoAutenticado(e)) return
+          const motivo = mensajeDeError(e).replace(/\.$/, '')
+          fallas.push(
+            `Se guardó el orden, pero no se pudo publicar «${porId.get(id)?.nombre ?? id}»: ${motivo}. Quedó en borradores.`,
+          )
+        }
+      }
+      await cargar()
+      if (fallas.length > 0) setErrorLista(fallas.join('\n'))
+      else {
+        const n = aPublicar.length
+        avisar(
+          `Orden guardado y ${n} ${n === 1 ? 'publicado' : 'publicados'}. El catálogo se actualiza en hasta un minuto.`,
+        )
+      }
     } catch (e) {
       if (redirigirSiNoAutenticado(e)) return
       const codigo = codigoDe(e)
@@ -191,8 +208,7 @@ export default function Productos() {
 
   const nombreCategoria = (id: string | null) => categorias.find((c) => c.id === id)?.nombre ?? 'Sin categoría'
 
-  const guardados = enOrden(orden?.cargado ?? [])
-  const sinGuardar = enOrden(orden?.sinGuardar ?? [])
+  const guardados = enOrden(orden?.cargado.orden ?? [])
 
   let lista: ReactNode
   let grilla: ReactNode
@@ -236,7 +252,15 @@ export default function Productos() {
         ))}
       </ol>
     )
-    grilla = <OrdenCatalogo productos={sinGuardar} guardando={guardando} onMover={moverTarjeta} onSoltar={soltar} />
+    grilla = orden && (
+      <OrdenCatalogo
+        porId={porId}
+        armado={orden.sinGuardar}
+        guardando={guardando}
+        onCambiar={(sinGuardar) => setOrden((actual) => actual && { ...actual, sinGuardar })}
+        onAnunciar={setAnuncio}
+      />
+    )
   }
 
   const pestana = (v: Vista, texto: ReactNode) => (
@@ -303,33 +327,38 @@ export default function Productos() {
       >
         <div className="orden__explicacion">
           <p>
-            El catálogo público muestra los productos publicados en este orden, de izquierda a derecha y de arriba
-            abajo. En el teléfono se ven por hileras de hasta cuatro que se deslizan de costado, y un producto con
-            diseños va solo en la suya.
+            El catálogo público muestra los productos publicados en este orden. En el teléfono se ven por hileras que se
+            deslizan de costado, como las de acá; en la computadora, en una grilla que sigue el mismo orden.
           </p>
           <p>
-            Los borradores no se ven hasta publicarlos. Los cambios se ven en el catálogo en hasta un minuto después de
-            guardar.
+            Una hilera termina al llegar a cuatro productos o donde vos la cortás: soltá un producto en «Soltá acá para
+            empezar una hilera nueva», o antes del primero de otra hilera. Los cambios se ven en el catálogo en hasta un
+            minuto después de guardar.
           </p>
-        </div>
-        <div className="orden__acciones">
-          {cambios && (
-            <span className="orden__pendiente" id="ordenPendiente">
-              Hay cambios en el orden sin guardar.
-            </span>
-          )}
-          <button
-            type="button"
-            className="btn btn--primario"
-            onClick={guardar}
-            disabled={!cambios || guardando}
-            aria-describedby={cambios ? 'ordenPendiente' : undefined}
-          >
-            {guardando ? 'Guardando…' : 'Guardar orden'}
-          </button>
         </div>
         {grilla}
       </div>
+      {orden && (cambios || guardando) && vista === 'orden' && (
+        <div className="orden__barra">
+          <span id="ordenPendiente">
+            {orden.sinGuardar.aPublicar.size > 0
+              ? `Orden sin guardar · ${orden.sinGuardar.aPublicar.size} para publicar`
+              : 'Orden sin guardar'}
+          </span>
+          <button type="button" className="btn btn--chico orden__descartar" onClick={descartar} disabled={guardando}>
+            Descartar
+          </button>
+          <button
+            type="button"
+            className="btn btn--primario btn--chico"
+            onClick={guardar}
+            disabled={guardando}
+            aria-describedby="ordenPendiente"
+          >
+            {guardando ? 'Guardando…' : orden.sinGuardar.aPublicar.size > 0 ? 'Guardar y publicar' : 'Guardar orden'}
+          </button>
+        </div>
+      )}
       <p className="visualmente-oculto" role="status">
         {anuncio}
       </p>

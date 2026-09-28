@@ -19,14 +19,14 @@ decisiones técnicas y las validaciones ejecutadas.
 | 10. Limpieza y cierre | ✅ Cerrada (2026-09-25) | [fase-10.md](./fase-10.md) |
 | 11. Mejoras opcionales del front | ✅ Cerrada (2026-09-25) | [fase-11.md](./fase-11.md) |
 | 12. Admin mobile y orden con arrastre | ✅ Cerrada (2026-09-25) | [fase-12.md](./fase-12.md) |
-| 13. Orden por hileras con cortes manuales | ⏳ Preparada (2026-09-28), falta implementar | [fase-13.md](./fase-13.md) |
+| 13. Orden por hileras con cortes manuales | 🔎 Implementada (2026-09-28), faltan verificaciones del usuario | [fase-13.md](./fase-13.md) |
 
 "🔎 Implementada" es una fase con el código commiteado a la que le quedan verificaciones del
 usuario; cuenta como dependencia cumplida.
 
-**Siguiente:** implementar la fase 13 ([fase-13.md](./fase-13.md), decisiones F13-D1 a F13-D11). El
-prototipo de la variante elegida está en `src/admin/prototipo-orden/`. El despliegue espera a la fase 10
-del backend en producción (F13-D11).
+**Siguiente:** desplegar la fase 10 del backend y después este front (F13-D11), y hacer las
+verificaciones de la fase 13. Sin fase nueva definida: para arrancar una, leer el PRD y "Pendientes
+abiertos".
 
 ## Decisiones para el usuario
 
@@ -39,7 +39,8 @@ Pruebas que el agente no puede ejecutar (visuales, en producción o tras un push
 están en la sección "Verificaciones del usuario" de cada `fase-N.md`. Al confirmarlas todas, se
 borra esa sección y su línea de acá, y la fase pasa a "✅ Cerrada".
 
-Ninguna.
+- Fase 13: teléfono real, publicar desde las hileras, hileras contra el catálogo y lector de pantalla,
+  tras desplegar ([fase-13.md](./fase-13.md#verificaciones-del-usuario)).
 
 ## Pendientes abiertos
 

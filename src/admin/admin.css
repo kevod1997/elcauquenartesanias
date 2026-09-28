@@ -151,11 +151,8 @@ a {
   color: var(--arena);
 }
 
-/* `main` ocupa todo el ancho sin padding a los costados: la grilla del orden mide `100cqi` como la del
-   catálogo público mide el `body` (F12-D7). En el `body`, `container-type` corta la propagación de su fondo al
-   lienzo, y una página corta queda sin fondo abajo. */
+/* `main` ocupa todo el ancho; el margen a los costados lo pone `.panel__marco`. */
 .panel__contenido {
-  container-type: inline-size;
   padding: clamp(20px, 4vw, 40px) 0 calc(clamp(20px, 4vw, 40px) + env(safe-area-inset-bottom, 0px));
 }
 
@@ -337,6 +334,7 @@ input[aria-invalid='true'] {
   border-radius: 7px;
   font-size: 13px;
   line-height: 1.45;
+  white-space: pre-line;
 }
 .aviso--error {
   background: var(--terracota-suave);
@@ -991,29 +989,6 @@ progress:indeterminate::-moz-progress-bar {
 
 /* ---------- Orden global (F8-D1, F8-D2) ---------- */
 
-.orden__acciones {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.orden__pendiente {
-  font-size: 13px;
-  color: var(--texto-suave);
-}
-
-.lista__orden {
-  flex: none;
-  min-width: 2ch;
-  font-family: 'Playfair Display', serif;
-  font-style: italic;
-  font-weight: 500;
-  font-size: 22px;
-  color: var(--madera);
-  text-align: center;
-}
-
 .lista__acciones {
   align-items: center;
 }
@@ -1065,7 +1040,7 @@ progress:indeterminate::-moz-progress-bar {
   gap: 18px;
 }
 
-/* ---------- Orden del catálogo (F12-D6, F12-D7) ---------- */
+/* ---------- Orden del catálogo (F13-D2, F13-D3, F13-D6) ---------- */
 
 .orden__explicacion {
   display: grid;
@@ -1078,126 +1053,364 @@ progress:indeterminate::-moz-progress-bar {
   margin: 0;
 }
 
-/* Desktop: la regla de `.grid` del catálogo público al mismo ancho, `min(1140px, 100cqi - 40px)`, centrada
-   aunque la sección sea más angosta: a un mismo ancho de ventana, las mismas columnas. */
-.orden__grilla {
-  --ancho-catalogo: min(1140px, 100cqi - 40px);
+/* La barra de guardar queda fija abajo: el panel le deja lugar. */
+#panel-orden {
+  padding-bottom: 72px;
+}
+
+/* En desktop, lugares de 160px (F13-D6); en el teléfono se reparten el ancho. */
+.orden {
+  --lugar: 160px;
+  --separacion: 8px;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(290px, 100%), 1fr));
-  gap: clamp(20px, 4vw, 32px);
-  width: var(--ancho-catalogo);
-  margin: 0 calc((100% - var(--ancho-catalogo)) / 2);
+  gap: 8px;
+  max-width: calc(44px + 4 * var(--lugar) + 3 * var(--separacion) + 2 * 7px + 8px);
+}
+
+.orden__ayuda {
+  margin: 0 0 4px;
+  padding: 10px 12px;
+  background: var(--ambar-suave);
+  border-radius: 10px;
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: var(--cacao);
+}
+
+.orden__hileras {
+  display: grid;
+  gap: 8px;
+  margin: 0;
   padding: 0;
   list-style: none;
 }
 
+/* Transiciones de 320 a 400 ms al reacomodarse (F13-D2). */
+.orden__casilla,
+.orden__hilera,
+.orden__lugares {
+  transition:
+    transform 320ms var(--ease),
+    box-shadow 320ms var(--ease),
+    border-color 320ms var(--ease),
+    background-color 400ms var(--ease);
+}
+
+/* Cada renglón es una hilera: el número (la manija para moverla entera) y cuatro lugares. */
 .orden__hilera {
-  display: none;
-}
-
-.orden__tarjeta {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  background: var(--papel);
-  border: 1px solid var(--arena);
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 8px;
+  align-items: stretch;
   border-radius: 12px;
-  overflow: hidden;
 }
-.orden__tarjeta.is-arrastrada {
-  border-color: var(--dorado);
-  box-shadow: 0 16px 34px -12px rgba(59, 42, 26, 0.45);
+.orden__hilera.is-origen {
+  background: var(--ambar-suave);
 }
-
-.orden__foto {
+.orden__hilera.is-arrastrada {
   position: relative;
-  aspect-ratio: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--crema-2);
-  color: var(--texto-tenue);
-}
-.orden__foto img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+  z-index: 3;
+  background: var(--papel);
+  box-shadow: 0 14px 28px -10px rgba(59, 42, 26, 0.55);
 }
 
-/* `touch-action: none`: el navegador no desplaza la página mientras sostienen la manija (F12-D5). */
-.orden__manija {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
+/* `touch-action: none`: el navegador no desplaza la página mientras se arrastra la hilera (F12-D5). */
+.orden__numero {
+  min-height: 44px;
   padding: 0;
-  border: 1px solid rgba(247, 242, 235, 0.45);
-  border-radius: 10px;
-  background: rgba(59, 42, 26, 0.78);
-  color: var(--crema);
+  border: none;
+  border-radius: 8px;
+  background: var(--crema-2);
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 19px;
+  color: var(--madera);
   cursor: grab;
   touch-action: none;
   -webkit-touch-callout: none;
-  transition: background-color var(--t-rapida) var(--ease);
+  -webkit-user-select: none;
+  user-select: none;
 }
-.orden__manija:disabled {
+.orden__numero:disabled {
   cursor: not-allowed;
-  opacity: 0.45;
-}
-.orden__manija:active:not(:disabled),
-.is-arrastrada .orden__manija {
-  cursor: grabbing;
-  background: var(--cacao);
+  opacity: 0.6;
 }
 
-.orden__cuerpo {
+.orden__lugares {
+  display: flex;
+  gap: var(--separacion);
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: var(--papel);
+  border: 1px solid var(--arena);
+  border-radius: 10px;
+}
+
+.orden__casilla,
+.orden__vacio {
+  flex: 0 0 calc((100% - 3 * var(--separacion)) / 4);
+  aspect-ratio: 1;
+}
+.orden__vacio {
+  border: 1.5px dashed var(--arena);
+  border-radius: 8px;
+}
+.orden__vacio.is-encima {
+  border-color: var(--ambar);
+  border-style: solid;
+  background: var(--ambar-suave);
+}
+
+.orden__casilla {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--crema-2);
+  color: var(--texto-tenue);
+  cursor: grab;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.orden__casilla[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+.orden__casilla img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+.orden__casilla.is-borrador {
+  border-color: var(--verde);
+  border-style: dashed;
+}
+.orden__casilla.is-arrastrada {
+  z-index: 4;
+  border-color: var(--madera);
+  border-style: solid;
+  transform: scale(1.08);
+  box-shadow: 0 12px 22px -8px rgba(59, 42, 26, 0.6);
+}
+
+/* El destino se marca enseguida; las hileras se reacomodan recién tras la espera de 450 ms (F13-D2). */
+.orden__casilla.is-apuntada {
+  border-color: var(--ambar);
+  border-style: solid;
+  box-shadow: 0 0 0 3px var(--ambar-suave);
+  transform: scale(0.94);
+}
+.orden__hilera.is-apuntada .orden__lugares {
+  border-color: var(--ambar);
+  box-shadow: 0 0 0 3px var(--ambar-suave);
+}
+
+.orden__chip-d {
+  position: absolute;
+  top: 4px;
+  right: 4px;
   display: grid;
-  gap: 2px;
-  padding: 10px 12px 4px;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--verde);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
 }
 
-.orden__numero {
-  font-family: 'Playfair Display', serif;
-  font-style: italic;
-  font-weight: 500;
-  font-size: 22px;
-  line-height: 1.1;
-  color: var(--madera);
-}
-
-.orden__borrador {
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 24px;
-  color: var(--ambar);
+.orden__nuevo {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--verde);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
 }
 
 .orden__nombre {
-  font-size: 15px;
-  color: var(--tinta);
+  position: absolute;
+  inset: auto 0 0;
+  padding: 12px 4px 3px;
+  background: linear-gradient(transparent, rgba(44, 31, 14, 0.75));
+  color: var(--crema);
+  font-size: 12px;
+  line-height: 1.2;
   overflow-wrap: anywhere;
 }
 
-.orden__tarjeta--borrador .orden__foto,
-.orden__tarjeta--borrador .orden__nombre {
-  opacity: 0.55;
+.orden__nueva {
+  margin-left: 52px;
+  padding: 14px;
+  border: 2px dashed var(--dorado);
+  border-radius: 10px;
+  font-size: 13px;
+  color: var(--texto-suave);
+  text-align: center;
+  transition: background-color var(--t-rapida) var(--ease);
+}
+.orden__nueva.is-encima,
+.orden__borradores.is-encima {
+  background: var(--ambar-suave);
+  border-color: var(--ambar);
 }
 
-.orden__mover {
-  display: flex;
-  gap: 8px;
-  margin-top: auto;
-  padding: 8px 12px 12px;
+.orden__borradores {
+  margin-top: 18px;
+  padding: 12px;
+  border: 1px dashed var(--arena);
+  border-radius: 12px;
+  background: var(--crema);
 }
-.orden__mover .btn {
+.orden__subtitulo {
+  margin: 0;
+  font-size: 18px;
+}
+.orden__grupo {
+  margin: 14px 0 2px;
+  font-size: 14px;
+}
+.orden__nota {
+  margin: 0 0 8px;
+  font-size: 12.5px;
+  color: var(--texto-suave);
+}
+.orden__listos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--separacion);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.orden__listos .orden__casilla {
+  flex-basis: var(--lugar);
+}
+
+.orden__sin-foto {
+  display: grid;
+  place-items: center;
+}
+
+.orden__nolistos {
+  display: grid;
+  gap: 6px;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12.5px;
+  color: var(--texto-suave);
+}
+.orden__nolistos li {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.orden__nolistos img,
+.orden__nolistos .orden__sin-foto {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  object-fit: cover;
+  opacity: 0.5;
+}
+.orden__nolistos strong {
+  color: var(--tinta);
+}
+.orden__nolistos .orden__motivo {
   flex: 1;
   min-width: 0;
-  padding-inline: 6px;
+}
+.orden__nolistos .btn {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+/* Tacho fijo abajo mientras se arrastra, arriba de la barra de guardar. */
+.orden__tacho {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--alto-barra, 0px) + 76px + env(safe-area-inset-bottom, 0px));
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 18px;
+  border: 2px dashed var(--terracota);
+  border-radius: 999px;
+  background: var(--papel);
+  color: var(--terracota);
+  font-size: 13px;
+  font-weight: 600;
+  transform: translateX(-50%);
+  box-shadow: 0 10px 24px -10px rgba(0, 0, 0, 0.45);
+  animation: orden-tacho-entra 240ms var(--ease);
+  transition:
+    background-color var(--t-rapida) var(--ease),
+    transform var(--t-rapida) var(--ease);
+}
+.orden__tacho.is-encima {
+  background: var(--terracota);
+  color: #fff;
+  border-style: solid;
+  transform: translateX(-50%) scale(1.08);
+}
+@keyframes orden-tacho-entra {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 12px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .orden__tacho {
+    animation: none;
+  }
+}
+
+/* Barra de guardar, fija abajo mientras haya cambios (F13-D4). */
+.orden__barra {
+  position: fixed;
+  right: 12px;
+  bottom: calc(var(--alto-barra, 0px) + 10px + env(safe-area-inset-bottom, 0px));
+  left: 12px;
+  z-index: 28;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 8px 8px 8px 14px;
+  background: var(--cacao);
+  color: var(--crema);
+  border-radius: 14px;
+  box-shadow: 0 10px 24px -10px rgba(0, 0, 0, 0.55);
+  font-size: 13px;
+}
+.orden__barra span {
+  flex: 1;
+}
+.orden__barra .btn {
+  min-height: 40px;
+}
+/* Sobre la barra oscura, "Descartar" lleva relleno para que no parezca deshabilitado. */
+.orden__descartar {
+  background: var(--terracota-suave);
+  border-color: var(--terracota-suave);
+  color: var(--terracota);
+  font-weight: 600;
 }
 
 /* ---------- Feedback de toque (F12-D3) ---------- */
@@ -1263,9 +1476,6 @@ progress:indeterminate::-moz-progress-bar {
   }
   .pestanas__pestana:hover {
     color: var(--cacao);
-  }
-  .orden__manija:hover:not(:disabled) {
-    background: var(--cacao);
   }
 }
 
@@ -1405,43 +1615,28 @@ progress:indeterminate::-moz-progress-bar {
     padding-inline: 8px;
   }
 
-  /* Orden del catálogo: dos columnas y un separador antes de cada hilera (F12-D7). */
-  .orden__grilla {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
-    width: auto;
-    margin: 0;
+  /* Orden del catálogo: los lugares se reparten el ancho del teléfono (F13-D2). */
+  .orden {
+    --separacion: 5px;
   }
   .orden__hilera {
-    display: block;
-    grid-column: 1 / -1;
-    margin-top: 8px;
-    padding-bottom: 4px;
-    border-bottom: 1px solid var(--arena);
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--texto-tenue);
-  }
-  .orden__hilera:first-child {
-    margin-top: 0;
-  }
-  .orden__cuerpo {
-    padding: 8px 10px 2px;
+    grid-template-columns: 30px 1fr;
+    gap: 6px;
   }
   .orden__numero {
-    font-size: 19px;
+    font-size: 17px;
+  }
+  .orden__lugares {
+    padding: 5px;
+  }
+  .orden__listos .orden__casilla {
+    flex-basis: calc((100% - 3 * var(--separacion)) / 4);
   }
   .orden__nombre {
-    font-size: 14px;
+    padding: 10px 3px 2px;
+    font-size: 9.5px;
   }
-  .orden__mover {
-    flex-direction: column;
-    gap: 6px;
-    padding: 8px 10px 10px;
-  }
-  .orden__mover .btn {
-    min-height: 44px;
+  .orden__nueva {
+    margin-left: 36px;
   }
 }

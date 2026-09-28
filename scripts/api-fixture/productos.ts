@@ -40,6 +40,8 @@ export const productos = (origen: string): ProductoPublico[] => {
       ...galeria.map((base) => imagen(origen, base)),
       ...disenos.map(([base, nombre]) => imagen(origen, base, nombre)),
     ],
+    // Los que tienen diseños empiezan hilera, para ver los cortes en el catálogo.
+    iniciaHilera: disenos.length > 0,
   })
 
   return [

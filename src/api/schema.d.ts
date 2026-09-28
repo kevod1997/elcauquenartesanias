@@ -1093,13 +1093,15 @@ export interface paths {
                     "application/json": {
                         /** @description Ids de todos los productos, sin repetir, en el orden global. */
                         orden: string[];
+                        /** @description Ids que empiezan una hilera, sin repetir y todos presentes en `orden`; `[]` borra todas las marcas. Ausente: las marcas se conservan. */
+                        cortes?: string[];
                         /** @description Tal como la devolvió el listado. */
                         ordenVersion: number;
                     };
                 };
             };
             responses: {
-                /** @description Orden guardado, con la versión nueva. */
+                /** @description Orden guardado, con sus cortes y la versión nueva. */
                 200: {
                     headers: {
                         [name: string]: unknown;
@@ -1107,6 +1109,8 @@ export interface paths {
                     content: {
                         "application/json": {
                             orden: string[];
+                            /** @description Ids con corte de hilera, en el orden de `orden`. */
+                            cortes: string[];
                             ordenVersion: number;
                         };
                     };
@@ -1352,7 +1356,7 @@ export interface paths {
         put?: never;
         /**
          * Publica el producto si su imagen principal es válida; idempotente
-         * @description La imagen principal (`galeria[0]`) tiene que estar procesada y no ser un diseño; si no, el producto queda como estaba. No cambia `ordenVersion` ni el lugar en el orden global.
+         * @description La imagen principal (`galeria[0]`) tiene que estar procesada y no ser un diseño; si no, el producto queda como estaba. No cambia `ordenVersion`, el lugar en el orden global ni el corte de hilera.
          */
         post: {
             parameters: {
@@ -1438,7 +1442,7 @@ export interface paths {
         put?: never;
         /**
          * Pasa el producto a borrador; idempotente
-         * @description No cambia `ordenVersion` ni el lugar en el orden global.
+         * @description No cambia `ordenVersion`, el lugar en el orden global ni el corte de hilera.
          */
         post: {
             parameters: {
@@ -2438,6 +2442,8 @@ export interface components {
             galeria: components["schemas"]["ImagenGaleria"][];
             /** @enum {string} */
             estado: "borrador" | "publicado";
+            /** @description Corte de hilera: el producto empieza una hilera del catálogo mobile. Solo lo cambia `PUT /admin/productos/orden`. */
+            iniciaHilera: boolean;
             /** @description ISO 8601, UTC. */
             creadoEn: string;
             /** @description ISO 8601, UTC. */
@@ -2483,6 +2489,8 @@ export interface components {
             medidas: components["schemas"]["MedidaPublica"][];
             /** @description Solo las imágenes procesadas, en el orden de la galería; `galeria[0]` es la imagen principal (nunca un diseño). */
             galeria: components["schemas"]["ImagenPublica"][];
+            /** @description Corte de hilera: el producto empieza una hilera nueva del catálogo mobile. */
+            iniciaHilera: boolean;
         };
         MedidaPublica: {
             /** @description Nombre del tipo; `null` si no tiene tipo. */

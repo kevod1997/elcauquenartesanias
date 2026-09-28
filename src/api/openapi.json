@@ -199,6 +199,10 @@
               "publicado"
             ]
           },
+          "iniciaHilera": {
+            "type": "boolean",
+            "description": "Corte de hilera: el producto empieza una hilera del catálogo mobile. Solo lo cambia `PUT /admin/productos/orden`."
+          },
           "creadoEn": {
             "type": "string",
             "description": "ISO 8601, UTC."
@@ -217,6 +221,7 @@
           "medidas",
           "galeria",
           "estado",
+          "iniciaHilera",
           "creadoEn",
           "actualizadoEn"
         ]
@@ -379,6 +384,10 @@
             },
             "maxItems": 6,
             "description": "Solo las imágenes procesadas, en el orden de la galería; `galeria[0]` es la imagen principal (nunca un diseño)."
+          },
+          "iniciaHilera": {
+            "type": "boolean",
+            "description": "Corte de hilera: el producto empieza una hilera nueva del catálogo mobile."
           }
         },
         "required": [
@@ -388,7 +397,8 @@
           "categoriaId",
           "descripcion",
           "medidas",
-          "galeria"
+          "galeria",
+          "iniciaHilera"
         ]
       },
       "MedidaPublica": {
@@ -2187,6 +2197,13 @@
                     },
                     "description": "Ids de todos los productos, sin repetir, en el orden global."
                   },
+                  "cortes": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Ids que empiezan una hilera, sin repetir y todos presentes en `orden`; `[]` borra todas las marcas. Ausente: las marcas se conservan."
+                  },
                   "ordenVersion": {
                     "type": "integer",
                     "minimum": 0,
@@ -2203,7 +2220,7 @@
         },
         "responses": {
           "200": {
-            "description": "Orden guardado, con la versión nueva.",
+            "description": "Orden guardado, con sus cortes y la versión nueva.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2215,12 +2232,20 @@
                         "type": "string"
                       }
                     },
+                    "cortes": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Ids con corte de hilera, en el orden de `orden`."
+                    },
                     "ordenVersion": {
                       "type": "integer"
                     }
                   },
                   "required": [
                     "orden",
+                    "cortes",
                     "ordenVersion"
                   ]
                 }
@@ -2639,7 +2664,7 @@
     "/admin/productos/{id}/publicar": {
       "post": {
         "summary": "Publica el producto si su imagen principal es válida; idempotente",
-        "description": "La imagen principal (`galeria[0]`) tiene que estar procesada y no ser un diseño; si no, el producto queda como estaba. No cambia `ordenVersion` ni el lugar en el orden global.",
+        "description": "La imagen principal (`galeria[0]`) tiene que estar procesada y no ser un diseño; si no, el producto queda como estaba. No cambia `ordenVersion`, el lugar en el orden global ni el corte de hilera.",
         "parameters": [
           {
             "schema": {
@@ -2766,7 +2791,7 @@
     "/admin/productos/{id}/volver-a-borrador": {
       "post": {
         "summary": "Pasa el producto a borrador; idempotente",
-        "description": "No cambia `ordenVersion` ni el lugar en el orden global.",
+        "description": "No cambia `ordenVersion`, el lugar en el orden global ni el corte de hilera.",
         "parameters": [
           {
             "schema": {

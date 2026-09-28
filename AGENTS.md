@@ -21,6 +21,8 @@ cada fase (decisiones FN-Dk y registro), en `fases/fase-N.md`, y el estado, en
   `../elcauquen-backend`; el 3000 lo ocupa otro proyecto) con `ADMIN_ORIGIN=http://localhost:4321`.
   El owner y un editor activo de prueba están en `.env.test.local` (`OWNER_TEST_*`, `EDITOR_TEST_*`);
   el login es `POST /api/auth/sign-in/email` con el header `Origin: http://localhost:4321`.
+  Si la API local da `500` `ERROR_INTERNO` tras un cambio del backend, faltan migraciones: `pnpm db:migrate`
+  en `../elcauquen-backend` (su `.env` apunta a la base de Docker).
 - **El backend local manda mails reales por Resend**: invitá solo a `delivered+<etiqueta>@resend.dev`.
   El token de invitación o de reset está en la tabla `verification`, con `identifier`
   `reset-password:<token>` (`docker exec elcauquen-backend-postgres-1 psql -U postgres -d elcauquen`).
@@ -35,7 +37,8 @@ cada fase (decisiones FN-Dk y registro), en `fases/fase-N.md`, y el estado, en
 - **Para probar el arrastre del orden desde la extensión**, la pestaña está oculta: no corre
   `requestAnimationFrame` y los timers se espacian. Tras cargar, reemplazá `requestAnimationFrame` por
   una espera con `MessageChannel` y tomá una captura (libera el frame que dnd-kit dejó pendiente);
-  después mandá `PointerEvent` a la manija con `setPointerCapture` neutralizado, o teclas reales. El
+  después mandá `PointerEvent` a la manija (también los `pointermove` y el `pointerup`: despachados en
+  `document` no mueven nada) con `setPointerCapture` neutralizado, o teclas reales. El
   clon de la animación de soltar sigue en el DOM hasta la próxima captura.
 - **Al detener en Windows un `pnpm dev` o `pnpm api:fixture` lanzado en segundo plano**, el proceso
   hijo sigue escuchando en su puerto: buscá el PID con `netstat -ano | grep :<puerto>` y cerralo con
