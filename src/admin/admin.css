@@ -146,9 +146,129 @@ a {
   gap: 10px;
 }
 
-.panel__integrante {
-  font-size: 14px;
+/* Chip del integrante: iniciales + nombre; abre el menú de la cuenta. */
+.panel__chip {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 4px 10px 4px 4px;
+  border: 1px solid rgba(247, 242, 235, 0.16);
+  border-radius: 999px;
+  background: rgba(247, 242, 235, 0.06);
   color: var(--arena);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    background var(--t-rapida) var(--ease),
+    transform var(--t-rapida) var(--ease);
+}
+.panel__chip:active {
+  transform: scale(0.97);
+  background: rgba(247, 242, 235, 0.14);
+}
+.panel__chip[aria-expanded='true'] {
+  background: rgba(247, 242, 235, 0.14);
+}
+
+.panel__iniciales {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--dorado);
+  color: var(--cacao);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.panel__integrante {
+  max-width: 18ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.panel__flecha {
+  transition: transform var(--t-rapida) var(--ease);
+}
+.panel__chip[aria-expanded='true'] .panel__flecha {
+  transform: rotate(180deg);
+}
+
+/* Menú de la cuenta (popover, en la capa superior): `top` y `right` los pone el script al abrir. */
+.panel__menu {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  min-width: 200px;
+  padding: 6px;
+  border: 1px solid var(--arena);
+  border-radius: 12px;
+  background: var(--papel);
+  color: var(--tinta);
+  box-shadow: 0 12px 32px -12px rgba(44, 31, 14, 0.35);
+  opacity: 0;
+  transform: translateY(-4px) scale(0.98);
+  transform-origin: top right;
+  transition:
+    opacity var(--t-rapida) var(--ease),
+    transform var(--t-rapida) var(--ease),
+    overlay var(--t-rapida) allow-discrete,
+    display var(--t-rapida) allow-discrete;
+}
+.panel__menu:popover-open {
+  opacity: 1;
+  transform: none;
+}
+@starting-style {
+  .panel__menu:popover-open {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+
+.panel__menu-nombre {
+  margin: 0;
+  padding: 8px 10px 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+.panel__menu-rol {
+  margin: 0;
+  padding: 2px 10px 8px;
+  border-bottom: 1px solid var(--arena);
+  font-size: 12px;
+  color: var(--texto-tenue);
+}
+
+.panel__menu-item {
+  appearance: none;
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  margin-top: 6px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: var(--terracota);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+.panel__menu-item:active {
+  background: var(--terracota-suave);
+}
+.panel__menu-item:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 
 /* `main` ocupa todo el ancho; el margen a los costados lo pone `.panel__marco`. */
@@ -1043,14 +1163,42 @@ progress:indeterminate::-moz-progress-bar {
 /* ---------- Orden del catálogo (F13-D2, F13-D3, F13-D6) ---------- */
 
 .orden__explicacion {
-  display: grid;
-  gap: 6px;
   font-size: 14px;
   line-height: 1.5;
   color: var(--texto-suave);
 }
+.orden__explicacion summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  list-style: none;
+  font-weight: 600;
+  color: var(--tinta);
+}
+.orden__explicacion summary::-webkit-details-marker {
+  display: none;
+}
+.orden__explicacion summary::after {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
+  transition: transform 0.15s;
+}
+.orden__explicacion[open] summary::after {
+  transform: translateY(1px) rotate(-135deg);
+}
 .orden__explicacion p {
-  margin: 0;
+  margin: 8px 0 0;
+  max-width: 68ch;
+}
+@media (prefers-reduced-motion: reduce) {
+  .orden__explicacion summary::after {
+    transition: none;
+  }
 }
 
 /* La barra de guardar queda fija abajo: el panel le deja lugar. */
@@ -1442,7 +1590,9 @@ progress:indeterminate::-moz-progress-bar {
 .panel__nav a:active {
   color: var(--crema);
 }
-.panel__nav a {
+.panel__nav a,
+.panel__menu-nombre,
+.panel__menu-rol {
   -webkit-user-select: none;
   user-select: none;
 }
@@ -1457,6 +1607,12 @@ progress:indeterminate::-moz-progress-bar {
   }
   .btn--secundario:hover:not(:disabled) {
     background: var(--crema-2);
+  }
+  .panel__chip:hover {
+    background: rgba(247, 242, 235, 0.12);
+  }
+  .panel__menu-item:hover:not(:disabled) {
+    background: var(--terracota-suave);
   }
   .btn--fantasma:hover:not(:disabled) {
     background: rgba(247, 242, 235, 0.1);
@@ -1504,7 +1660,7 @@ progress:indeterminate::-moz-progress-bar {
     --alto-barra: 58px;
   }
 
-  /* La cabecera queda fina: la marca, el integrante y "Cerrar sesión". */
+  /* La cabecera queda fina: la marca y el chip del integrante, solo con las iniciales. */
   .panel__bar {
     padding-top: calc(10px + env(safe-area-inset-top, 0px));
     padding-bottom: 10px;
@@ -1516,8 +1672,11 @@ progress:indeterminate::-moz-progress-bar {
   .panel__acciones {
     gap: 8px;
   }
+  .panel__chip {
+    padding-right: 8px;
+  }
   .panel__integrante {
-    font-size: 13px;
+    display: none;
   }
 
   /* La misma `<nav>` pasa a la barra fija de abajo, con las pestañas en partes iguales. */

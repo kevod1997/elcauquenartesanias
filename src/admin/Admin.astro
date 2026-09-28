@@ -96,10 +96,27 @@ const esActual = (href: string) => actual === href || actual.startsWith(`${href}
             }
           </nav>
           <div class="panel__acciones" id="barraSesion" hidden>
-            <span class="panel__integrante" id="barraIntegrante" />
-            <button type="button" class="btn btn--fantasma" id="btnCerrarSesion">
-              Cerrar sesión
+            {/* Chip del integrante: abre un popover con "Cerrar sesión" (cierra solo con Escape o tocando afuera). */}
+            <button
+              type="button"
+              class="panel__chip"
+              id="btnIntegrante"
+              popovertarget="menuIntegrante"
+              aria-haspopup="menu"
+            >
+              <span class="panel__iniciales" id="barraIniciales" aria-hidden="true" />
+              <span class="panel__integrante" id="barraIntegrante" />
+              <svg class="panel__flecha" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
+                <path d="M3 4.5L6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
             </button>
+            <div class="panel__menu" id="menuIntegrante" popover>
+              <p class="panel__menu-nombre" id="menuNombre" />
+              <p class="panel__menu-rol" id="menuRol" />
+              <button type="button" class="panel__menu-item" id="btnCerrarSesion">
+                Cerrar sesión
+              </button>
+            </div>
           </div>
         </header>
       )
@@ -128,10 +145,31 @@ const esActual = (href: string) => actual === href || actual.startsWith(`${href}
         if (!integrante) return
         // Con el rol en la barra, `admin.css` muestra "Integrantes" solo al owner (F4-D3, F9-D1).
         barra.dataset['rol'] = integrante.rol
+        const iniciales = integrante.nombre
+          .trim()
+          .split(/\s+/)
+          .slice(0, 2)
+          .map((parte) => parte[0]?.toUpperCase() ?? '')
+          .join('')
+        document.getElementById('barraIniciales')!.textContent = iniciales
         document.getElementById('barraIntegrante')!.textContent = integrante.nombre
+        document.getElementById('menuNombre')!.textContent = integrante.nombre
+        document.getElementById('menuRol')!.textContent = integrante.rol === 'owner' ? 'Dueño' : 'Editor'
+        document.getElementById('btnIntegrante')!.setAttribute('aria-label', `${integrante.nombre}: menú de la cuenta`)
         document.getElementById('barraSesion')!.hidden = false
       })
       .catch(() => {})
+    // El popover vive en la capa superior: se ubica bajo el chip, alineado a su borde derecho.
+    const chip = document.getElementById('btnIntegrante')!
+    const menu = document.getElementById('menuIntegrante')!
+    menu.addEventListener('beforetoggle', (evento) => {
+      const abierto = (evento as ToggleEvent).newState === 'open'
+      chip.setAttribute('aria-expanded', String(abierto))
+      if (!abierto) return
+      const caja = chip.getBoundingClientRect()
+      menu.style.top = `${caja.bottom + 8}px`
+      menu.style.right = `${document.documentElement.clientWidth - caja.right}px`
+    })
     const boton = document.getElementById('btnCerrarSesion') as HTMLButtonElement
     boton.addEventListener('click', async () => {
       boton.disabled = true

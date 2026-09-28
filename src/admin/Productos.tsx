@@ -325,7 +325,8 @@ export default function Productos() {
         aria-labelledby="pestana-orden"
         hidden={vista !== 'orden'}
       >
-        <div className="orden__explicacion">
+        <details className="orden__explicacion">
+          <summary>Cómo se ordena el catálogo</summary>
           <p>
             El catálogo público muestra los productos publicados en este orden. En el teléfono se ven por hileras que se
             deslizan de costado, como las de acá; en la computadora, en una grilla que sigue el mismo orden.
@@ -335,7 +336,7 @@ export default function Productos() {
             empezar una hilera nueva», o antes del primero de otra hilera. Los cambios se ven en el catálogo en hasta un
             minuto después de guardar.
           </p>
-        </div>
+        </details>
         {grilla}
       </div>
       {orden && (cambios || guardando) && vista === 'orden' && (
