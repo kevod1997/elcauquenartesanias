@@ -227,8 +227,10 @@ del front (PRD §3). La fase no agrega términos.
 
 ## Ajuste posterior: tarjeta simplificada en mobile
 
-Salió de explorar la home mobile con tres prototipos descartables (`src/pages/prototipos/`, sin versionar);
-el usuario tomó solo la tarjeta de la dirección A y dejó el resto de la estética como estaba.
+Salió de explorar la home mobile con tres prototipos descartables; el usuario tomó solo la tarjeta de la
+dirección A y dejó el resto de la estética como estaba. Los prototipos (A "Vidriera", B "Lista de precios"
+y C "Pared", con los datos del fixture) quedaron en la rama `prototipo/home-mobile`, fuera de main: para
+verlos, `git restore --source prototipo/home-mobile -- src/pages/prototipos` (solo al working tree) y abrir `/prototipos/` en `astro dev`.
 
 - **Tarjeta:** hasta 560px muestra foto, nombre, precio y un chip «+ Ver más» (o «+ N diseños») debajo de
   la foto, con la píldora de las medidas; la lupa y su velo no se muestran, para no tapar la foto. La
