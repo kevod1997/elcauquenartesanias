@@ -188,7 +188,10 @@ del front (PRD §3). La fase no agrega términos.
 | Ids de dnd-kit: el id del producto; `hilera:<primero>`, `vacio:<primero>:<k>` y `zona:*` | La hilera se identifica por su primer producto, que cambia solo al moverla. |
 | Los movimientos se anuncian en el `role="status"` de la isla al aplicarse; el plugin anuncia tomar, el tacho, soltar (repite el último) y descartar | Con la espera de 450 ms, el `dragover` del plugin llega antes de que se aplique el movimiento. |
 | La hilera se anuncia "con 1 producto" / "con N productos" | F13-D10 escribía "M productos"; con una sola, el plural sonaba mal. |
-| La barra de guardar aparece solo con cambios (o guardando), fija abajo, y el tacho queda 76px más arriba | Es la barra del prototipo E; el tacho la tapaba. |
+| La barra de guardar aparece solo con cambios (o guardando), fija abajo; el tacho va abajo a la derecha, encima de ella | Es la barra del prototipo E; centrado y más arriba, el tacho tapaba "Soltá acá para empezar una hilera nueva". |
+| Mientras se arrastra y 600 ms después de soltar, un salto de scroll de más de 150px se deshace | Al pasar un producto a otra hilera, React lo vuelve a montar y dnd-kit lleva a la vista el elemento desmontado, que manda la página arriba. |
+| Al soltar con teclado, el foco vuelve al producto o al número de hilera movido (`data-orden-id`) | Al pasar a otra hilera, React lo vuelve a montar y el foco que restaura dnd-kit se perdía; las flechas movían la página. |
+| Una hilera que mezcla productos con y sin diseños muestra un aviso debajo (y lo suma a la etiqueta de su número) | En el catálogo, las tarjetas sin diseños toman otra proporción y la hilera se ve despareja. |
 | Tras publicar se pone el orden guardado como cargado antes de `cargar()` | Así la recarga no rebasa y los que fallaron vuelven a "Borradores" (F13-D9). |
 | En desktop los lugares miden 160px y la vista, como máximo, 4 lugares de ancho | F13-D6 pidió tarjetas más grandes pasando los 560px. |
 | `container-type` salió de `.panel__contenido` | Solo lo usaba la grilla de F12-D7. |
@@ -216,6 +219,8 @@ del front (PRD §3). La fase no agrega términos.
 
 ## Desvíos
 
+- El aviso de hileras mezcladas no se vio en local: ningún producto local tiene diseños procesados, y
+  subirlos va al R2 de producción. Queda en la verificación 1.
 - La falla de un `publicar` (F13-D9) no se probó en vivo: un borrador listo no da `422` sin cambiar su
   galería en el medio. Queda en las verificaciones del usuario.
 - El texto "con M productos" de F13-D10 usa singular con una hilera de un producto.
@@ -226,7 +231,9 @@ Dependen de desplegar la fase 10 del backend y después este front (F13-D11).
 
 1. En el teléfono real, en `admin.*` → Productos → Orden del catálogo: mantener apretado un producto y
    llevarlo a otra hilera; arrastrar el número de una hilera a otro lugar; soltar un producto en "Soltá
-   acá para empezar una hilera nueva"; tomar uno, llevarlo al tacho y confirmar que todo vuelve.
+   acá para empezar una hilera nueva"; tomar uno, llevarlo al tacho y confirmar que todo vuelve. Con la
+   página desplazada, pasar un producto a otra hilera no la manda arriba; juntar en una hilera uno con
+   diseños y uno sin ellos muestra el aviso "Mezcla productos con y sin diseños…".
 2. Pasar un producto de prueba a borrador (o crear uno con imagen), soltarlo en una hilera, "Guardar y
    publicar", y comprobar que se publica. Después borrarlo o devolverlo como estaba.
 3. Abrir el catálogo público en el teléfono y comparar los carruseles con las hileras de la vista.

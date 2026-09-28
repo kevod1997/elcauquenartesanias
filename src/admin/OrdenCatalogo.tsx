@@ -1,7 +1,7 @@
 import { Accessibility, type DragEndEvent, type DragOverEvent, type DragStartEvent } from '@dnd-kit/dom'
 import { DragDropProvider, useDroppable } from '@dnd-kit/react'
 import { useSortable } from '@dnd-kit/react/sortable'
-import { type ReactNode, useMemo, useRef, useState } from 'react'
+import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { PRODUCTOS_POR_HILERA } from '../catalogo/presentacion'
 import { esValida, motivoParaNoPublicar } from './galeria'
 import { IconoFoto } from './iconos'
@@ -35,6 +35,13 @@ const TACHO = 'zona:tacho'
 const INSTRUCCIONES =
   'Para tomar un producto o una hilera, apretá Espacio o Enter. Con las flechas lo llevás a otro lugar; Espacio o Enter lo sueltan y Escape descarta el movimiento.'
 const DESCARTADO = 'Se descartó el movimiento: todo volvió a como estaba.'
+const MEZCLA =
+  'Mezcla productos con y sin diseños: en el catálogo las tarjetas sin diseños toman otra proporción y la hilera se ve despareja.'
+
+/** Cuánto puede saltar el scroll de una vez mientras se arrastra; más es un salto de dnd-kit y se deshace. */
+const SALTO = 150
+/** Cuánto sigue cuidado el scroll después de soltar, mientras dura la animación de soltar. */
+const CUIDADO_AL_SOLTAR = 600
 
 /** `1 producto`, `3 productos`. */
 const productos = (n: number) => `${n} ${n === 1 ? 'producto' : 'productos'}`
@@ -73,6 +80,36 @@ export default function OrdenCatalogo({ porId, armado, guardando, onCambiar, onA
   // El destino ya aplicado: sin esto, soltar sobre él lo movería otra vez.
   const aplicado = useRef<string | null>(null)
   const ultimoAnuncio = useRef<string | undefined>(undefined)
+  // Mientras se arrastra y al soltar: al pasar un producto a otra hilera, React lo vuelve a montar y dnd-kit
+  // lleva a la vista el elemento que quedó fuera del documento, que mide 0 y manda la página arriba.
+  const cuidarScroll = useRef(false)
+  const finCuidado = useRef<ReturnType<typeof setTimeout>>(undefined)
+
+  // Al soltar con teclado: el que se movió vuelve a tener el foco. Si pasó a otra hilera, React lo volvió a
+  // montar y el foco que restaura dnd-kit cae en el elemento viejo; sin esto, las flechas mueven la página.
+  const enfocar = useRef<string | null>(null)
+  useEffect(() => {
+    const id = enfocar.current
+    if (id === null) return
+    enfocar.current = null
+    const temporizador = setTimeout(() =>
+      document.querySelector<HTMLElement>(`[data-orden-id="${CSS.escape(id)}"]`)?.focus({ preventScroll: true }),
+    )
+    return () => clearTimeout(temporizador)
+  })
+
+  useEffect(() => {
+    let y = window.scrollY
+    const alDesplazar = () => {
+      if (cuidarScroll.current && Math.abs(window.scrollY - y) > SALTO) window.scrollTo(window.scrollX, y)
+      else y = window.scrollY
+    }
+    window.addEventListener('scroll', alDesplazar, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', alDesplazar)
+      clearTimeout(finCuidado.current)
+    }
+  }, [])
 
   const publicado = (id: string) => actual.current.porId.get(id)?.estado === 'publicado'
   const nombre = (id: string) => actual.current.porId.get(id)?.nombre ?? ''
@@ -160,6 +197,8 @@ export default function OrdenCatalogo({ porId, armado, guardando, onCambiar, onA
         alTomar.current = actual.current.armado
         aplicado.current = null
         ultimoAnuncio.current = undefined
+        clearTimeout(finCuidado.current)
+        cuidarScroll.current = true
         setActivo(source ? String(source.id) : null)
         navigator.vibrate?.(12)
       }}
@@ -178,12 +217,16 @@ export default function OrdenCatalogo({ porId, armado, guardando, onCambiar, onA
         if (activatorEvent instanceof KeyboardEvent) mover(origen, destino)
         else espera.current = setTimeout(() => mover(origen, destino), ESPERA)
       }}
-      onDragEnd={({ operation: { source, target }, canceled }) => {
+      onDragEnd={({ operation: { source, target, activatorEvent }, canceled }) => {
         clearTimeout(espera.current)
+        if (source && activatorEvent instanceof KeyboardEvent) enfocar.current = String(source.id)
         if (canceled || target?.id === TACHO) descartar()
         else if (source && target) mover(String(source.id), String(target.id))
         setActivo(null)
         setEncima(null)
+        finCuidado.current = setTimeout(() => {
+          cuidarScroll.current = false
+        }, CUIDADO_AL_SOLTAR)
       }}
     >
       <div className={`orden${arrastrando ? ' is-arrastrando' : ''}`}>
@@ -286,6 +329,11 @@ function Hilera({ ids, indice, porId, aPublicar, activo, encima, guardando }: Pr
     disabled: guardando,
   })
   const numero = indice + 1
+  const conDisenos = ids.filter((x) => {
+    const producto = porId.get(x)
+    return producto !== undefined && tieneDisenoProcesado(producto)
+  }).length
+  const mezcla = conDisenos > 0 && conDisenos < ids.length
   const clases = [
     'orden__hilera',
     isDragSource && 'is-arrastrada',
@@ -297,8 +345,9 @@ function Hilera({ ids, indice, porId, aPublicar, activo, encima, guardando }: Pr
       <button
         type="button"
         ref={handleRef}
+        data-orden-id={id}
         className="orden__numero"
-        aria-label={`Hilera ${numero}, con ${productos(ids.length)}: arrastrala para moverla entera`}
+        aria-label={`Hilera ${numero}, con ${productos(ids.length)}${mezcla ? ', mezcla productos con y sin diseños' : ''}: arrastrala para moverla entera`}
         aria-roledescription="arrastrable"
         disabled={guardando}
       >
@@ -328,6 +377,7 @@ function Hilera({ ids, indice, porId, aPublicar, activo, encima, guardando }: Pr
           <Vacio key={`${VACIO}${ids[0]}:${k}`} id={`${VACIO}${ids[0]}:${k}`} disabled={guardando} />
         ))}
       </ol>
+      {mezcla && <p className="orden__mezcla">{MEZCLA}</p>}
     </li>
   )
 }
@@ -360,6 +410,7 @@ function Casilla({ producto, indice, etiqueta, nuevo = false, encima, guardando 
   return (
     <li
       ref={ref}
+      data-orden-id={producto.id}
       tabIndex={guardando ? -1 : 0}
       aria-roledescription="arrastrable"
       aria-label={etiqueta}
