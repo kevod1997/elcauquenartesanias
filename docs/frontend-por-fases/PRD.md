@@ -181,6 +181,7 @@ páginas del catálogo usan `export const prerender = false`; el admin queda est
 | [10. Limpieza y cierre](./fases/fase-10.md) | Repo sin restos, DNS final | 3, 7, 8 y 9 |
 | [11. Mejoras opcionales del front](./fases/fase-11.md) | Páginas 404 y 500 propias, formulario de producto sin mensajes viejos, Productos como inicio del admin y botón para ver la contraseña | 10 |
 | [12. Admin mobile y orden con arrastre](./fases/fase-12.md) | Admin cómodo en el teléfono y el orden del catálogo en una grilla que se arrastra | 11 |
+| [13. Orden por hileras con cortes manuales](./fases/fase-13.md) | La vista del orden por hileras con arrastre, cortes manuales y borradores aparte; el catálogo público con los cortes | 12 y la fase 10 del backend |
 
 Las fases 3 y 4 pueden ejecutarse en cualquier orden después de la 2; las 7, 8 y 9 pueden ejecutarse en cualquier orden después de sus dependencias.
 
