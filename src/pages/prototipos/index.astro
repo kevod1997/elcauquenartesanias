@@ -1,0 +1,43 @@
+---
+// PROTOTIPO descartable: índice de las direcciones de la home mobile. No va a main.
+import Base from './_Base.astro'
+
+const direcciones = [
+  {
+    href: '/prototipos/home-a',
+    nombre: 'A. Vidriera',
+    resumen: 'Foto arriba, carruseles de tarjetas chicas por hilera, detalle en una hoja. Alegreya sobre papel madera.',
+  },
+  {
+    href: '/prototipos/home-b',
+    nombre: 'B. Lista de precios',
+    resumen: 'Lista de feria con puntos guía; cada fila se despliega en el lugar. Archivo sobre caldén oscuro.',
+  },
+  {
+    href: '/prototipos/home-c',
+    nombre: 'C. Pared',
+    resumen:
+      'Fondo gris de las fotos, foto que se funde, grilla de dos columnas por hilera. Playfair e Inter de la marca.',
+  },
+]
+---
+
+<Base titulo="Prototipos de la home">
+  <main style="max-width: 36rem; margin: 0 auto; padding: 24px 20px; font: 16px/1.5 system-ui, sans-serif;">
+    <h1 style="font-size: 22px; margin: 0 0 4px;">Home mobile: direcciones</h1>
+    <p style="margin: 0 0 20px; color: #555;">
+      Prototipos descartables con los datos del fixture. Abrilas a 375–430 px. En dev, la barra azul de abajo pasa de una
+      a otra (también ← y →; “h” la oculta). <a href="/">Home actual</a>.
+    </p>
+    <ul style="list-style: none; margin: 0; padding: 0; display: grid; gap: 14px;">
+      {
+        direcciones.map((d) => (
+          <li>
+            <a href={d.href} style="font-weight: 600;">{d.nombre}</a>
+            <p style="margin: 2px 0 0; color: #444;">{d.resumen}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </main>
+</Base>

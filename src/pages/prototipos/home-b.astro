@@ -1,0 +1,328 @@
+---
+// PROTOTIPO descartable. Dirección B, "Lista de precios": el catálogo es una lista de feria (foto chica, nombre,
+// puntos guía, precio) que entra casi entera en dos pantallas; cada fila se despliega en el lugar con la foto grande,
+// las medidas, los diseños y el WhatsApp. Sin JS: <details> con `name` deja una sola abierta.
+import { hrefInstagram, hrefWhatsappGeneral, hrefWhatsappProducto, INSTAGRAM } from '../../catalogo/contacto'
+import IconoInstagram from '../../catalogo/IconoInstagram.astro'
+import IconoWhatsapp from '../../catalogo/IconoWhatsapp.astro'
+import { formatearPrecio, textoMedida } from '../../catalogo/presentacion'
+import Base from './_Base.astro'
+import { grupos, productos } from './_datos'
+---
+
+<Base
+  titulo="Prototipo B: Lista de precios"
+  actual="B"
+  fuentes="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&display=swap"
+>
+  <div class="b">
+    <header class="hero">
+      <div class="hero__marca">
+        <img src="/assets/logo-160.webp" width="160" height="160" alt="" fetchpriority="high" />
+        <h1>El Cauquén<br />Artesanías en madera</h1>
+      </div>
+      <p>{productos.length} piezas hechas a mano, cada una única. Precios por unidad.</p>
+      <div class="hero__acciones">
+        <a class="boton" href={hrefWhatsappGeneral} target="_blank" rel="noopener noreferrer">
+          <IconoWhatsapp tamano={18} /> Escribir por WhatsApp
+        </a>
+        <a class="redondo" href={hrefInstagram} target="_blank" rel="noopener noreferrer" aria-label={`Instagram ${INSTAGRAM}`}>
+          <IconoInstagram tamano={20} />
+        </a>
+      </div>
+    </header>
+
+    <main class="lista" aria-label="Piezas y precios">
+      {
+        grupos.map((grupo) => (
+          <div class="grupo">
+            {grupo.map(({ producto }) => {
+              const principal = producto.galeria[0]
+              const primeraMedida = producto.medidas[0]
+              return (
+                <details class="fila" name="pieza">
+                  <summary>
+                    {principal && <img src={principal.url160} width="160" height="160" alt="" loading="lazy" decoding="async" />}
+                    <span class="fila__linea">
+                      <span class="fila__nombre">{producto.nombre}</span>
+                      <span class="fila__guia" aria-hidden="true" />
+                      <span class="fila__precio">{formatearPrecio(producto.precio)}</span>
+                    </span>
+                    {primeraMedida && <span class="fila__medida">{textoMedida(primeraMedida)}</span>}
+                  </summary>
+                  <div class="fila__detalle">
+                    <div class="fila__fotos">
+                      {producto.galeria.map((imagen, i) => (
+                        <figure>
+                          <img src={imagen.url640} width="640" height="640" alt={imagen.nombreDiseno ?? (i === 0 ? `Ficha de ${producto.nombre}` : producto.nombre)} loading="lazy" decoding="async" />
+                          {imagen.nombreDiseno && <figcaption>{imagen.nombreDiseno}</figcaption>}
+                        </figure>
+                      ))}
+                    </div>
+                    {producto.descripcion && <p>{producto.descripcion}</p>}
+                    {producto.medidas.length > 0 && (
+                      <p class="fila__medidas">{producto.medidas.map(textoMedida).join(', ')}</p>
+                    )}
+                    <a class="boton" href={hrefWhatsappProducto(producto.nombre)} target="_blank" rel="noopener noreferrer">
+                      <IconoWhatsapp tamano={18} /> Consultar por {producto.nombre.toLowerCase()}
+                    </a>
+                  </div>
+                </details>
+              )
+            })}
+          </div>
+        ))
+      }
+    </main>
+
+    <footer class="pie">
+      <p>Pagás en efectivo, por transferencia o con Mercado Pago.</p>
+      <p>
+        <a href={hrefWhatsappGeneral} target="_blank" rel="noopener noreferrer">WhatsApp</a> y <a href={hrefInstagram} target="_blank" rel="noopener noreferrer">{INSTAGRAM.replace('/', '')}</a>
+      </p>
+      <p class="pie__credito">
+        © El Cauquén Artesanías. Diseñado por <a href="https://kevindefalco.dev" target="_blank" rel="noopener noreferrer">Kevo</a>
+      </p>
+    </footer>
+  </div>
+</Base>
+
+<style>
+  .b {
+    --calden: #3a1f14;
+    --calden-claro: #4b2b1d;
+    --paja: #efe3c8;
+    --paja-tenue: #c3ae8c;
+    --filete: rgba(239, 227, 200, 0.14);
+    min-height: 100svh;
+    background: var(--calden);
+    color: var(--paja);
+    font: 400 16px/1.5 Archivo, sans-serif;
+    font-variation-settings: 'wdth' 100;
+  }
+
+  :global(body) {
+    margin: 0;
+    background: #3a1f14;
+  }
+
+  .b :where(a, button, summary):focus-visible {
+    outline: 2px solid var(--paja);
+    outline-offset: 3px;
+  }
+
+  /* ---------- Hero ---------- */
+
+  .hero {
+    padding: 20px 20px 24px;
+  }
+
+  .hero__marca {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .hero__marca img {
+    width: 64px;
+    height: 64px;
+    flex: none;
+    border-radius: 50%;
+  }
+
+  .hero h1 {
+    margin: 0;
+    font-size: clamp(20px, 5.8vw, 24px);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+  }
+
+  .hero p {
+    margin: 16px 0 0;
+    color: var(--paja-tenue);
+  }
+
+  .hero__acciones {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .boton {
+    display: inline-flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    min-height: 48px;
+    padding: 0 18px;
+    border-radius: 6px;
+    background: var(--paja);
+    color: var(--calden);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .redondo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    flex: none;
+    border: 1px solid var(--filete);
+    border-radius: 6px;
+    color: var(--paja);
+  }
+
+  /* ---------- Lista ---------- */
+
+  .grupo {
+    border-top: 1px solid var(--paja-tenue);
+  }
+
+  .grupo + .grupo {
+    margin-top: 20px;
+  }
+
+  .fila {
+    border-bottom: 1px solid var(--filete);
+  }
+
+  .fila[open] {
+    background: var(--calden-claro);
+  }
+
+  summary {
+    display: grid;
+    grid-template-columns: 56px minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    column-gap: 14px;
+    align-items: center;
+    min-height: 76px;
+    padding: 10px 20px;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  summary img {
+    grid-row: 1 / span 2;
+    width: 56px;
+    height: 56px;
+    border-radius: 4px;
+    object-fit: cover;
+  }
+
+  .fila__linea {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    align-self: end;
+  }
+
+  .fila__nombre {
+    font-size: 19px;
+    font-weight: 600;
+    font-variation-settings: 'wdth' 78;
+    line-height: 1.15;
+  }
+
+  /* Los puntos guía de una lista de precios: unen el nombre con su precio. */
+  .fila__guia {
+    flex: 1;
+    min-width: 12px;
+    border-bottom: 2px dotted var(--paja-tenue);
+    transform: translateY(-4px);
+    opacity: 0.55;
+  }
+
+  .fila__precio {
+    font-size: 18px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .fila__medida {
+    align-self: start;
+    color: var(--paja-tenue);
+    font-size: 14px;
+  }
+
+  .fila__detalle {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 4px 20px 22px;
+  }
+
+  .fila__detalle p {
+    margin: 0;
+    max-width: 60ch;
+  }
+
+  .fila__medidas {
+    color: var(--paja-tenue);
+  }
+
+  .fila__fotos {
+    display: flex;
+    gap: 8px;
+    margin: 0 -20px;
+    padding: 0 20px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 20px;
+    scrollbar-width: none;
+  }
+
+  .fila__fotos figure {
+    flex: 0 0 calc(100% - 28px);
+    margin: 0;
+    scroll-snap-align: start;
+  }
+
+  .fila__fotos:has(figure:only-child) figure {
+    flex-basis: 100%;
+  }
+
+  .fila__fotos img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    border-radius: 4px;
+  }
+
+  .fila__fotos figcaption {
+    margin-top: 6px;
+    color: var(--paja-tenue);
+    font-size: 14px;
+  }
+
+  /* ---------- Pie ---------- */
+
+  .pie {
+    padding: 32px 20px calc(80px + env(safe-area-inset-bottom));
+    color: var(--paja-tenue);
+  }
+
+  .pie p {
+    margin: 0 0 8px;
+  }
+
+  .pie a {
+    color: var(--paja);
+    text-underline-offset: 3px;
+  }
+
+  .pie__credito {
+    padding-top: 16px;
+    font-size: 13px;
+  }
+</style>

@@ -1,0 +1,111 @@
+---
+// PROTOTIPO descartable: head común y barra para pasar de una dirección a otra. No va a main.
+interface Props {
+  titulo: string
+  /** Hoja de Google Fonts de la dirección; en la versión real se autoalojan como las de catalogo.css. */
+  fuentes?: string
+  actual?: 'A' | 'B' | 'C'
+}
+
+const { titulo, fuentes, actual } = Astro.props
+const variantes = [
+  { clave: 'A', nombre: 'Vidriera', href: '/prototipos/home-a' },
+  { clave: 'B', nombre: 'Lista de precios', href: '/prototipos/home-b' },
+  { clave: 'C', nombre: 'Pared', href: '/prototipos/home-c' },
+] as const
+const i = variantes.findIndex((v) => v.clave === actual)
+const anterior = variantes[(i + variantes.length - 1) % variantes.length]
+const siguiente = variantes[(i + 1) % variantes.length]
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="robots" content="noindex" />
+    <title>{titulo}</title>
+    <link rel="icon" href="/assets/logo-160.webp" />
+    {fuentes && <link rel="preconnect" href="https://fonts.googleapis.com" />}
+    {fuentes && <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />}
+    {fuentes && <link rel="stylesheet" href={fuentes} />}
+  </head>
+  <body>
+    <slot />
+    {
+      import.meta.env.DEV && i >= 0 && anterior && siguiente && (
+        <nav class="proto-barra" aria-label="Direcciones del prototipo">
+          <a href={anterior.href} aria-label={`Anterior: ${anterior.nombre}`} data-proto="prev">‹</a>
+          <a href="/prototipos/" class="proto-barra__nombre">
+            {actual} ({variantes[i]?.nombre})
+          </a>
+          <a href={siguiente.href} aria-label={`Siguiente: ${siguiente.nombre}`} data-proto="next">›</a>
+          <button type="button" aria-label="Ocultar la barra" data-proto="ocultar">×</button>
+        </nav>
+      )
+    }
+  </body>
+</html>
+
+<script>
+  const barra = document.querySelector<HTMLElement>('.proto-barra')
+  if (barra) {
+    if (sessionStorage.getItem('proto-oculta')) barra.hidden = true
+    barra.querySelector('[data-proto="ocultar"]')?.addEventListener('click', () => {
+      barra.hidden = true
+      sessionStorage.setItem('proto-oculta', '1')
+    })
+    document.addEventListener('keydown', (e) => {
+      const t = e.target as HTMLElement
+      if (t.closest('input, textarea, [contenteditable]') || document.querySelector('dialog[open]')) return
+      if (e.key === 'h') {
+        barra.hidden = !barra.hidden
+        sessionStorage.removeItem('proto-oculta')
+      }
+      const destino = e.key === 'ArrowLeft' ? 'prev' : e.key === 'ArrowRight' ? 'next' : null
+      if (destino) barra.querySelector<HTMLAnchorElement>(`[data-proto="${destino}"]`)?.click()
+    })
+  }
+</script>
+
+<style is:global>
+  .proto-barra {
+    position: fixed;
+    left: 50%;
+    bottom: calc(10px + env(safe-area-inset-bottom));
+    z-index: 1000;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 4px;
+    border-radius: 999px;
+    background: #1d4ed8;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+    font: 600 13px/1 system-ui, sans-serif;
+  }
+  .proto-barra[hidden] {
+    display: none;
+  }
+  .proto-barra a,
+  .proto-barra button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 10px;
+    border: 0;
+    border-radius: 999px;
+    background: none;
+    color: #fff;
+    font: inherit;
+    font-size: 18px;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .proto-barra .proto-barra__nombre {
+    font-size: 13px;
+    white-space: nowrap;
+  }
+</style>

@@ -1,0 +1,526 @@
+---
+// PROTOTIPO descartable. Dirección A, "Vidriera": la foto abre la página y las hileras son carruseles de tarjetas
+// chicas (foto, nombre, precio); el detalle y el WhatsApp del producto van en una hoja que sube desde abajo.
+import { hrefInstagram, hrefWhatsappGeneral, hrefWhatsappProducto, INSTAGRAM } from '../../catalogo/contacto'
+import IconoInstagram from '../../catalogo/IconoInstagram.astro'
+import IconoWhatsapp from '../../catalogo/IconoWhatsapp.astro'
+import { disenos, formatearPrecio, textoMedida } from '../../catalogo/presentacion'
+import Base from './_Base.astro'
+import { grupos, productos } from './_datos'
+---
+
+<Base
+  titulo="Prototipo A: Vidriera"
+  actual="A"
+  fuentes="https://fonts.googleapis.com/css2?family=Alegreya:wght@500;700&family=Alegreya+Sans:wght@400;500;700&display=swap"
+>
+  <div class="a">
+    <header class="barra">
+      <a class="marca" href="/prototipos/home-a">
+        <img src="/assets/logo-160.webp" width="160" height="160" alt="" />
+        <span>El Cauquén</span>
+      </a>
+      <a class="barra__ig" href={hrefInstagram} target="_blank" rel="noopener noreferrer" aria-label={`Instagram ${INSTAGRAM}`}>
+        <IconoInstagram tamano={20} />
+      </a>
+    </header>
+
+    <section class="hero">
+      <img
+        class="hero__foto"
+        src="/assets/velas-640.webp"
+        srcset="/assets/velas-640.webp 640w, /assets/velas.webp 1600w"
+        sizes="100vw"
+        width="640"
+        height="663"
+        alt="Cuatro bases de madera torneada con velas encendidas"
+        fetchpriority="high"
+      />
+      <div class="hero__texto">
+        <h1>Cazuelas, mates y bowls de madera, hechos a mano</h1>
+        <p>Cada pieza es única. Escribinos y te contamos qué hay disponible.</p>
+        <div class="hero__acciones">
+          <a class="boton" href={hrefWhatsappGeneral} target="_blank" rel="noopener noreferrer">
+            <IconoWhatsapp tamano={18} /> Escribir por WhatsApp
+          </a>
+          <a class="enlace" href="#piezas">Ver las piezas</a>
+        </div>
+      </div>
+    </section>
+
+    <main id="piezas" class="piezas">
+      <div class="piezas__cabeza">
+        <h2>Las piezas</h2>
+        <p>Precios por unidad. Tocá una para ver medidas y diseños.</p>
+      </div>
+
+      {
+        grupos.map((grupo) => (
+          <ul class:list={['hilera', { 'hilera--sola': grupo.length === 1 }]}>
+            {grupo.map(({ producto, indice }) => (
+              <li>
+                <button type="button" class="pieza" data-abre={`hoja-${indice}`}>
+                  {producto.galeria[0] && (
+                    <img src={producto.galeria[0].url640} width="640" height="640" alt="" loading="lazy" decoding="async" />
+                  )}
+                  <span class="pieza__nombre">{producto.nombre}</span>
+                  <span class="pieza__precio">{formatearPrecio(producto.precio)}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        ))
+      }
+    </main>
+
+    <footer class="pie">
+      <h2>¿Querés alguna?</h2>
+      <p>Escribinos por WhatsApp o Instagram. Pagás en efectivo, por transferencia o con Mercado Pago.</p>
+      <div class="pie__redes">
+        <a class="boton" href={hrefWhatsappGeneral} target="_blank" rel="noopener noreferrer">
+          <IconoWhatsapp tamano={18} /> WhatsApp
+        </a>
+        <a class="boton boton--claro" href={hrefInstagram} target="_blank" rel="noopener noreferrer">
+          <IconoInstagram tamano={18} /> Instagram
+        </a>
+      </div>
+      <p class="pie__credito">
+        © El Cauquén Artesanías. Diseñado por <a href="https://kevindefalco.dev" target="_blank" rel="noopener noreferrer">Kevo</a>
+      </p>
+    </footer>
+
+    {
+      productos.map((producto, indice) => {
+        const listaDisenos = disenos(producto.galeria)
+        return (
+          <dialog class="hoja" id={`hoja-${indice}`} aria-labelledby={`hoja-${indice}-titulo`}>
+            <div class="hoja__cabeza">
+              <h3 id={`hoja-${indice}-titulo`}>{producto.nombre}</h3>
+              <form method="dialog">
+                <button class="hoja__cerrar" aria-label="Cerrar">
+                  <svg width="14" height="14" viewBox="0 0 14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M1 1l12 12M13 1L1 13" /></svg>
+                </button>
+              </form>
+            </div>
+            <div class="hoja__fotos">
+              {producto.galeria.map((imagen, i) => (
+                <figure>
+                  <img src={imagen.url640} width="640" height="640" alt={imagen.nombreDiseno ?? (i === 0 ? `Ficha de ${producto.nombre}` : producto.nombre)} loading="lazy" decoding="async" />
+                  {imagen.nombreDiseno && <figcaption>{imagen.nombreDiseno}</figcaption>}
+                </figure>
+              ))}
+            </div>
+            <div class="hoja__cuerpo">
+              <p class="hoja__precio">{formatearPrecio(producto.precio)} <span>por unidad</span></p>
+              {producto.descripcion && <p>{producto.descripcion}</p>}
+              {producto.medidas.length > 0 && (
+                <ul class="hoja__medidas">
+                  {producto.medidas.map((m) => (
+                    <li>{textoMedida(m)}</li>
+                  ))}
+                </ul>
+              )}
+              {listaDisenos.length > 0 && (
+                <p class="hoja__nota">{listaDisenos.length} diseños: deslizá las fotos para verlos.</p>
+              )}
+              <a class="boton" href={hrefWhatsappProducto(producto.nombre)} target="_blank" rel="noopener noreferrer">
+                <IconoWhatsapp tamano={18} /> Consultar por WhatsApp
+              </a>
+            </div>
+          </dialog>
+        )
+      })
+    }
+  </div>
+</Base>
+
+<script>
+  for (const boton of document.querySelectorAll<HTMLElement>('[data-abre]')) {
+    boton.addEventListener('click', () => {
+      const hoja = document.getElementById(boton.dataset.abre ?? '') as HTMLDialogElement | null
+      hoja?.showModal()
+    })
+  }
+  // Tocar fuera de la hoja la cierra.
+  for (const hoja of document.querySelectorAll('dialog')) {
+    hoja.addEventListener('click', (e) => {
+      if (e.target === hoja) hoja.close()
+    })
+  }
+</script>
+
+<style>
+  .a {
+    --kraft: #e6d8bf;
+    --papel: #faf6ee;
+    --tinta: #2a1a0f;
+    --tenue: #6b5842;
+    --verde: #3e5030;
+    --filete: rgba(42, 26, 15, 0.16);
+    min-height: 100svh;
+    background: var(--kraft);
+    color: var(--tinta);
+    font: 400 16px/1.5 'Alegreya Sans', sans-serif;
+  }
+
+  :global(body) {
+    margin: 0;
+    background: #e6d8bf;
+  }
+
+  .a :where(a, button):focus-visible {
+    outline: 2px solid var(--verde);
+    outline-offset: 3px;
+  }
+
+  h1,
+  h2,
+  h3 {
+    margin: 0;
+    font-family: Alegreya, serif;
+    font-weight: 700;
+    text-wrap: balance;
+  }
+
+  /* ---------- Barra ---------- */
+
+  .barra {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    padding: 0 12px 0 16px;
+  }
+
+  .marca {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: inherit;
+    text-decoration: none;
+    font: 700 19px/1 Alegreya, serif;
+  }
+
+  .marca img {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+  }
+
+  .barra__ig {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    color: var(--tinta);
+  }
+
+  /* ---------- Hero ---------- */
+
+  .hero__foto {
+    display: block;
+    width: 100%;
+    height: 40svh;
+    min-height: 220px;
+    object-fit: cover;
+    object-position: 50% 62%;
+  }
+
+  .hero__texto {
+    padding: 20px 20px 36px;
+  }
+
+  .hero h1 {
+    font-size: clamp(26px, 7.4vw, 32px);
+    line-height: 1.1;
+  }
+
+  .hero p {
+    margin: 10px 0 0;
+    color: var(--tenue);
+  }
+
+  .hero__acciones {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-top: 18px;
+  }
+
+  .boton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    min-height: 48px;
+    padding: 0 20px;
+    border-radius: 999px;
+    background: var(--verde);
+    color: var(--papel);
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .boton--claro {
+    background: var(--papel);
+    color: var(--tinta);
+  }
+
+  .enlace {
+    color: var(--tinta);
+    font-weight: 500;
+    text-underline-offset: 4px;
+  }
+
+  /* ---------- Piezas ---------- */
+
+  .piezas {
+    padding: 32px 0 40px;
+    border-top: 1px solid var(--filete);
+  }
+
+  .piezas__cabeza {
+    padding: 0 20px 20px;
+  }
+
+  .piezas h2 {
+    font-size: 26px;
+  }
+
+  .piezas__cabeza p {
+    margin: 4px 0 0;
+    color: var(--tenue);
+    font-size: 15px;
+  }
+
+  .hilera {
+    display: flex;
+    gap: 12px;
+    margin: 0 0 28px;
+    padding: 0 20px;
+    list-style: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 20px;
+    scrollbar-width: none;
+    overscroll-behavior-inline: contain;
+  }
+
+  .hilera li {
+    flex: 0 0 min(64vw, 280px);
+    scroll-snap-align: start;
+  }
+
+  .hilera--sola li {
+    flex-basis: 100%;
+  }
+
+  .pieza {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .pieza img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    height: auto;
+    border-radius: 6px;
+    background: var(--papel);
+  }
+
+  .pieza__nombre {
+    display: block;
+    margin-top: 10px;
+    font: 700 18px/1.2 Alegreya, serif;
+  }
+
+  .pieza__precio {
+    display: block;
+    margin-top: 2px;
+    color: var(--tenue);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- Pie ---------- */
+
+  .pie {
+    padding: 36px 20px calc(80px + env(safe-area-inset-bottom));
+    background: var(--tinta);
+    color: var(--papel);
+  }
+
+  .pie h2 {
+    font-size: 26px;
+  }
+
+  .pie p {
+    margin: 8px 0 0;
+    color: rgba(250, 246, 238, 0.75);
+  }
+
+  .pie__redes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .pie__credito {
+    font-size: 13px;
+    padding-top: 28px;
+  }
+
+  .pie__credito a {
+    color: var(--papel);
+  }
+
+  /* ---------- Hoja ---------- */
+
+  .hoja {
+    width: 100%;
+    max-width: 100%;
+    max-height: 92svh;
+    margin: auto 0 0;
+    padding: 0 0 env(safe-area-inset-bottom);
+    border: 0;
+    border-radius: 16px 16px 0 0;
+    background: var(--papel);
+    color: var(--tinta);
+    overflow-y: auto;
+    transition:
+      transform 260ms cubic-bezier(0.22, 0.61, 0.36, 1),
+      overlay 260ms allow-discrete,
+      display 260ms allow-discrete;
+    transform: translateY(100%);
+  }
+
+  .hoja[open] {
+    transform: translateY(0);
+  }
+
+  @starting-style {
+    .hoja[open] {
+      transform: translateY(100%);
+    }
+  }
+
+  .hoja::backdrop {
+    background: rgba(42, 26, 15, 0.55);
+  }
+
+  .hoja__cabeza {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 8px 10px 20px;
+    background: var(--papel);
+  }
+
+  .hoja h3 {
+    font-size: 22px;
+  }
+
+  .hoja__cerrar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(42, 26, 15, 0.07);
+    color: var(--tinta);
+    cursor: pointer;
+  }
+
+  .hoja__fotos {
+    display: flex;
+    gap: 8px;
+    padding: 0 20px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 20px;
+    scrollbar-width: none;
+  }
+
+  .hoja__fotos figure {
+    flex: 0 0 calc(100% - 28px);
+    margin: 0;
+    scroll-snap-align: start;
+  }
+
+  .hoja__fotos:has(figure:only-child) figure {
+    flex-basis: 100%;
+  }
+
+  .hoja__fotos img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    border-radius: 6px;
+  }
+
+  .hoja__fotos figcaption {
+    margin-top: 6px;
+    color: var(--tenue);
+    font-size: 14px;
+  }
+
+  .hoja__cuerpo {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 18px 20px 24px;
+  }
+
+  .hoja__cuerpo p {
+    margin: 0;
+    line-height: 1.55;
+  }
+
+  .hoja__precio {
+    font: 700 22px/1 Alegreya, serif;
+  }
+
+  .hoja__precio span {
+    font: 400 14px 'Alegreya Sans', sans-serif;
+    color: var(--tenue);
+  }
+
+  .hoja__medidas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: var(--tenue);
+  }
+
+  .hoja__nota {
+    color: var(--tenue);
+    font-size: 15px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hoja,
+    .hoja[open] {
+      transition: none;
+      transform: none;
+    }
+  }
+</style>
