@@ -48,7 +48,7 @@ const textoMas =
   <div class="card__body">
     <div class="card__head">
       <h3 class="card__nombre">{producto.nombre}</h3>
-      <span class="card__precio">{formatearPrecio(producto.precio)}</span>
+      {producto.precio !== null && <span class="card__precio">{formatearPrecio(producto.precio)}</span>}
     </div>
 
     <span class="card__mas" aria-hidden="true">

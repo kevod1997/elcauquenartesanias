@@ -327,13 +327,13 @@ export default function EditarProducto() {
           <Campo
             ref={precioRef}
             id="productoPrecio"
-            etiqueta="Precio"
+            etiqueta="Precio (opcional)"
             prefijo="$"
             inputMode="decimal"
             value={formulario.precio}
             onChange={(e) => editar('precio', e.target.value)}
             autoComplete="off"
-            ayuda="En pesos, con centavos opcionales (ej. 15000 o 15000,50)."
+            ayuda="En pesos, con centavos opcionales (ej. 15000 o 15000,50). Dejalo vacío si no querés mostrar precio."
             error={errores.precio}
           />
           <CampoSelect

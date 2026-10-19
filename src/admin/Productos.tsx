@@ -225,7 +225,11 @@ export default function Productos() {
               <span className="lista__detalle">{nombreCategoria(producto.categoriaId)}</span>
             </span>
             <span className="lista__datos">
-              <span className="lista__precio">{formatearPrecio(producto.precio)}</span>
+              {producto.precio ? (
+                <span className="lista__precio">{formatearPrecio(producto.precio)}</span>
+              ) : (
+                <span className="lista__precio lista__precio--vacio">Sin precio</span>
+              )}
               <span className={`estado estado--${producto.estado}`}>
                 {producto.estado === 'publicado' ? 'Publicado' : 'Borrador'}
               </span>

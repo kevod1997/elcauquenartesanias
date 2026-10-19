@@ -21,10 +21,10 @@ const PRECIO = /^(\d+)(?:[.,](\d{1,2}))?$/
 /**
  * Pesos escritos (`15000`, `15000,5`, `19.99`) a centavos, operando sobre el texto: `19,99 * 100` en
  * `number` da `1998.9999…`. Un separador con tres dígitos (`1.500`) se rechaza en vez de adivinar.
+ * El texto vacío no es un precio: el formulario lo trata antes como «sin precio».
  */
 export function pesosACentavos(texto: string): { centavos: number } | { error: string } {
   const limpio = texto.trim()
-  if (limpio === '') return { error: 'Escribí el precio.' }
   const partes = PRECIO.exec(limpio)
   if (!partes) return { error: 'Escribí el precio en pesos, sin puntos de miles (ej. 15000 o 15000,50).' }
   const centavos = BigInt(partes[1] ?? '0') * 100n + BigInt((partes[2] ?? '').padEnd(2, '0'))
@@ -100,7 +100,7 @@ export const FORMULARIO_VACIO: Formulario = { nombre: '', precio: '', categoriaI
 export function formularioDe(producto: Producto): Formulario {
   return {
     nombre: producto.nombre,
-    precio: centavosAPesos(producto.precio.amount),
+    precio: producto.precio ? centavosAPesos(producto.precio.amount) : '',
     categoriaId: producto.categoriaId ?? '',
     descripcion: producto.descripcion ?? '',
     medidas: producto.medidas.map(({ tipoMedidaId, valor }) => ({ tipoMedidaId, valor })),
@@ -131,16 +131,17 @@ export function leerFormulario(formulario: Formulario): { cuerpo: CuerpoAlta } |
   if (nombre.length === 0) errores.nombre = 'Escribí un nombre.'
   else if (nombre.length > NOMBRE_PRODUCTO_MAXIMO)
     errores.nombre = `Puede tener hasta ${NOMBRE_PRODUCTO_MAXIMO} caracteres.`
-  const precio = pesosACentavos(formulario.precio)
-  if ('error' in precio) errores.precio = precio.error
+  // Precio vacío: producto sin precio.
+  const precio = formulario.precio.trim() === '' ? null : pesosACentavos(formulario.precio)
+  if (precio && 'error' in precio) errores.precio = precio.error
   const descripcion = formulario.descripcion.trim()
   if (descripcion.length > DESCRIPCION_MAXIMA)
     errores.descripcion = `Puede tener hasta ${DESCRIPCION_MAXIMA} caracteres.`
-  if (Object.keys(errores).length > 0 || 'error' in precio) return { errores }
+  if (Object.keys(errores).length > 0 || (precio && 'error' in precio)) return { errores }
   return {
     cuerpo: {
       nombre,
-      precio: { amount: precio.centavos, currency: 'ARS' },
+      precio: precio && { amount: precio.centavos, currency: 'ARS' },
       categoriaId: formulario.categoriaId || null,
       descripcion: descripcion || null,
       medidas: formulario.medidas.map(({ tipoMedidaId, valor }) => ({ tipoMedidaId, valor })),
@@ -152,7 +153,8 @@ export function leerFormulario(formulario: Formulario): { cuerpo: CuerpoAlta } |
 export function cambiosPara(cuerpo: CuerpoAlta, producto: Producto): CuerpoCambios {
   const cambios: CuerpoCambios = {}
   if (cuerpo.nombre !== producto.nombre) cambios.nombre = cuerpo.nombre
-  if (cuerpo.precio.amount !== producto.precio.amount) cambios.precio = cuerpo.precio
+  const precio = cuerpo.precio ?? null
+  if ((precio?.amount ?? null) !== (producto.precio?.amount ?? null)) cambios.precio = precio
   if ((cuerpo.categoriaId ?? null) !== producto.categoriaId) cambios.categoriaId = cuerpo.categoriaId ?? null
   if ((cuerpo.descripcion ?? null) !== producto.descripcion) cambios.descripcion = cuerpo.descripcion ?? null
   const medidas = (cuerpo.medidas ?? []).map((m) => ({ tipoMedidaId: m.tipoMedidaId ?? null, valor: m.valor }))

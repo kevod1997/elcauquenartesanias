@@ -24,7 +24,7 @@ export const productos = (origen: string): ProductoPublico[] => {
   const producto = (
     id: string,
     nombre: string,
-    pesos: number,
+    pesos: number | null,
     descripcion: string,
     medidas: MedidaPublica[],
     galeria: string[],
@@ -32,7 +32,7 @@ export const productos = (origen: string): ProductoPublico[] => {
   ): ProductoPublico => ({
     id,
     nombre,
-    precio: { amount: pesos * 100, currency: 'ARS' },
+    precio: pesos === null ? null : { amount: pesos * 100, currency: 'ARS' },
     categoriaId: null,
     descripcion,
     medidas,
@@ -56,7 +56,7 @@ export const productos = (origen: string): ProductoPublico[] => {
     producto(
       'p-cuencos',
       'Cuencos o bowls',
-      7000,
+      null, // sin precio, para ver el catálogo con precios opcionales
       'Torneados a mano, pequeños y versátiles. Vetas y tonos irrepetibles en cada pieza.',
       [medida('Diámetro', '12', 'cm'), medida('Alto', '7', 'cm')],
       ['cuencos-placa'],

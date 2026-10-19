@@ -979,7 +979,11 @@ export interface paths {
                 content: {
                     "application/json": {
                         nombre: string;
-                        precio: components["schemas"]["Precio"];
+                        /**
+                         * @description Ausente o `null`: sin precio.
+                         * @default null
+                         */
+                        precio?: components["schemas"]["Precio"] | null;
                         /**
                          * @description `null`: sin categoría.
                          * @default null
@@ -1250,7 +1254,8 @@ export interface paths {
                 content: {
                     "application/json": {
                         nombre?: string;
-                        precio?: components["schemas"]["Precio"];
+                        /** @description `null` borra el precio; ausente lo conserva. */
+                        precio?: components["schemas"]["Precio"] | null;
                         /** @description `null`: sin categoría. */
                         categoriaId?: string | null;
                         /** @description Ausente, `null` o `""` se guarda como `null`. */
@@ -2433,7 +2438,7 @@ export interface components {
         Producto: {
             id: string;
             nombre: string;
-            precio: components["schemas"]["Precio"];
+            precio: components["schemas"]["Precio"] | null;
             categoriaId: string | null;
             descripcion: string | null;
             /** @description En el orden enviado. */
@@ -2482,7 +2487,7 @@ export interface components {
         ProductoPublico: {
             id: string;
             nombre: string;
-            precio: components["schemas"]["Precio"];
+            precio: components["schemas"]["Precio"] | null;
             categoriaId: string | null;
             descripcion: string | null;
             /** @description En el orden del producto. */

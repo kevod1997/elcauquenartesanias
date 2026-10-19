@@ -39,7 +39,7 @@ No se incluyen carrito, pago, stock, registro público ni cambios en el backend.
 - Un solo cliente HTTP: base URL por entorno, `credentials: 'include'` en el admin y traducción de la forma de error del contrato (código legible por máquina + mensaje) a errores tipados.
 - `401` redirige al login; `403` muestra falta de permiso; `409` se maneja según su código (`NOMBRE_EN_USO`, `ORDEN_DESACTUALIZADO`, etc.); `422` muestra la regla incumplida; `503` indica infraestructura no disponible.
 - Los IDs son strings opacos. No se parsean ni se asume su formato.
-- Los precios son enteros en centavos y la moneda es `ARS`; el formateo es solo de presentación.
+- Los precios son enteros en centavos y la moneda es `ARS`; el formateo es solo de presentación. El precio es opcional: `precio` puede ser `null` y la UI lo muestra sin importe.
 
 ### UI
 
@@ -182,6 +182,7 @@ páginas del catálogo usan `export const prerender = false`; el admin queda est
 | [11. Mejoras opcionales del front](./fases/fase-11.md) | Páginas 404 y 500 propias, formulario de producto sin mensajes viejos, Productos como inicio del admin y botón para ver la contraseña | 10 |
 | [12. Admin mobile y orden con arrastre](./fases/fase-12.md) | Admin cómodo en el teléfono y el orden del catálogo en una grilla que se arrastra | 11 |
 | [13. Orden por hileras con cortes manuales](./fases/fase-13.md) | La vista del orden por hileras con arrastre, cortes manuales y borradores aparte; el catálogo público con los cortes | 12 y la fase 10 del backend |
+| [14. Precio opcional](./fases/fase-14.md) | El admin guarda productos sin precio y el catálogo público los muestra sin importe | 13 y la fase 11 del backend |
 
 Las fases 3 y 4 pueden ejecutarse en cualquier orden después de la 2; las 7, 8 y 9 pueden ejecutarse en cualquier orden después de sus dependencias.
 

@@ -163,7 +163,14 @@
             "type": "string"
           },
           "precio": {
-            "$ref": "#/components/schemas/Precio"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Precio"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "categoriaId": {
             "type": [
@@ -356,7 +363,14 @@
             "type": "string"
           },
           "precio": {
-            "$ref": "#/components/schemas/Precio"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Precio"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "categoriaId": {
             "type": [
@@ -2011,7 +2025,16 @@
                     "maxLength": 80
                   },
                   "precio": {
-                    "$ref": "#/components/schemas/Precio"
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/Precio"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Ausente o `null`: sin precio."
                   },
                   "categoriaId": {
                     "type": [
@@ -2059,8 +2082,7 @@
                   }
                 },
                 "required": [
-                  "nombre",
-                  "precio"
+                  "nombre"
                 ]
               }
             }
@@ -2381,7 +2403,15 @@
                     "maxLength": 80
                   },
                   "precio": {
-                    "$ref": "#/components/schemas/Precio"
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/Precio"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "description": "`null` borra el precio; ausente lo conserva."
                   },
                   "categoriaId": {
                     "type": [

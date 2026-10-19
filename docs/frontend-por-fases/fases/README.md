@@ -20,12 +20,13 @@ decisiones técnicas y las validaciones ejecutadas.
 | 11. Mejoras opcionales del front | ✅ Cerrada (2026-09-25) | [fase-11.md](./fase-11.md) |
 | 12. Admin mobile y orden con arrastre | ✅ Cerrada (2026-09-25) | [fase-12.md](./fase-12.md) |
 | 13. Orden por hileras con cortes manuales | 🔎 Implementada (2026-09-28), faltan verificaciones del usuario | [fase-13.md](./fase-13.md) |
+| 14. Precio opcional | 🔎 Implementada (2026-10-19), falta desplegar y verificar en producción | [fase-14.md](./fase-14.md) |
 
 "🔎 Implementada" es una fase con el código commiteado a la que le quedan verificaciones del
 usuario; cuenta como dependencia cumplida.
 
-**Siguiente:** desplegar la fase 10 del backend y después este front (F13-D11), y hacer las
-verificaciones de la fase 13. Sin fase nueva definida: para arrancar una, leer el PRD y "Pendientes
+**Siguiente:** desplegar la fase 10 y la 11 del backend y después este front (F13-D11), no quitar ningún precio
+hasta que el front esté desplegado (F14-D1), y hacer las verificaciones de las fases 13 y 14. Sin fase nueva definida: para arrancar una, leer el PRD y "Pendientes
 abiertos".
 
 ## Decisiones para el usuario
@@ -39,6 +40,7 @@ Pruebas que el agente no puede ejecutar (visuales, en producción o tras un push
 están en la sección "Verificaciones del usuario" de cada `fase-N.md`. Al confirmarlas todas, se
 borra esa sección y su línea de acá, y la fase pasa a "✅ Cerrada".
 
+- Fase 14: tras desplegar, ver la landing sin precios ([fase-14.md](./fase-14.md#verificaciones-del-usuario)).
 - Fase 13: teléfono real, publicar desde las hileras, hileras contra el catálogo y lector de pantalla,
   tras desplegar ([fase-13.md](./fase-13.md#verificaciones-del-usuario)).
 

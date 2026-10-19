@@ -658,6 +658,10 @@ input[aria-invalid='true'] {
   color: var(--texto-suave);
 }
 
+.lista__precio--vacio {
+  color: var(--texto-tenue);
+}
+
 .estado {
   display: inline-flex;
   align-items: center;
