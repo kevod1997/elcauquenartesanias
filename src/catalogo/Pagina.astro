@@ -20,6 +20,17 @@ const { titulo, descripcion } = Astro.props
     <link rel="icon" href="/assets/logo-160.webp" />
     <link rel="preload" href="/assets/fonts/playfair-latin-var.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/assets/fonts/playfair-latin-italic-var.woff2" as="font" type="font/woff2" crossorigin />
+    <!-- Cloudflare Web Analytics: visitas y Core Web Vitals, sin cookies ni datos personales. El token es público. -->
+    {
+      import.meta.env.PROD && (
+        <script
+          is:inline
+          defer
+          src="https://static.cloudflareinsights.com/beacon.min.js"
+          data-cf-beacon='{"token": "bcc525bf0c4c49da9d7fef468bf9a7d3"}'
+        />
+      )
+    }
   </head>
   <body>
     <slot />
